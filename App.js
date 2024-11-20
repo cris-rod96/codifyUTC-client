@@ -6,8 +6,6 @@ import {
   View,
   StatusBar,
 } from 'react-native'
-import SplashScreen from './src/views/splash/SplashScreen'
-import Home from './src/views/home/Home'
 import { useEffect, useState } from 'react'
 import './global.css'
 import {
@@ -50,6 +48,14 @@ import {
   Mulish_800ExtraBold_Italic,
   Mulish_900Black_Italic,
 } from '@expo-google-fonts/mulish'
+import { Home, SplashScreen } from './src/views'
+import { Welcome1, Welcome2, Welcome3 } from './src/views/welcome'
+import Landing from './src/views/landing/Landing'
+import Register from './src/views/register/Register'
+import Login from './src/views/login/Login'
+import Setup from './src/views/setup/Setup'
+import ActivationCode from './src/views/activation_code/ActivationCode'
+import RecoveryPassword from './src/views/recovery_password/RecoveryPassword'
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
@@ -114,7 +120,7 @@ export default function App() {
               paddingTop: Platform.OS === 'android' && 30,
             }}
           >
-            <Home />
+            <RecoveryPassword />
           </View>
           <StatusBar backgroundColor="#F5F9FF" barStyle="dark-content" />
         </SafeAreaView>
