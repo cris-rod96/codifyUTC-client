@@ -1,81 +1,190 @@
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useRef, useState } from 'react'
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
+import Toast from 'react-native-toast-message'
+import { userApi } from '../../api/user/user.api'
+
 const Register = () => {
+  const navigation = useNavigation()
+  const initialState = {
+    email: '',
+    password: '',
+  }
+  const [data, setData] = useState(initialState)
+
+  // Referencias para cada input
+  const emailRef = useRef(null)
+  const passwordRef = useRef(null)
+
+  // Referencia para el ScrollView
+  const scrollRef = useRef(null)
+
+  const handleChange = (name, value) => {
+    setData({ ...data, [name]: value })
+  }
+
+  const showToast = (type, title, message) => {
+    Toast.show({
+      type: type,
+      text1: title,
+      text2: message,
+      position: 'bottom',
+      bottomOffset: 80,
+    })
+  }
+
+  const handleSubmit = () => {
+    if (data.email === '' || data.password === '') {
+      showToast('error', 'Error', 'Todos los campos son obligatorios')
+      return
+    }
+
+    userApi
+      .verifyUser(data.email)
+      .then((res) => {
+        const { message } = res.data
+        showToast('success', 'Registro exitoso', message)
+
+        setTimeout(() => {
+          navigation.navigate('Setup', {
+            email: data.email,
+            password: data.password,
+          })
+          setData(initialState)
+        }, 3500)
+      })
+      .catch((err) => {
+        const { message } = err.response.data
+        showToast('error', 'Error', message)
+      })
+  }
+
+  // Función para hacer scroll automático
+  const handleFocus = (inputRef) => {
+    setTimeout(() => {
+      inputRef.current?.measureLayout(
+        scrollRef.current,
+        (x, y, width, height) => {
+          scrollRef.current?.scrollTo({ y: y - 100, animated: true })
+        }
+      )
+    }, 100)
+  }
+
   return (
-    <View className="flex flex-col gap-3 relative h-full">
-      <View className="w-full h-[150] bg-red-400" />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: '#F5F9FF' }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex flex-col gap-3 py-5 px-5 relative h-full">
+            <View className="w-full h-[200px] bg-red-400" />
 
-      <View className="my-5">
-        <Text style={{ fontFamily: 'Jost_600SemiBold', fontSize: 24 }}>
-          ¡Comencemos!
-        </Text>
-        <Text style={{ fontFamily: 'Mulish_700Bold', fontSize: 14 }}>
-          Necesitas crear una cuenta para continuar
-        </Text>
+            <View className="my-5">
+              <Text style={{ fontFamily: 'Jost_600SemiBold', fontSize: 24 }}>
+                ¡Comencemos!
+              </Text>
+              <Text style={{ fontFamily: 'Mulish_700Bold', fontSize: 14 }}>
+                Necesitas crear una cuenta para continuar
+              </Text>
 
-        <View className="flex flex-col gap-3 my-5">
-          <TextInput
-            placeholder="example@utc.edu.ec"
-            className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#BBB9B9',
-            }}
-          />
-          <TextInput
-            secureTextEntry
-            placeholder="****************"
-            className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#BBB9B9',
-            }}
-          />
+              <View className="flex flex-col gap-3 my-5">
+                <TextInput
+                  placeholder="example@utc.edu.ec"
+                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#555555',
+                  }}
+                  onChangeText={(e) => handleChange('email', e)}
+                  autoCapitalize="none"
+                  defaultValue={data.email}
+                  ref={emailRef}
+                  onFocus={() => handleFocus(emailRef)} // Desplaza hacia la posición del primer input
+                />
+                <TextInput
+                  secureTextEntry
+                  placeholder="****************"
+                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#555555',
+                  }}
+                  onChangeText={(e) => handleChange('password', e)}
+                  autoCapitalize="none"
+                  defaultValue={data.password}
+                  ref={passwordRef}
+                  onFocus={() => handleFocus(passwordRef)} // Desplaza hacia la posición del segundo input
+                />
 
-          <TouchableOpacity className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-4 rounded-full relative">
-            <Text
-              style={{
-                fontFamily: 'Jost_600SemiBold',
-                fontSize: 15,
-                color: '#FFFFFF',
-              }}
-            >
-              Registrarme
-            </Text>
+                <TouchableOpacity
+                  className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-4 rounded-full relative"
+                  onPress={handleSubmit}
+                >
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 15,
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    Registrarme
+                  </Text>
 
-            <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-              <Ionicons
-                name="chevron-forward-sharp"
-                size={20}
-                color={'#741D1D'}
-              />
+                  <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
+                    <Ionicons
+                      name="chevron-forward-sharp"
+                      size={20}
+                      color={'#741D1D'}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
-          </TouchableOpacity>
-        </View>
-      </View>
 
-      <View className="absolute bottom-7 flex flex-row gap-2 items-center justify-center w-full">
-        <Text
-          style={{
-            fontFamily: 'Mulish_700Bold',
-            fontSize: 13,
-          }}
-        >
-          Ya tengo una cuenta.
-        </Text>
-        <Text
-          style={{
-            fontFamily: 'Mulish_800ExtraBold',
-            fontSize: 13,
-            color: '#741D1D',
-          }}
-        >
-          Iniciar sesión
-        </Text>
-      </View>
-    </View>
+            <View className="absolute bottom-7 left-5 flex flex-row gap-2 items-center justify-center w-full">
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 13,
+                }}
+              >
+                Ya tengo una cuenta.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_800ExtraBold',
+                  fontSize: 13,
+                  color: '#741D1D',
+                }}
+                onPress={() => navigation.navigate('Login')}
+              >
+                Iniciar sesión
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+      <Toast position="bottom" />
+    </KeyboardAvoidingView>
   )
 }
 

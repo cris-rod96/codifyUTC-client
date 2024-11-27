@@ -8,34 +8,17 @@ import {
   StatusBar,
 } from 'react-native'
 import logo from '../../../assets/logo.png'
+import { useNavigation } from '@react-navigation/native'
 
 const SplashScreen = () => {
-  const [dots, setDots] = useState('')
-  const opacity = new Animated.Value(1) // Valor de opacidad inicial
+  const navigation = useNavigation()
 
   useEffect(() => {
     StatusBar.setHidden(true)
-    // Cambiar los puntos y animar opacidad cada 500 ms
-    const interval = setInterval(() => {
-      setDots((prevDots) => (prevDots === '...' ? '.' : prevDots + '.'))
 
-      // Animación de opacidad
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0, // Opacidad a 0
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1, // Opacidad a 1
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start()
-    }, 500)
-
-    // Limpiar intervalo al desmontar componente
-    return () => clearInterval(interval)
+    setTimeout(() => {
+      navigation.navigate('Welcome')
+    }, 3500)
   }, [])
 
   return (
