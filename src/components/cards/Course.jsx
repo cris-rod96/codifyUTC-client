@@ -1,95 +1,142 @@
-import { Image, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Linking, Text, TouchableOpacity, View } from 'react-native'
 import image from '../../../assets/web-dev.jpg'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-const Course = () => {
+import { msgUtil } from '../../utils/index.utils'
+
+const Course = ({ course }) => {
   const navigation = useNavigation()
+
+  const shareOnWhatsApp = () => {
+    const msg = msgUtil.messageWhatsapp(course, 'Tu profesor')
+    const url = `whatsapp://send?text=${encodeURIComponent(msg)}`
+
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url)
+        } else {
+          Alert.alert('Error', 'No se pudo abrir WhatsApp.')
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0') // Meses de 0 a 11, por eso sumamos 1
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   return (
-    <TouchableOpacity
-      className="flex flex-row w-full border border-gray-200 rounded-2xl shadow-lg shadow-gray-300 h-[180px] bg-white overflow-hidden mb-5"
-      onPress={() =>
-        navigation.navigate('DetailCourse', {
-          courseName: 'Informática',
-        })
-      }
-      onLongPress={() => alert('Adios')}
-    >
-      <View className="w-[50%] h-full relative">
-        <Image source={image} className="absolute w-full h-full object-cover" />
+    <View className="flex flex-col w-full mb-10 rounded-xl overflow-hidden bg-white border border-gray-200 shadow-lg">
+      {/* Header */}
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('DetailCourse', {
+            courseName: course.subject,
+          })
+        }
+      >
+        <View className="h-[180px] w-full relative bg-red-500 rounded-t-xl overflow-hidden">
+          <Image
+            source={course.poster ? { uri: course.poster } : image}
+            className="absolute w-full h-full object-cover rounded-t-xl"
+          />
+        </View>
+      </TouchableOpacity>
+
+      {/* Contenido */}
+      <View className="flex flex-col gap-3 px-6 py-4">
+        <View className="flex flex-row items-center justify-between">
+          <Text
+            style={{
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 18,
+              color: '#202244',
+              fontWeight: '600',
+            }}
+          >
+            {course.subject}
+          </Text>
+          <Text
+            style={{
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 14,
+              color: '#A6A6A6',
+              fontWeight: '500',
+            }}
+          >
+            {course.semester} Sistemas
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-center gap-2">
+          <Ionicons name="people-circle-sharp" size={22} color={'#202244'} />
+          <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
+            Estudiantes: <Text style={{ fontWeight: 'bold' }}>20</Text>
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-center gap-2">
+          <Ionicons name="book-sharp" size={22} color={'#202244'} />
+          <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
+            Clases: <Text style={{ fontWeight: 'bold' }}>20</Text>
+          </Text>
+        </View>
+
+        {/* Nuevo contenido adicional */}
+        <View className="flex flex-row items-center gap-2">
+          <Ionicons name="key" size={22} color={'#202244'} />
+          <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
+            Código de Acceso:{' '}
+            <Text style={{ fontWeight: 'bold' }}>{course.access_code}</Text>
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-center gap-2">
+          <Ionicons name="calendar" size={22} color={'#202244'} />
+          <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
+            Fecha de Creación:{' '}
+            <Text style={{ fontWeight: 'bold' }}>
+              {formatDate(course.created_at)}
+            </Text>
+          </Text>
+        </View>
+
+        <View className="flex flex-row items-center gap-2">
+          <Ionicons name="albums" size={22} color={'#202244'} />
+          <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
+            Sección:{' '}
+            <Text style={{ fontWeight: 'bold' }}>{course.section}</Text>
+          </Text>
+        </View>
       </View>
-      <View className="w-full p-3 flex flex-col gap-2">
-        <Text
-          style={{
-            fontFamily: 'Mulish_700Bold',
-            fontSize: 12,
-            color: '#FF6B00',
-          }}
+
+      {/* Footer */}
+      <View className="flex flex-row justify-between w-full  ">
+        {/* Botón Compartir */}
+        <TouchableOpacity
+          className="w-1/2 py-3 flex flex-row items-center justify-center bg-[#25D366] "
+          onPress={shareOnWhatsApp}
         >
-          Desarrollo Web
-        </Text>
-
-        <Text
-          style={{
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 14,
-            color: '#202244',
-          }}
-        >
-          Tercero Sistemas "A"
-        </Text>
-
-        <View className="flex flex-row items-center gap-3">
-          <Ionicons name="calendar-clear-outline" size={16} color={'#202244'} />
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 12,
-              color: '#202244',
-            }}
-          >
-            Matutina
+          <Ionicons name="logo-whatsapp" color="white" size={20} />
+          <Text style={{ color: 'white', fontFamily: 'Jost_600SemiBold' }}>
+            Compartir
           </Text>
-        </View>
-        <View className="flex flex-row items-center gap-3">
-          <Ionicons name="time-outline" size={16} color={'#202244'} />
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 12,
-              color: '#202244',
-            }}
-          >
-            08:00 - 10:00
-          </Text>
-        </View>
+        </TouchableOpacity>
 
-        <View className="flex flex-row items-center gap-3">
-          <Ionicons name="book-outline" size={16} color={'#202244'} />
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 12,
-              color: '#202244',
-            }}
-          >
-            10 clases
+        {/* Botón Eliminar */}
+        <TouchableOpacity className="w-1/2 py-3 flex flex-row items-center justify-center bg-[#D32F2F] ">
+          <Ionicons name="trash" color="white" size={20} />
+          <Text style={{ color: 'white', fontFamily: 'Jost_600SemiBold' }}>
+            Eliminar
           </Text>
-        </View>
-
-        <View className="flex flex-row items-center gap-3">
-          <Ionicons name="people-outline" size={16} color={'#202244'} />
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 12,
-              color: '#202244',
-            }}
-          >
-            19 estudiantes
-          </Text>
-        </View>
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   )
 }
 

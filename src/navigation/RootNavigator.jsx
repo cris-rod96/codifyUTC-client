@@ -1,4 +1,8 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createStackNavigator } from '@react-navigation/stack'
+import {
+  TransitionSpecs,
+  CardStyleInterpolators,
+} from '@react-navigation/stack'
 import { Home, SplashScreen } from '../views'
 import { Welcome1, Welcome2, Welcome3 } from '../views/welcome'
 import Login from '../views/login/Login'
@@ -7,36 +11,33 @@ import RecoveryPassword from '../views/recovery_password/RecoveryPassword'
 import ActivationCode from '../views/activation_code/ActivationCode'
 import ChangePassword from '../views/change_password/ChangePassword'
 import Setup from '../views/setup/Setup'
-import {
-  TransitionSpecs,
-  CardStyleInterpolators,
-} from '@react-navigation/stack'
 import RecoveryCode from '../views/activation_code/RecoveryCode'
 import TabNavigator from './TabNavigator'
+import ThirdSession from '../views/third_session/ThirdSession'
 
-const Stack = createNativeStackNavigator()
+const Stack = createStackNavigator()
 
 function RootNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName="Login"
       screenOptions={{
         headerShown: false,
         contentStyle: {
           backgroundColor: '#F5F9FF',
         },
         transitionSpec: {
-          open: TransitionSpecs.TransitionIOSSpec, // Animación de apertura
-          close: TransitionSpecs.FadeOutToBottomAndroidSpec, // Animación de cierre
+          open: TransitionSpecs.ScaleFromCenterAndroidSpec, // Animación personalizada para abrir
+          close: TransitionSpecs.FadeOutToBottomAndroidSpec, // Animación personalizada para cerrar
         },
-        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Animación horizontal estilo iOS
       }}
     >
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Welcome" component={Welcome1} />
       <Stack.Screen name="Welcome2" component={Welcome2} />
       <Stack.Screen name="Welcome3" component={Welcome3} />
-
+      <Stack.Screen name="ThirdSession" component={ThirdSession} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen
@@ -49,7 +50,6 @@ function RootNavigator() {
             elevation: 0,
             backgroundColor: '#F5F9FF',
             shadowOpacity: 0,
-            borderBottomWidth: 0,
           },
           headerTitleStyle: {
             fontFamily: 'Jost_600SemiBold',
@@ -61,7 +61,25 @@ function RootNavigator() {
       />
       <Stack.Screen name="ActivationCode" component={ActivationCode} />
       <Stack.Screen name="RecoveryCode" component={RecoveryCode} />
-      <Stack.Screen name="ChangePassword" component={ChangePassword} />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePassword}
+        options={{
+          headerShown: true,
+          headerTitle: 'Crear nueva contraseña',
+          headerStyle: {
+            elevation: 0,
+            backgroundColor: '#F5F9FF',
+            shadowOpacity: 0,
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+          headerTitleAlign: 'left',
+        }}
+      />
       <Stack.Screen
         name="Setup"
         component={Setup}
@@ -72,7 +90,6 @@ function RootNavigator() {
             elevation: 0,
             backgroundColor: '#F5F9FF',
             shadowOpacity: 0,
-            borderBottomWidth: 0,
           },
           headerTitleStyle: {
             fontFamily: 'Jost_600SemiBold',
@@ -82,7 +99,6 @@ function RootNavigator() {
           headerTitleAlign: 'left',
         }}
       />
-
       <Stack.Screen name="Landing" component={TabNavigator} />
     </Stack.Navigator>
   )

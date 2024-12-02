@@ -3,8 +3,15 @@ import { Image, Text, TouchableOpacity, View } from 'react-native'
 import profile from '../../../assets/profile.png'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { storageUtil } from '../../utils/index.utils'
 const Profile = () => {
   const navigation = useNavigation()
+
+  const closeSession = async () => {
+    await storageUtil.removeSecureData('user_info')
+    await storageUtil.removeSecureData('token')
+    navigation.navigate('Login')
+  }
   return (
     <View className="flex flex-col items-center justify-center h-full w-full bg-[#F5F9FF]">
       <View
@@ -138,7 +145,10 @@ const Profile = () => {
               <Ionicons name="chevron-forward" size={22} color={'#202244'} />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex flex-row justify-between items-center w-full">
+            <TouchableOpacity
+              className="flex flex-row justify-between items-center w-full"
+              onPressIn={closeSession}
+            >
               <View className="flex flex-row gap-2 items-center">
                 <Ionicons name="exit-outline" size={22} color={'#E00E0E'} />
                 <Text

@@ -1,199 +1,254 @@
-import React, { useRef, useState } from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import { useState, useEffect } from 'react'
 import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
+  ScrollView,
+  StatusBar,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
 import Toast from 'react-native-toast-message'
-import { userApi } from '../../api/user/user.api'
-import { authApi } from '../../api/auth/auth.api'
 import toastConfig from '../../config/toast.config'
+import useLogin from '../../hooks/useLogin'
+import { useNavigation } from '@react-navigation/native'
 
 const Login = () => {
   const navigation = useNavigation()
-  const initialState = {
-    email: '',
-    password: '',
-  }
-  const [data, setData] = useState(initialState)
+  const { credentials, handleChange, onSubmit } = useLogin()
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
 
-  // Referencias para cada input
-  const emailRef = useRef(null)
-  const passwordRef = useRef(null)
-
-  // Referencia para el ScrollView
-  const scrollRef = useRef(null)
-
-  const handleChange = (name, value) => {
-    setData({ ...data, [name]: value })
-  }
-
-  const showToast = (toastType, title, message) => {
+  const showToast = (type, title, message) => {
     Toast.show({
-      type: toastType,
+      type,
       text1: title,
       text2: message,
-      position: 'bottom',
-      bottomOffset: 80,
     })
   }
 
-  const handleSubmit = () => {
-    if (data.email === '' || data.password === '') {
-      showToast('success', 'Login Exitoso', 'Todos los campos son obligatorios')
-      return
+  const login = async () => {
+    const { ok, toast, title, message } = await onSubmit()
+    showToast(toast, title, message)
+
+    if (ok) {
+      setTimeout(() => {
+        navigation.navigate('Home')
+      }, 1500)
     }
-
-    authApi
-      .login(data.email, data.password)
-      .then((res) => {
-        const { message } = res.data
-        showToast('success', 'Login exitoso', message)
-
-        setTimeout(() => {
-          navigation.navigate('Landing')
-        }, 3500)
-      })
-      .catch((err) => {
-        const { message } = err.response.data
-        showToast('error', 'Error', message)
-      })
   }
 
-  // Función para hacer scroll automático
-  const handleFocus = (inputRef) => {
-    setTimeout(() => {
-      inputRef.current?.measureLayout(
-        scrollRef.current,
-        (x, y, width, height) => {
-          scrollRef.current?.scrollTo({ y: y - 100, animated: true })
-        }
-      )
-    }, 100)
+  const goToRegister = () => {
+    navigation.navigate('Register')
   }
+
+  const goToRecoveryPassword = () => {
+    navigation.navigate('RecoveryPassword')
+  }
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true)
+      }
+    )
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false)
+      }
+    )
+
+    // Clean up listeners
+    return () => {
+      keyboardDidHideListener.remove()
+      keyboardDidShowListener.remove()
+    }
+  }, [])
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#F5F9FF' }}
+      className="flex-1"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          ref={scrollRef}
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex flex-col gap-3 py-5 px-5 relative h-full">
-            <View className="w-full h-[200px] bg-red-400" />
-
-            <View className="my-5">
-              <Text style={{ fontFamily: 'Jost_600SemiBold', fontSize: 24 }}>
-                ¡Bienvenido de vuelta!
+          <StatusBar
+            barStyle={keyboardVisible ? 'light-content' : 'dark-content'}
+            backgroundColor={keyboardVisible ? '#741D1D' : '#F5F9FF'}
+          />
+          {/* Header visible cuando el teclado está abierto */}
+          {keyboardVisible && (
+            <View className="bg-[#741D1D] h-[50px] w-full flex justify-center items-center ">
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 20,
+                  color: 'white',
+                }}
+              >
+                Codify UTC
               </Text>
-              <Text style={{ fontFamily: 'Mulish_700Bold', fontSize: 14 }}>
-                Ingresa tus datos para continuar
+            </View>
+          )}
+
+          <View className="flex-1 py-5 bg-[#F5F9FF]">
+            {/* Logo visible cuando el teclado no está visible */}
+            {!keyboardVisible && (
+              <View className="w-[90%] mx-auto h-[250px] "></View>
+            )}
+
+            <View className="w-[85%] mx-auto py-5 flex flex-col ">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 24,
+                  color: '#000000',
+                }}
+              >
+                Inicio de sesión.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 14,
+                  color: '#000000',
+                }}
+              >
+                Accede a tu cuenta para continuar
               </Text>
 
-              <View className="flex flex-col gap-3 my-5">
-                <TextInput
-                  placeholder="example@utc.edu.ec"
-                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: '#555555',
-                  }}
-                  onChangeText={(e) => handleChange('email', e)}
-                  autoCapitalize="none"
-                  defaultValue={data.email}
-                  ref={emailRef}
-                  onFocus={() => handleFocus(emailRef)} // Desplaza hacia la posición del primer input
-                />
-                <TextInput
-                  secureTextEntry
-                  placeholder="****************"
-                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: '#555555',
-                  }}
-                  onChangeText={(e) => handleChange('password', e)}
-                  autoCapitalize="none"
-                  defaultValue={data.password}
-                  ref={passwordRef}
-                  onFocus={() => handleFocus(passwordRef)} // Desplaza hacia la posición del segundo input
-                />
+              {/* Formulario */}
+              <View className="flex flex-col gap-3 mt-5">
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Ionicons name="mail-outline" size={20} color={'#545454'} />
+                  </View>
+                  <TextInput
+                    defaultValue={credentials.email}
+                    onChangeText={(text) => handleChange('email', text)}
+                    placeholder="Correo electrónico"
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
+
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  {/* Icono del candado */}
+                  <View className="w-14 flex items-center justify-center h-full">
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+
+                  {/* Campo de contraseña */}
+                  <TextInput
+                    secureTextEntry={!isPasswordVisible}
+                    placeholder="Contraseña"
+                    defaultValue={credentials.password}
+                    onChangeText={(text) => handleChange('password', text)}
+                    className="flex-1 bg-white px-1"
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+
+                  {/* Icono del ojo */}
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  >
+                    {isPasswordVisible ? (
+                      <Ionicons
+                        name="eye-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="eye-off-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+
+                <View className="flex flex-row justify-end">
+                  <TouchableOpacity onPress={goToRecoveryPassword}>
+                    <Text
+                      style={{
+                        fontFamily: 'Mulish_800ExtraBold',
+                        fontSize: 12,
+                      }}
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
-                  className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-4 rounded-full relative"
-                  onPressIn={handleSubmit}
+                  className="bg-[#741D1D] py-4 rounded-full flex items-center justify-center mt-3"
+                  onPress={login}
                 >
                   <Text
                     style={{
                       fontFamily: 'Jost_600SemiBold',
-                      fontSize: 15,
-                      color: '#FFFFFF',
+                      fontSize: 18,
+                      color: 'white',
                     }}
                   >
                     Iniciar sesión
                   </Text>
 
-                  <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-                    <Ionicons
-                      name="chevron-forward-sharp"
-                      size={20}
-                      color={'#741D1D'}
-                    />
-                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color={'white'}
+                    className="absolute right-4"
+                  />
                 </TouchableOpacity>
 
-                {/* ¿Olvidaste tu contraseña? */}
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('RecoveryPassword')}
-                >
+                <View className="mt-5 flex flex-row justify-center items-center gap-2">
                   <Text
                     style={{
-                      fontFamily: 'Mulish_800ExtraBold',
-                      fontSize: 13,
-                      color: '#741D1D',
-                      textAlign: 'center',
-                      marginBottom: 5, // Reducido el margen inferior
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#545454',
                     }}
                   >
-                    ¿Olvidaste tu contraseña?
+                    ¿No tienes una cuenta?
                   </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity onPress={goToRegister}>
+                    <Text
+                      className="underline"
+                      style={{
+                        fontFamily: 'Mulish_800ExtraBold',
+                        fontSize: 14,
+                        color: '#741D1D',
+                      }}
+                    >
+                      Registrate
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-
-            <View className="absolute bottom-7 left-5 flex flex-row gap-2 items-center justify-center w-full">
-              <Text
-                style={{
-                  fontFamily: 'Mulish_700Bold',
-                  fontSize: 13,
-                }}
-              >
-                ¿No tienes cuenta?
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_800ExtraBold',
-                  fontSize: 13,
-                  color: '#741D1D',
-                }}
-                onPress={() => navigation.navigate('Register')}
-              >
-                Regístrate
-              </Text>
             </View>
           </View>
         </ScrollView>

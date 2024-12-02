@@ -19,6 +19,12 @@ const ClassNavigator = () => {
         headerStyle: {
           backgroundColor: '#F5F9FF',
         },
+
+        headerTitleAlign: 'center',
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 21,
+        },
       }}
     >
       <Stack.Screen
@@ -33,7 +39,7 @@ const ClassNavigator = () => {
 
           headerRight: () => (
             <TouchableOpacity className="mr-4" onPressIn={toggleModal}>
-              <Ionicons name="add-circle-sharp" size={26} />
+              <Ionicons name="add-circle-sharp" size={26} color={'#741D1D'} />
             </TouchableOpacity>
           ),
         }}

@@ -8,18 +8,20 @@ import ProfileNavigator from './ProfileNavigator'
 import ClassNavigation from './ClassTabs'
 import ClassNavigator from './ClassNavigator'
 import { useModal } from '../context/ModalContext'
+import { useCourseModal } from '../context/CourseModalContext'
 
 const Tab = createBottomTabNavigator()
 
 function TabNavigator() {
   const { isVisible } = useModal()
+  const { isVisible: isVisibleCourseModal } = useCourseModal()
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#741D1D',
         tabBarInactiveTintColor: '#545454',
         tabBarStyle: {
-          display: isVisible ? 'none' : 'flex',
+          display: isVisible || isVisibleCourseModal ? 'none' : 'flex',
           backgroundColor: '#F5F9FF',
         },
       }}
@@ -40,6 +42,7 @@ function TabNavigator() {
         component={CourseNavigator}
         options={{
           headerShown: false,
+
           tabBarLabel: 'Cursos',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="school-sharp" size={size} color={color} />
@@ -62,6 +65,15 @@ function TabNavigator() {
         component={Activities}
         options={{
           tabBarLabel: 'Actividades',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
 
           tabBarIcon: ({ size, color }) => (
             <Ionicons name="game-controller-sharp" size={size} color={color} />

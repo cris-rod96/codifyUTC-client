@@ -1,10 +1,12 @@
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { useEffect } from 'react'
 const Welcome1 = () => {
   const navigation = useNavigation()
+  StatusBar.setHidden(true)
   return (
-    <View className="flex flex-col gap-3 px-5 py-10 relative h-full bg-[#F5F9FF]">
+    <View className="h-screen flex-col gap-3 w-[90%] mx-auto relative pt-[30px] bg-[#F5F9FF] ">
       <View className="flex flex-col items-end">
         <TouchableOpacity className="w-auto">
           <Text
@@ -40,7 +42,7 @@ const Welcome1 = () => {
         </Text>
       </View>
 
-      <View className="absolute bottom-10 flex flex-row items-center justify-between w-full left-5">
+      <View className="absolute bottom-8 flex flex-row items-center justify-between w-full px-3 ">
         <View className="flex flex-row gap-3">
           <View className="w-3 h-3 rounded-full bg-[#741D1D]" />
           <View className="w-3 h-3 rounded-full bg-[#741D1D46]" />

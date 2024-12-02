@@ -1,49 +1,67 @@
-import React, { useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Animated,
-  StatusBar,
-} from 'react-native'
-import logo from '../../../assets/logo.png'
 import { useNavigation } from '@react-navigation/native'
+import React, { useEffect } from 'react'
+import { StatusBar, Text, View } from 'react-native'
+
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 const SplashScreen = () => {
   const navigation = useNavigation()
 
   useEffect(() => {
-    StatusBar.setHidden(true)
-
     setTimeout(() => {
-      navigation.navigate('Welcome')
-    }, 3500)
-  }, [])
+      navigation.navigate('Login')
+    }, 3000)
+  }, [navigation])
 
   return (
-    <View className="flex-1 justify-center items-center pt-5 bg-[#F5F9FF]">
-      <View>
-        <Image source={logo} className="w-[150] h-[150] resize" />
-        <Text className="text-center text-3xl" style={styles.name}>
-          Codify UTC
+    <View className="flex-1 h-screen bg-red-900 justify-center items-center">
+      <StatusBar hidden />
+      <Text
+        className="text-white"
+        style={{ fontFamily: 'Jost_600SemiBold', fontSize: 30 }}
+      >
+        {'<Codify UTC/>'}
+      </Text>
+
+      <Animated.View
+        entering={FadeInDown.delay(300).duration(800)}
+        className="absolute bottom-20"
+      >
+        <Text
+          className="text-white"
+          style={{ fontFamily: 'Mulish_700Bold', fontSize: 10 }}
+        >
+          ¡Aprende a programar jugando!
         </Text>
-      </View>
+      </Animated.View>
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  loadingText: {
-    marginTop: 40,
-    fontSize: 16,
-    textAlign: 'center',
-    fontFamily: 'Mulish_400Regular_Italic',
-  },
-
-  name: {
-    fontFamily: 'Jost_600SemiBold',
-  },
-})
-
 export default SplashScreen
+
+// const navigation = useNavigation()
+
+// StatusBar.setHidden(true)
+
+// // useEffect(() => {
+// //   // StatusBar.setHidden(true)
+// //   storageUtil
+// //     .getSecureData('user_info')
+// //     .then((res) => {
+// //       if (res) {
+// //         navigation.navigate('Landing')
+// //       } else {
+// //         storageUtil.getSecureData('welcome').then((res) => {
+// //           if (res) {
+// //             navigation.navigate('Login')
+// //           } else {
+// //             navigation.navigate('Welcome')
+// //           }
+// //         })
+// //       }
+// //     })
+// //     .catch((err) => {
+// //       console.log(err)
+// //     })
+// // }, [])

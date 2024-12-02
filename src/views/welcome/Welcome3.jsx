@@ -1,10 +1,17 @@
 import { Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import { storageUtil } from '../../utils/index.utils'
 const Welcome3 = () => {
   const navigation = useNavigation()
+
+  const goToLogin = async () => {
+    const welcome = await storageUtil.saveSecureData('welcome', 'true')
+    navigation.navigate('Login')
+  }
+
   return (
-    <View className="flex flex-col gap-3 relative h-full px-5 py-10">
+    <View className="h-screen flex-col gap-3 w-[90%] mx-auto relative  bg-[#F5F9FF] pt-[30px]">
       <View className="flex flex-col items-end">
         <TouchableOpacity className="w-auto">
           <Text
@@ -41,7 +48,7 @@ const Welcome3 = () => {
         </Text>
       </View>
 
-      <View className="absolute bottom-10 flex flex-row items-center justify-between w-full left-5">
+      <View className="absolute bottom-8 flex flex-row items-center justify-between w-full pl-3">
         <View className="flex flex-row gap-3">
           <View className="w-3 h-3 rounded-full bg-[#741D1D46]" />
           <View className="w-3 h-3 rounded-full bg-[#741D1D46]" />
@@ -50,7 +57,7 @@ const Welcome3 = () => {
 
         <TouchableOpacity
           className="w-40 h-10 rounded-full bg-[#741D1D] flex flex-row items-center justify-center text-white relative"
-          onPress={() => navigation.navigate('Login')}
+          onPressIn={goToLogin}
         >
           <Text
             style={{

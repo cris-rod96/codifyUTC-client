@@ -1,189 +1,265 @@
-import React, { useRef, useState } from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import { useEffect, useState } from 'react'
 import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform,
-  Keyboard,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import useRegister from '../../hooks/useRegister'
 import Toast from 'react-native-toast-message'
-import { userApi } from '../../api/user/user.api'
+import toastConfig from '../../config/toast.config'
+import { useNavigation } from '@react-navigation/native'
 
 const Register = () => {
   const navigation = useNavigation()
-  const initialState = {
-    email: '',
-    password: '',
-  }
-  const [data, setData] = useState(initialState)
+  const { data, handleChange, onSubmit } = useRegister()
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
-  // Referencias para cada input
-  const emailRef = useRef(null)
-  const passwordRef = useRef(null)
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true)
+      }
+    )
 
-  // Referencia para el ScrollView
-  const scrollRef = useRef(null)
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false)
+      }
+    )
 
-  const handleChange = (name, value) => {
-    setData({ ...data, [name]: value })
-  }
+    return () => {
+      keyboardDidShowListener.remove()
+      keyboardDidHideListener.remove()
+    }
+  }, [])
 
   const showToast = (type, title, message) => {
     Toast.show({
       type: type,
       text1: title,
       text2: message,
-      position: 'bottom',
-      bottomOffset: 80,
     })
   }
 
-  const handleSubmit = () => {
-    if (data.email === '' || data.password === '') {
-      showToast('error', 'Error', 'Todos los campos son obligatorios')
-      return
+  const verifyUser = async () => {
+    const { ok, toast, title, message, role } = await onSubmit()
+
+    showToast(toast, title, message)
+
+    if (ok) {
+      setTimeout(() => {
+        navigation.navigate('Setup', {
+          email: data.email,
+          password: data.password,
+          nick_name: data.nick_name,
+          role,
+        })
+      }, 2500)
     }
-
-    userApi
-      .verifyUser(data.email)
-      .then((res) => {
-        const { message } = res.data
-        showToast('success', 'Registro exitoso', message)
-
-        setTimeout(() => {
-          navigation.navigate('Setup', {
-            email: data.email,
-            password: data.password,
-          })
-          setData(initialState)
-        }, 3500)
-      })
-      .catch((err) => {
-        const { message } = err.response.data
-        showToast('error', 'Error', message)
-      })
-  }
-
-  // Función para hacer scroll automático
-  const handleFocus = (inputRef) => {
-    setTimeout(() => {
-      inputRef.current?.measureLayout(
-        scrollRef.current,
-        (x, y, width, height) => {
-          scrollRef.current?.scrollTo({ y: y - 100, animated: true })
-        }
-      )
-    }, 100)
   }
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, backgroundColor: '#F5F9FF' }}
+      className="flex-1"
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          ref={scrollRef}
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex flex-col gap-3 py-5 px-5 relative h-full">
-            <View className="w-full h-[200px] bg-red-400" />
+          <StatusBar
+            barStyle={keyboardVisible ? 'light-content' : 'dark-content'}
+            backgroundColor={keyboardVisible ? '#741D1D' : '#F5F9FF'}
+          />
 
-            <View className="my-5">
-              <Text style={{ fontFamily: 'Jost_600SemiBold', fontSize: 24 }}>
+          {/* Header visible cuando el teclado esta abierto */}
+          {keyboardVisible && (
+            <View className="bg-[#741D1D] h-[50px] w-full flex justify-center items-center">
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 20,
+                  color: '#FFFFFF',
+                }}
+              >
+                Codify UTC
+              </Text>
+            </View>
+          )}
+
+          <View className="flex-1 py-5 bg-[#F5F9FF]">
+            {/* Logo Visible */}
+            {!keyboardVisible && (
+              <View className="w-[90%] mx-auto h-[250px]"></View>
+            )}
+
+            <View className="w-[85%] mx-auto py-5 flex flex-col gap-2">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 24,
+                }}
+              >
                 ¡Comencemos!
               </Text>
-              <Text style={{ fontFamily: 'Mulish_700Bold', fontSize: 14 }}>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 14,
+                }}
+              >
                 Necesitas crear una cuenta para continuar
               </Text>
+              <View className="flex flex-col gap-3 mt-5">
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Ionicons name="mail-outline" size={20} color={'#545454'} />
+                  </View>
+                  <TextInput
+                    defaultValue={data.email}
+                    autoCapitalize="none"
+                    onChangeText={(text) => handleChange('email', text)}
+                    placeholder="Correo electrónico"
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
 
-              <View className="flex flex-col gap-3 my-5">
-                <TextInput
-                  placeholder="example@utc.edu.ec"
-                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: '#555555',
-                  }}
-                  onChangeText={(e) => handleChange('email', e)}
-                  autoCapitalize="none"
-                  defaultValue={data.email}
-                  ref={emailRef}
-                  onFocus={() => handleFocus(emailRef)} // Desplaza hacia la posición del primer input
-                />
-                <TextInput
-                  secureTextEntry
-                  placeholder="****************"
-                  className="bg-[#FFFFFF] border border-[#E0E0E0] px-3 py-5 rounded-lg"
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: '#555555',
-                  }}
-                  onChangeText={(e) => handleChange('password', e)}
-                  autoCapitalize="none"
-                  defaultValue={data.password}
-                  ref={passwordRef}
-                  onFocus={() => handleFocus(passwordRef)} // Desplaza hacia la posición del segundo input
-                />
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Ionicons
+                      name="person-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+                  <TextInput
+                    autoCapitalize="none"
+                    defaultValue={data.nick_name}
+                    onChangeText={(text) => handleChange('nick_name', text)}
+                    placeholder="Nickname"
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
+
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  {/* Icono del candado */}
+                  <View className="w-14 flex items-center justify-center h-full">
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+
+                  {/* Campo de contraseña */}
+                  <TextInput
+                    autoCapitalize="none"
+                    secureTextEntry={!isPasswordVisible}
+                    placeholder="Contraseña"
+                    defaultValue={data.password}
+                    onChangeText={(text) => handleChange('password', text)}
+                    className="flex-1 bg-white px-1"
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+
+                  {/* Icono del ojo */}
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  >
+                    {isPasswordVisible ? (
+                      <Ionicons
+                        name="eye-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="eye-off-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
-                  className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-4 rounded-full relative"
-                  onPress={handleSubmit}
+                  className="bg-[#741D1D] py-4 rounded-full flex items-center justify-center mt-3"
+                  onPress={verifyUser}
                 >
                   <Text
                     style={{
                       fontFamily: 'Jost_600SemiBold',
-                      fontSize: 15,
-                      color: '#FFFFFF',
+                      fontSize: 18,
+                      color: 'white',
                     }}
                   >
                     Registrarme
                   </Text>
 
-                  <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-                    <Ionicons
-                      name="chevron-forward-sharp"
-                      size={20}
-                      color={'#741D1D'}
-                    />
-                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color={'white'}
+                    className="absolute right-4"
+                  />
                 </TouchableOpacity>
-              </View>
-            </View>
 
-            <View className="absolute bottom-7 left-5 flex flex-row gap-2 items-center justify-center w-full">
-              <Text
-                style={{
-                  fontFamily: 'Mulish_700Bold',
-                  fontSize: 13,
-                }}
-              >
-                Ya tengo una cuenta.
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_800ExtraBold',
-                  fontSize: 13,
-                  color: '#741D1D',
-                }}
-                onPress={() => navigation.navigate('Login')}
-              >
-                Iniciar sesión
-              </Text>
+                <View className="mt-5 flex flex-row justify-center items-center gap-2">
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#545454',
+                    }}
+                  >
+                    ¿Ya tienes una cuenta?
+                  </Text>
+                  <TouchableOpacity>
+                    <Text
+                      className="underline"
+                      style={{
+                        fontFamily: 'Mulish_800ExtraBold',
+                        fontSize: 14,
+                        color: '#741D1D',
+                      }}
+                    >
+                      Iniciar sesión
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-      <Toast position="bottom" />
+      <Toast config={toastConfig} position="bottom" />
     </KeyboardAvoidingView>
   )
 }

@@ -1,183 +1,246 @@
 import { Ionicons } from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
-  Keyboard,
 } from 'react-native'
+import useChangePassword from '../../hooks/useChangePassword'
 import Toast from 'react-native-toast-message'
-import { useState } from 'react'
-import { userApi } from '../../api/user/user.api'
-import { useNavigation } from '@react-navigation/native'
+import toastConfig from '../../config/toast.config'
 
-const ChangePassword = ({ route }) => {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [message, setMessage] = useState('')
-
-  const { method, value } = route.params
-  const navigation = useNavigation()
-
-  const handlePasswordChange = (value) => {
-    setPassword(value)
-    validatePasswords(value, confirmPassword)
-  }
-
-  const handleConfirmPasswordChange = (value) => {
-    setConfirmPassword(value)
-    validatePasswords(password, value)
-  }
-
-  const validatePasswords = (pass, confirmPass) => {
-    if (confirmPass.trim().length > 0) {
-      if (pass === confirmPass) {
-        setMessage('✔ Las contraseñas coinciden')
-      } else {
-        setMessage('✖ Las contraseñas no coinciden')
-      }
-    } else {
-      setMessage('')
-    }
-  }
+const ChangePassword = ({ route, navigation }) => {
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
+  const {
+    message,
+    handlePassword,
+    handleConfirmPassword,
+    addUserData,
+    onSubmit,
+  } = useChangePassword()
 
   const showToast = (type, title, message) => {
     Toast.show({
       type: type,
       text1: title,
       text2: message,
-      position: 'bottom',
-      bottomOffset: 80,
     })
   }
 
-  const handleSubmit = () => {
-    Keyboard.dismiss() // Cierra el teclado al presionar el botón
+  const changePassword = async () => {
+    const { ok, toast, title, message } = await onSubmit()
+    console.log(ok, toast, title, message)
+    showToast(toast, title, message)
 
-    if (password !== confirmPassword || password.trim() === '') {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Las contraseñas no coinciden o están vacías',
-        position: 'bottom',
-        bottomOffset: 80,
-      })
-      return
+    if (ok) {
+      setTimeout(() => {
+        navigation.navigate('Login')
+      }, 2500)
     }
-
-    userApi
-      .changePassword({
-        method,
-        value,
-        password,
-      })
-      .then((res) => {
-        const { message } = res.data
-        showToast('success', 'Contraseña cambiada', message)
-        setPassword('') // Limpia los campos
-        setConfirmPassword('')
-        setTimeout(() => {
-          navigation.navigate('Login')
-        }, 3500)
-      })
-      .catch((err) => {
-        const { message } = err.response.data
-        showToast('error', 'Error', message)
-      })
   }
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true)
+      }
+    )
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false)
+      }
+    )
+
+    // Clean up listeners
+    return () => {
+      keyboardDidHideListener.remove()
+      keyboardDidShowListener.remove()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (route.params) {
+      const { method, value } = route.params
+      addUserData(method, value)
+    }
+  }, [route])
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-[#F5F9FF]"
     >
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="flex flex-col relative h-full px-2 w-full">
-          <View className="w-full h-[300px] bg-red-400" />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <StatusBar
+            barStyle={keyboardVisible ? 'light-content' : 'dark-content'}
+            backgroundColor={keyboardVisible ? '#741D1D' : '#F5F9FF'}
+          />
 
-          <View className="flex my-10 gap-4">
-            <Text
-              style={{
-                fontFamily: 'Jost_600SemiBold',
-                fontSize: 19,
-                color: '#000000',
-                textAlign: 'left',
-              }}
-            >
-              Crear nueva contraseña
-            </Text>
+          <View className="flex-1 pb-5 w-[90%] mx-auto">
+            {!keyboardVisible && (
+              <View className="w-full mx-auto h-[200px] mb-10"></View>
+            )}
 
-            <View className="flex gap-5">
-              <TextInput
-                className="rounded-2xl h-16 w-full bg-white border border-gray-300 px-4"
-                placeholder="Contraseña"
-                secureTextEntry={true}
-                onChangeText={handlePasswordChange}
-                value={password}
-                style={{
-                  fontFamily: 'Mulish_700Bold',
-                  fontSize: 14,
-                  color: '#202244',
-                }}
-              />
-              <TextInput
-                className="rounded-2xl h-16 w-full bg-white border border-gray-300 px-4"
-                placeholder="Confirmar Contraseña"
-                secureTextEntry={true}
-                onChangeText={handleConfirmPasswordChange}
-                value={confirmPassword}
-                style={{
-                  fontFamily: 'Mulish_700Bold',
-                  fontSize: 14,
-                  color: '#202244',
-                }}
-              />
-              {message !== '' && (
+            <View className=" flex flex-col">
+              {!keyboardVisible && (
                 <Text
                   style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: message.includes('✔') ? 'green' : 'red',
-                    marginTop: 5,
+                    fontFamily: 'Jost_600SemiBold',
+                    fontSize: 19,
+                    color: '#202244',
                   }}
                 >
-                  {message}
+                  Crear nueva contraseña
                 </Text>
               )}
+
+              <View className="mt-8 flex flex-col gap-5">
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  {/* Icono del candado */}
+                  <View className="w-14 flex items-center justify-center h-full">
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+
+                  {/* Campo de contraseña */}
+                  <TextInput
+                    secureTextEntry={!isPasswordVisible}
+                    placeholder="Contraseña"
+                    // defaultValue={credentials.password}
+                    onChangeText={(text) => handlePassword(text)}
+                    className="flex-1 bg-white px-1"
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+
+                  {/* Icono del ojo */}
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                  >
+                    {isPasswordVisible ? (
+                      <Ionicons
+                        name="eye-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="eye-off-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  {/* Icono del candado */}
+                  <View className="w-14 flex items-center justify-center h-full">
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+
+                  {/* Campo de contraseña */}
+                  <TextInput
+                    secureTextEntry={!isPasswordVisible}
+                    placeholder="Confirmar contraseña"
+                    // defaultValue={credentials.password}
+                    onChangeText={(text) => handleConfirmPassword(text)}
+                    className="flex-1 bg-white px-1"
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+
+                  {/* Icono del ojo */}
+                  <TouchableOpacity
+                    className="px-4"
+                    onPress={() =>
+                      setConfirmPasswordVisible(!confirmPasswordVisible)
+                    }
+                  >
+                    {confirmPasswordVisible ? (
+                      <Ionicons
+                        name="eye-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="eye-off-outline"
+                        size={22}
+                        color={'#545454'}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                {message && (
+                  <View className="flex flex-col items-center ">
+                    <Text
+                      style={{
+                        fontFamily: 'Mulish_600SemiBold',
+                        fontSize: 13,
+                        color: '#741D1D',
+                      }}
+                    >
+                      Las contraseñas no coinciden
+                    </Text>
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  className="bg-[#741D1D] py-4 rounded-full flex items-center justify-center mt-3"
+                  onPress={changePassword}
+                >
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 18,
+                      color: 'white',
+                    }}
+                  >
+                    Continuar
+                  </Text>
+
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color={'white'}
+                    className="absolute right-4"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-
-          <TouchableOpacity
-            className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-5 rounded-full w-full"
-            onPress={handleSubmit}
-          >
-            <Text
-              style={{
-                fontFamily: 'Jost_600SemiBold',
-                fontSize: 15,
-                color: '#FFFFFF',
-              }}
-            >
-              Continuar
-            </Text>
-
-            <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-              <Ionicons
-                name="chevron-forward-sharp"
-                size={20}
-                color={'#741D1D'}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      <Toast position="bottom" />
+        </ScrollView>
+      </TouchableWithoutFeedback>
+      <Toast config={toastConfig} position="bottom" />
     </KeyboardAvoidingView>
   )
 }

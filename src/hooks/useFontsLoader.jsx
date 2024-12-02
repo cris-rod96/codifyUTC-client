@@ -21,6 +21,8 @@ import {
   Mulish_800ExtraBold,
   Mulish_900Black,
 } from '@expo-google-fonts/mulish'
+import { Bokor_400Regular } from '@expo-google-fonts/bokor'
+import { PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p'
 
 export default function useFontsLoader() {
   const [fontsLoaded] = useFonts({
@@ -41,6 +43,8 @@ export default function useFontsLoader() {
     Mulish_700Bold,
     Mulish_800ExtraBold,
     Mulish_900Black,
+    Bokor_400Regular,
+    PressStart2P_400Regular,
   })
 
   return fontsLoaded

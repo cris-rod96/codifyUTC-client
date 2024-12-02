@@ -1,6 +1,8 @@
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import gmailLogo from '../../../assets/gmail.png'
+import { useEffect } from 'react'
+import { storageUtil } from '../../utils/index.utils'
 const Landing = () => {
   return (
     <View className="flex flex-col gap-3 relative h-full">

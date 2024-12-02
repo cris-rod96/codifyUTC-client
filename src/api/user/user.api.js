@@ -1,12 +1,16 @@
 import { instance } from '../base.api'
 
 export const userApi = {
-  verifyUser: (email) => {
-    return instance.get(`/users/verify?email=${email}`)
+  verifyUser: (email, nick_name) => {
+    return instance.get(`/users/verify?email=${email}&nick_name=${nick_name}`)
   },
 
-  register: (data) => {
-    return instance.post('/users', data)
+  register: (formData) => {
+    return instance.post('/users', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
   },
 
   activateAccount: (data) => {

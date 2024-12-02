@@ -14,16 +14,18 @@ import RootNavigator from './src/navigation/RootNavigator'
 import useFontsLoader from './src/hooks/useFontsLoader'
 import { ModalProvider } from './src/context/ModalContext'
 import { ToastProvider } from './src/context/ToastContext'
+import { CourseModalProvider } from './src/context/CourseModalContext'
+import { Provider } from 'react-redux'
+import store from './src/redux/store'
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true)
-
   const fontsLoaded = useFontsLoader()
 
   useEffect(() => {
     setTimeout(() => {
       setShowSplash(false)
-      StatusBar.setHidden(false)
+      // StatusBar.setHidden(false)
     }, 3500)
   }, [])
 
@@ -32,22 +34,15 @@ export default function App() {
   }
 
   return (
-    <ModalProvider>
-      <NavigationContainer>
-        <SafeAreaView style={styles.container}>
-          <View
-            className="w-full "
-            style={{
-              flex: 1,
-              // paddingTop: Platform.OS === 'ios' ? 0 : 30,
-            }}
-          >
+    <Provider store={store}>
+      <CourseModalProvider>
+        <ModalProvider>
+          <NavigationContainer>
             <RootNavigator />
-          </View>
-          <StatusBar backgroundColor="#F5F9FF" barStyle="dark-content" />
-        </SafeAreaView>
-      </NavigationContainer>
-    </ModalProvider>
+          </NavigationContainer>
+        </ModalProvider>
+      </CourseModalProvider>
+    </Provider>
   )
 }
 

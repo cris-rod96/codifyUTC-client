@@ -6,16 +6,28 @@ import {
   View,
   Keyboard,
   TouchableWithoutFeedback,
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import profileLogo from '../../../assets/profile.png'
+import ecuFlag from '../../../assets/flag_ecuador.png'
 import { Ionicons } from '@expo/vector-icons'
 import RNPickerSelect from 'react-native-picker-select'
 import { useEffect, useState } from 'react'
 import { userApi } from '../../api/user/user.api'
 import Toast from 'react-native-toast-message'
+import { pickerImagesUtil } from '../../utils/index.utils'
+import toastConfig from '../../config/toast.config'
+import Select from 'react-native-picker-select'
+import useSetup from '../../hooks/useSetup'
 
 const Setup = ({ route, navigation }) => {
+  const { addRegisterData, handleChange, user, onSubmit } = useSetup()
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [imageUri, setImageUri] = useState(null)
   const initialState = {
     email: '',
     password: '',
@@ -25,187 +37,222 @@ const Setup = ({ route, navigation }) => {
     nick_name: '',
     gender: '',
   }
-  const [data, setData] = useState(initialState)
-  const { email, password } = route.params
+  // const { email, password, nick_name,role } = route.params
 
   const showToast = (type, title, message) => {
     Toast.show({
       type: type,
       text1: title,
       text2: message,
-      position: 'bottom',
-      bottomOffset: 80,
     })
   }
 
-  const handleChange = (name, value) => {
-    setData({ ...data, [name]: value })
+  const pickImage = async () => {
+    const uri = await pickerImagesUtil.pickImageFromGalllery()
+    if (uri) {
+      setImageUri(uri)
+    }
   }
 
-  const handleSubmit = () => {
-    if (Object.values(data).includes('')) {
-      showToast('error', 'Error', 'Todos los campos son obligatorios')
-      return
+  const register = async () => {
+    const { ok, message, title, toast } = await onSubmit(imageUri)
+    showToast(toast, title, message)
+
+    if (ok) {
+      setTimeout(() => {
+        navigation.navigate('ActivationCode', {
+          email: user.email,
+          full_name: user.full_name,
+        })
+      }, 2500)
     }
-
-    userApi
-      .register(data)
-      .then((res) => {
-        showToast(
-          'success',
-          'Registro exitoso',
-          'Revisa tu correo para activar tu cuenta.'
-        )
-
-        setTimeout(() => {
-          navigation.navigate('ActivationCode', {
-            email: data.email,
-            full_name: data.full_name,
-          })
-        }, 3500)
-      })
-      .catch((err) => {
-        const { message } = err.response.data
-        showToast('error', 'Error', message)
-      })
   }
 
   useEffect(() => {
-    setData({ ...data, email, password })
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true)
+      }
+    )
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false)
+      }
+    )
+
+    return () => {
+      keyboardDidShowListener.remove()
+      keyboardDidHideListener.remove()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (route.params) {
+      const { email, nick_name, password, role } = route.params
+      addRegisterData(email, nick_name, password, role)
+    }
   }, [route])
 
-  const dismissKeyboard = () => {
-    Keyboard.dismiss()
-  }
-
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard}>
-      <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        enableOnAndroid={true}
-        extraScrollHeight={100} // Espacio adicional para evitar que el teclado cubra el campo
-      >
-        <View className="flex flex-col relative h-full px-5 py-10">
-          {/* Foto de perfil */}
-          <View className="relative w-[100px] h-[100px] rounded-full bg-red-300 mx-auto border-2 border-gray-300">
-            <Image
-              source={profileLogo}
-              className="absolute w-full h-full object-cover"
-            />
-            <View className="w-8 h-8 rounded-full bg-[#741D1D] flex items-center justify-center absolute bottom-1 right-1 border-2 border-gray-300">
-              <Ionicons name="camera-sharp" color={'white'} size={14} />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View className="flex-1 pb-5 bg-[#F5F9FF] flex-col gap-3">
+            <View className="w-[90%] mx-auto flex flex-col justify-center items-center gap-3">
+              {!keyboardVisible && (
+                <TouchableOpacity
+                  className="relative w-44 h-44 rounded-full border border-gray-300 mb-6"
+                  onPress={pickImage}
+                >
+                  <Image
+                    source={imageUri ? { uri: imageUri } : profileLogo}
+                    className="absolute w-full h-full object-cover rounded-full"
+                  />
+                  <View className="absolute bottom-2 right-2 rounded-full bg-[#741D1D] w-10 h-10 flex items-center justify-center">
+                    <Ionicons name="camera" size={24} color="white" />
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {/* Formulario */}
+              <View className="flex w-full mt-2 gap-3">
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Ionicons
+                      name="person-outline"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+                  <TextInput
+                    defaultValue={user.full_name}
+                    autoCapitalize="none"
+                    autoComplete="off"
+                    onChangeText={(text) => handleChange('full_name', text)}
+                    placeholder="Nombres completos"
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
+
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <View className="w-10 h-10 relative">
+                      <Image
+                        source={ecuFlag}
+                        className="absolute w-full h-full object-cover"
+                      />
+                    </View>
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  >
+                    {'(+ 593)'}
+                  </Text>
+                  <TextInput
+                    autoComplete="off"
+                    defaultValue={user.phone}
+                    autoCapitalize="none"
+                    keyboardType="phone-pad"
+                    onChangeText={(text) => handleChange('phone', text)}
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
+
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Ionicons name="card-outline" size={20} color={'#545454'} />
+                  </View>
+                  <TextInput
+                    autoComplete="off"
+                    defaultValue={user.dni}
+                    autoCapitalize="none"
+                    onChangeText={(text) => handleChange('dni', text)}
+                    keyboardType="numeric"
+                    placeholder="Cédula"
+                    className="flex-1 bg-white  px-1 "
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  />
+                </View>
+
+                <View className="h-[58px] rounded-lg bg-white shadow-md shadow-gray-300 flex items-center">
+                  <Select
+                    className="w-full h-full"
+                    onValueChange={(value) => handleChange('gender', value)}
+                    items={[
+                      { label: '♀️ Femenino', value: 'Femenino' },
+                      { label: '♂️ Masculino', value: 'Masculino' },
+                      { label: '⚧️ Otro', value: 'Otro' },
+                    ]}
+                    placeholder={{
+                      label: 'Género',
+                      value: null,
+                      color: '#545454',
+                    }}
+                    style={{
+                      inputAndroid: {
+                        fontFamily: 'Mulish_700Bold',
+                        fontSize: 14,
+                        color: '#505050',
+                      },
+                      placeholder: {
+                        fontFamily: 'Mulish_700Bold',
+                        fontSize: 14,
+                      },
+                    }}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  className="flex items-center justify-center h-[60px] bg-[#741D1D] rounded-full shadow-md shadow-gray-300 mt-3"
+                  onPress={register}
+                >
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 18,
+                      color: 'white',
+                    }}
+                  >
+                    Continuar
+                  </Text>
+                  <Ionicons
+                    name="chevron-forward-outline"
+                    size={22}
+                    color="white"
+                    className="absolute right-4"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-
-          {/* Formulario */}
-          <View className="mt-10 flex flex-col gap-4">
-            {/* Inputs */}
-            <TextInput
-              placeholder="Nombre completo"
-              className="px-4 h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 14,
-              }}
-              onChangeText={(value) => handleChange('full_name', value)}
-              autoCapitalize="words"
-              defaultValue={data.full_name}
-            />
-            <TextInput
-              placeholder="Nickname"
-              className="px-4 h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 14,
-              }}
-              onChangeText={(value) => handleChange('nick_name', value)}
-              autoCapitalize="none"
-              defaultValue={data.nick_name}
-            />
-            <TextInput
-              placeholder="Cédula"
-              className="px-4 h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 14,
-              }}
-              keyboardType="numeric"
-              onChangeText={(value) => handleChange('dni', value)}
-              defaultValue={data.dni}
-            />
-
-            <TextInput
-              placeholder="Teléfono"
-              className="px-4 h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 14,
-              }}
-              keyboardType="numeric"
-              onChangeText={(value) => handleChange('phone', value)}
-              defaultValue={data.phone}
-            />
-
-            {/* Select */}
-            <View className="h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm flex justify-center items-center">
-              <RNPickerSelect
-                onValueChange={(value) => handleChange('gender', value)}
-                items={[
-                  { label: 'Femenino', value: 'Femenino' },
-                  { label: 'Masculino', value: 'Masculino' },
-                  { label: 'Prefiero no decirlo', value: 'Otro' },
-                ]}
-                placeholder={{
-                  label: 'Selecciona tu género',
-                  value: null,
-                  color: '#9EA0A4',
-                }}
-                style={{
-                  inputIOS: {
-                    fontSize: 14,
-                    fontFamily: 'Mulish_700Bold',
-                    color: '#000',
-                  },
-                  inputAndroid: {
-                    fontSize: 14,
-                    fontFamily: 'Mulish_700Bold',
-                    color: '#000',
-                  },
-                  placeholder: {
-                    fontSize: 12,
-                    fontFamily: 'Mulish_700Bold',
-                  },
-                }}
-              />
-            </View>
-          </View>
-
-          {/* Botón */}
-          <TouchableOpacity
-            className="flex flex-row gap-2 items-center justify-center mt-5 bg-[#741D1D] py-4 rounded-full relative"
-            onPress={handleSubmit}
-          >
-            <Text
-              style={{
-                fontFamily: 'Jost_600SemiBold',
-                fontSize: 15,
-                color: '#FFFFFF',
-              }}
-            >
-              Continuar
-            </Text>
-            <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-              <Ionicons
-                name="chevron-forward-sharp"
-                size={20}
-                color={'#741D1D'}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAwareScrollView>
-    </TouchableWithoutFeedback>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+      <Toast config={toastConfig} position="bottom" />
+    </KeyboardAvoidingView>
   )
 }
 

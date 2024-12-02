@@ -1,9 +1,12 @@
 import { Ionicons } from '@expo/vector-icons'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from '@react-navigation/stack'
 import Profile from '../views/profiile/Profile'
 import EditProfile from '../views/edit/EditProfile'
 
-const ProfileStack = createNativeStackNavigator()
+const ProfileStack = createStackNavigator()
 const ProfileNavigator = () => {
   return (
     <ProfileStack.Navigator
@@ -24,6 +27,7 @@ const ProfileNavigator = () => {
         contentStyle: {
           backgroundColor: '#F5F9FF',
         },
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
     >
       <ProfileStack.Screen name="Profile" component={Profile} />
