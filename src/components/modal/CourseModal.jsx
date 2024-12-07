@@ -16,7 +16,7 @@ import {
   storageUtil,
 } from '../../utils/index.utils'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast.config'
+import toastConfig from '../../config/toast/toast.config'
 import { coursesAPI } from '../../api/courses/courses.api'
 
 const CourseModal = ({ isVisible, toggleModal }) => {

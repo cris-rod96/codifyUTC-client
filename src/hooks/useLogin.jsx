@@ -16,7 +16,7 @@ const useLogin = () => {
     })
   }
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const { email, password } = credentials
 
     if (email === '' || password === '') {
@@ -28,37 +28,37 @@ const useLogin = () => {
       }
     }
 
-    return authApi
-      .login(credentials.email, credentials.password)
-      .then((res) => {
-        const { token, user } = res.data
-        if (user) {
-          storageUtil.saveSecureData(
-            'user_info',
-            JSON.stringify({
-              user,
-              token,
-            })
-          )
+    try {
+      const res = await authApi.login(email, password)
+      const { token, user } = res.data
 
-          return {
-            ok: true,
-            toast: 'success',
-            title: 'Inicio de sesión exitoso',
-            message: `Bienvenido ${user.full_name}`,
-          }
-        }
-      })
-      .catch((err) => {
-        const { message } = err.response.data
+      if (user) {
+        console.log(user)
+        await storageUtil.saveSecureData(
+          'user_info',
+          JSON.stringify({ user, token })
+        )
+
         return {
-          ok: false,
-          toast: 'error',
-          title: 'Error al iniciar sesión',
-          message,
+          ok: true,
+          toast: 'success',
+          title: 'Inicio de sesión exitoso',
+          message: `Bienvenido ${user.full_name}`,
+          role: user.role,
         }
-      })
+      }
+    } catch (err) {
+      const message = err.response?.data?.message || 'Error desconocido'
+
+      return {
+        ok: false,
+        toast: 'error',
+        title: 'Error al iniciar sesión',
+        message,
+      }
+    }
   }
+
   return {
     handleChange,
     credentials,

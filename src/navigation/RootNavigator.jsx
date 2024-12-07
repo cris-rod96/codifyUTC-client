@@ -3,103 +3,98 @@ import {
   TransitionSpecs,
   CardStyleInterpolators,
 } from '@react-navigation/stack'
-import { Home, SplashScreen } from '../views'
-import { Welcome1, Welcome2, Welcome3 } from '../views/welcome'
-import Login from '../views/login/Login'
-import Register from '../views/register/Register'
-import RecoveryPassword from '../views/recovery_password/RecoveryPassword'
-import ActivationCode from '../views/activation_code/ActivationCode'
-import ChangePassword from '../views/change_password/ChangePassword'
-import Setup from '../views/setup/Setup'
-import RecoveryCode from '../views/activation_code/RecoveryCode'
-import TabNavigator from './TabNavigator'
-import ThirdSession from '../views/third_session/ThirdSession'
+import TabsTeacherNavigator from './teacher/TabsTeacherNavigator'
+import TabStudentNavigator from './student/TabStudentNavigator'
+
+import {
+  changePasswordOptions,
+  navigatorOptions,
+  recoveryOptions,
+  setupOptions,
+} from '../config/index.config'
+import { useEffect, useState } from 'react'
+import { storageUtil } from '../utils/index.utils'
+import Loading from '../components/loading/Loading'
+import {
+  ActivationCode,
+  ChangePassword,
+  Login,
+  RecoveryCode,
+  RecoveryPassword,
+  Register,
+  Setup,
+  SplashScreen,
+  ThirdSession,
+  Welcome1,
+  Welcome2,
+  Welcome3,
+} from '../views/index.views'
 
 const Stack = createStackNavigator()
 
 function RootNavigator() {
+  const [userType, setUserType] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    storageUtil
+      .getSecureData('user_info')
+      .then((res) => {
+        const infoUser = JSON.parse(res)
+        const { user } = infoUser
+        setUserType(user.role)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return <Loading />
+  }
+
   return (
     <Stack.Navigator
       initialRouteName="Login"
-      screenOptions={{
-        headerShown: false,
-        contentStyle: {
-          backgroundColor: '#F5F9FF',
-        },
-        transitionSpec: {
-          open: TransitionSpecs.ScaleFromCenterAndroidSpec, // Animación personalizada para abrir
-          close: TransitionSpecs.FadeOutToBottomAndroidSpec, // Animación personalizada para cerrar
-        },
-        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Animación horizontal estilo iOS
-      }}
+      screenOptions={navigatorOptions(TransitionSpecs, CardStyleInterpolators)}
     >
+      {/* RUTAS COMPARTIDAS */}
       <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Welcome" component={Welcome1} />
       <Stack.Screen name="Welcome2" component={Welcome2} />
       <Stack.Screen name="Welcome3" component={Welcome3} />
       <Stack.Screen name="ThirdSession" component={ThirdSession} />
-      <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="Setup" component={Setup} />
       <Stack.Screen
         name="RecoveryPassword"
         component={RecoveryPassword}
-        options={{
-          headerShown: true,
-          headerTitle: 'Recuperar contraseña',
-          headerStyle: {
-            elevation: 0,
-            backgroundColor: '#F5F9FF',
-            shadowOpacity: 0,
-          },
-          headerTitleStyle: {
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 21,
-            color: '#202244',
-          },
-          headerTitleAlign: 'left',
-        }}
+        options={recoveryOptions}
       />
-      <Stack.Screen name="ActivationCode" component={ActivationCode} />
-      <Stack.Screen name="RecoveryCode" component={RecoveryCode} />
       <Stack.Screen
         name="ChangePassword"
         component={ChangePassword}
-        options={{
-          headerShown: true,
-          headerTitle: 'Crear nueva contraseña',
-          headerStyle: {
-            elevation: 0,
-            backgroundColor: '#F5F9FF',
-            shadowOpacity: 0,
-          },
-          headerTitleStyle: {
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 21,
-            color: '#202244',
-          },
-          headerTitleAlign: 'left',
-        }}
+        options={changePasswordOptions}
+      />
+      <Stack.Screen name="RecoveryCode" component={RecoveryCode} />
+      <Stack.Screen
+        name="ActivationCode"
+        component={ActivationCode}
+        options={setupOptions}
+      />
+
+      <Stack.Screen
+        name="TabsTeacherNavigator"
+        component={TabsTeacherNavigator}
       />
       <Stack.Screen
-        name="Setup"
-        component={Setup}
-        options={{
-          headerShown: true,
-          headerTitle: 'Completar perfil',
-          headerStyle: {
-            elevation: 0,
-            backgroundColor: '#F5F9FF',
-            shadowOpacity: 0,
-          },
-          headerTitleStyle: {
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 21,
-            color: '#202244',
-          },
-          headerTitleAlign: 'left',
-        }}
+        name="TabStudentNavigator"
+        component={TabStudentNavigator}
       />
-      <Stack.Screen name="Landing" component={TabNavigator} />
     </Stack.Navigator>
   )
 }
