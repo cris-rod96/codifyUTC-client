@@ -1,29 +1,37 @@
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from 'react-native'
+import { View, Text, ScrollView, Image } from 'react-native'
 import profile from '../../../../assets/profile.png'
-import { Ionicons } from '@expo/vector-icons'
 import { storageUtil } from '../../../utils/index.utils'
 import CoursesSlide from '../../../components/slides/courses/CoursesSlide'
 import {
   ActivitiesSlide,
   ClasseSlide,
 } from '../../../components/slides/index.slides'
+import { useDispatch, useSelector } from 'react-redux'
+import { saveCourses } from '../../../redux/slices/teacher.slice'
 const Home = () => {
+  const { courses } = useSelector((state) => state.teacher)
+  const dispatch = useDispatch()
   const [user, setUser] = useState(null)
+
+  // Obtener todos los datos relacionados al Docente
+  // Cursos
+  // Clases
+  // Actividades
+
+  // Si entra a cursos mostrar todos los cursos
+  // Si entra a un determinado curso mostrar las clases y los estudiantes que pertenecen a ese curso
 
   useEffect(() => {
     storageUtil
       .getSecureData('user_info')
       .then((res) => {
         if (res) {
-          setUser(JSON.parse(res))
+          const data = JSON.parse(res)
+          console.log(data)
+          const { courses } = data.user
+          dispatch(saveCourses(courses))
+          setUser(data.user)
         }
       })
       .catch((err) => {
@@ -69,7 +77,7 @@ const Home = () => {
         </View>
 
         {/* Sección de cursos */}
-        <CoursesSlide courses={[]} />
+        <CoursesSlide courses={courses} />
 
         {/* Sección de clases */}
         <ClasseSlide classes={[]} />

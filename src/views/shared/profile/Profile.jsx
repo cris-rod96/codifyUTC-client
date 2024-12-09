@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import profile from '../../../../assets/profile.png'
 import { Ionicons } from '@expo/vector-icons'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { storageUtil } from '../../../utils/index.utils'
+import Loading from '../../../components/loading/Loading'
 const Profile = () => {
+  const [user, setUser] = useState(null)
   const navigation = useNavigation()
 
   const closeSession = async () => {
@@ -12,10 +14,20 @@ const Profile = () => {
     navigation.dispatch(
       CommonActions.navigate({
         name: 'Login',
-      })
+      }),
     )
   }
-  return (
+
+  useEffect(() => {
+    storageUtil.getSecureData('user_info').then((res) => {
+      const data = JSON.parse(res)
+      console.log(data.user)
+      setUser(data.user)
+    })
+  }, [])
+  return !user ? (
+    <Loading message={'Espere por favor'} />
+  ) : (
     <View className="flex flex-col items-center justify-center h-full w-full bg-[#F5F9FF]">
       <View
         className="w-5/6 h-[450px] relative bg-white rounded-xl border border-gray-200 shadow"
@@ -41,7 +53,7 @@ const Profile = () => {
                 color: '#202244',
               }}
             >
-              Cristhian Rodríguez
+              {user?.full_name}
             </Text>
 
             <Text
@@ -52,7 +64,7 @@ const Profile = () => {
                 color: '#545454',
               }}
             >
-              crisrodam1996@gmail.com
+              {user?.email}
             </Text>
           </View>
 
@@ -76,21 +88,23 @@ const Profile = () => {
               <Ionicons name="chevron-forward" size={22} color={'#202244'} />
             </TouchableOpacity>
 
-            <TouchableOpacity className="flex flex-row justify-between items-center w-full">
-              <View className="flex flex-row gap-2 items-center">
-                <Ionicons name="trash-outline" size={22} color={'#202244'} />
-                <Text
-                  style={{
-                    color: '#202244',
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 15,
-                  }}
-                >
-                  Papelera
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={22} color={'#202244'} />
-            </TouchableOpacity>
+            {user.role === 'Docente' && (
+              <TouchableOpacity className="flex flex-row justify-between items-center w-full">
+                <View className="flex flex-row gap-2 items-center">
+                  <Ionicons name="trash-outline" size={22} color={'#202244'} />
+                  <Text
+                    style={{
+                      color: '#202244',
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 15,
+                    }}
+                  >
+                    Papelera
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={22} color={'#202244'} />
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity className="flex flex-row justify-between items-center w-full">
               <View className="flex flex-row gap-2 items-center">

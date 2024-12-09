@@ -16,6 +16,7 @@ import Toast from 'react-native-toast-message'
 import toastConfig from '../../../config/toast/toast.config'
 import useLogin from '../../../hooks/useLogin'
 import { CommonActions, useNavigation } from '@react-navigation/native'
+import axios from 'axios'
 
 const Login = () => {
   const navigation = useNavigation()
@@ -57,13 +58,13 @@ const Login = () => {
       'keyboardDidShow',
       () => {
         setKeyboardVisible(true)
-      }
+      },
     )
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
         setKeyboardVisible(false)
-      }
+      },
     )
 
     // Clean up listeners

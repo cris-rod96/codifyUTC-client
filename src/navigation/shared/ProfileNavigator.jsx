@@ -26,10 +26,17 @@ const ProfileNavigator = () => {
         contentStyle: {
           backgroundColor: '#F5F9FF',
         },
+
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
     >
-      <ProfileStack.Screen name="Profile" component={Profile} />
+      <ProfileStack.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          headerLeft: null,
+        }}
+      />
       <ProfileStack.Screen
         name="EditProfile"
         component={EditProfile}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { authApi } from '../api/auth/auth.api'
-import { storageUtil } from '../utils/index.utils'
+import { geoUtil, storageUtil } from '../utils/index.utils'
 
 const useLogin = () => {
   const initialState = {
@@ -29,14 +29,15 @@ const useLogin = () => {
     }
 
     try {
-      const res = await authApi.login(email, password)
+      const loginLocation = await geoUtil.getLoginLocation()
+
+      const res = await authApi.login(email, password, loginLocation)
       const { token, user } = res.data
 
       if (user) {
-        console.log(user)
         await storageUtil.saveSecureData(
           'user_info',
-          JSON.stringify({ user, token })
+          JSON.stringify({ user, token }),
         )
 
         return {

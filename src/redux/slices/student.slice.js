@@ -8,8 +8,8 @@ const studentSlice = createSlice({
   name: 'student',
   initialState,
   reducers: {
-    saveAllClassesByCourse: (state, payload) => {
-      state.classes = payload
+    saveAllClassesByCourse: (state, action) => {
+      state.classes = action.payload
     },
   },
 })
