@@ -1,18 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { View, Text, ScrollView, Image } from 'react-native'
-import profile from '../../../../assets/profile.png'
-import { storageUtil } from '../../../utils/index.utils'
-import CoursesSlide from '../../../components/slides/courses/CoursesSlide'
+import profile from 'assets/profile.png'
+import { storageUtil } from 'utils/index.utils'
 import {
   ActivitiesSlide,
   ClasseSlide,
-} from '../../../components/slides/index.slides'
+  CoursesSlide,
+} from 'components/slides/index.slides'
 import { useDispatch, useSelector } from 'react-redux'
-import { saveCourses } from '../../../redux/slices/teacher.slice'
+import {
+  saveActivities,
+  saveClasses,
+  saveCourses,
+} from 'redux/slices/teacher.slice'
+import Loading from '../../../components/loading/Loading'
 const Home = () => {
-  const { courses } = useSelector((state) => state.teacher)
   const dispatch = useDispatch()
   const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Obtener todos los datos relacionados al Docente
   // Cursos
@@ -28,16 +33,24 @@ const Home = () => {
       .then((res) => {
         if (res) {
           const data = JSON.parse(res)
-          console.log(data)
-          const { courses } = data.user
+          const { courses, classes, activities } = data.user
           dispatch(saveCourses(courses))
+          dispatch(saveClasses(classes))
+          dispatch(saveActivities(activities))
           setUser(data.user)
         }
       })
       .catch((err) => {
         console.log(err)
       })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }, [])
+
+  if (isLoading) {
+    return <Loading message={'Cargando información'} />
+  }
 
   return (
     <ScrollView className="flex-1">
@@ -77,12 +90,12 @@ const Home = () => {
         </View>
 
         {/* Sección de cursos */}
-        <CoursesSlide courses={courses} />
+        <CoursesSlide />
 
         {/* Sección de clases */}
-        <ClasseSlide classes={[]} />
+        <ClasseSlide />
         {/* Sección de Actividades */}
-        <ActivitiesSlide activities={[]} />
+        <ActivitiesSlide />
       </View>
     </ScrollView>
   )

@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-const CoursesSlide = ({ courses }) => {
+const CoursesSlide = () => {
+  const { courses } = useSelector((state) => state.teacher)
   const flatListRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
 

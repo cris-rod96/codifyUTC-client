@@ -11,6 +11,7 @@ import {
   View,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 import toastConfig from '../../../config/toast/toast.config'
@@ -19,8 +20,9 @@ import { CommonActions, useNavigation } from '@react-navigation/native'
 import axios from 'axios'
 
 const Login = () => {
+  const [loading, setLoading] = useState(false)
   const navigation = useNavigation()
-  const { credentials, handleChange, onSubmit } = useLogin()
+  const { credentials, handleChange, onSubmit } = useLogin(setLoading)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
 
@@ -58,13 +60,13 @@ const Login = () => {
       'keyboardDidShow',
       () => {
         setKeyboardVisible(true)
-      },
+      }
     )
     const keyboardDidHideListener = Keyboard.addListener(
       'keyboardDidHide',
       () => {
         setKeyboardVisible(false)
-      },
+      }
     )
 
     // Clean up listeners
@@ -209,9 +211,14 @@ const Login = () => {
                 </View>
 
                 <TouchableOpacity
-                  className="bg-[#741D1D] py-4 rounded-full flex items-center justify-center mt-3"
+                  className={`py-4 rounded-full flex flex-row gap-3  items-center justify-center mt-3 ${
+                    loading ? 'bg-gray-400' : 'bg-[#741D1D]'
+                  }`}
                   onPress={login}
                 >
+                  {loading && (
+                    <ActivityIndicator size="small" color={'#ffffff'} />
+                  )}
                   <Text
                     style={{
                       fontFamily: 'Jost_600SemiBold',
@@ -219,15 +226,17 @@ const Login = () => {
                       color: 'white',
                     }}
                   >
-                    Iniciar sesión
+                    {loading ? 'Validando' : 'Iniciar sesión'}
                   </Text>
 
-                  <Ionicons
-                    name="chevron-forward"
-                    size={22}
-                    color={'white'}
-                    className="absolute right-4"
-                  />
+                  {!loading && (
+                    <Ionicons
+                      name="chevron-forward"
+                      size={22}
+                      color={'white'}
+                      className="absolute right-4"
+                    />
+                  )}
                 </TouchableOpacity>
 
                 <View className="mt-5 flex flex-row justify-center items-center gap-2">

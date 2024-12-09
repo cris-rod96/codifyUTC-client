@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { authApi } from '../api/auth/auth.api'
 import { geoUtil, storageUtil } from '../utils/index.utils'
 
-const useLogin = () => {
+const useLogin = (setLoading) => {
   const initialState = {
     email: '',
     password: '',
@@ -27,6 +27,7 @@ const useLogin = () => {
         message: 'Todos los campos son obligatorios',
       }
     }
+    setLoading(true)
 
     try {
       const loginLocation = await geoUtil.getLoginLocation()
@@ -37,7 +38,7 @@ const useLogin = () => {
       if (user) {
         await storageUtil.saveSecureData(
           'user_info',
-          JSON.stringify({ user, token }),
+          JSON.stringify({ user, token })
         )
 
         return {
@@ -57,6 +58,8 @@ const useLogin = () => {
         title: 'Error al iniciar sesión',
         message,
       }
+    } finally {
+      setLoading(false)
     }
   }
 
