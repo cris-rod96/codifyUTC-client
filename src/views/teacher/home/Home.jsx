@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Image } from 'react-native'
 import profile from 'assets/profile.png'
 import { storageUtil } from 'utils/index.utils'
 import {
-  ActivitiesSlide,
+  StudentSlide,
   ClasseSlide,
   CoursesSlide,
 } from 'components/slides/index.slides'
@@ -14,6 +14,10 @@ import {
   saveCourses,
 } from 'redux/slices/teacher.slice'
 import Loading from '../../../components/loading/Loading'
+import {
+  saveAllClassesInCourses,
+  saveAllStudents,
+} from '../../../redux/slices/teacher.slice'
 const Home = () => {
   const dispatch = useDispatch()
   const [user, setUser] = useState(null)
@@ -33,10 +37,12 @@ const Home = () => {
       .then((res) => {
         if (res) {
           const data = JSON.parse(res)
+          console.log(data)
           const { courses, classes, activities } = data.user
           dispatch(saveCourses(courses))
-          dispatch(saveClasses(classes))
-          dispatch(saveActivities(activities))
+          dispatch(saveAllClassesInCourses(courses))
+          dispatch(saveAllStudents(courses))
+          // dispatch(saveActivities(activities))
           setUser(data.user)
         }
       })
@@ -95,7 +101,7 @@ const Home = () => {
         {/* Sección de clases */}
         <ClasseSlide />
         {/* Sección de Actividades */}
-        <ActivitiesSlide />
+        <StudentSlide />
       </View>
     </ScrollView>
   )

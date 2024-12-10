@@ -96,7 +96,7 @@ const CoursesSlide = () => {
                     color: '#545454',
                   }}
                 >
-                  Programación Web
+                  {item.semester} Sistemas
                 </Text>
                 <Text
                   style={{
@@ -105,7 +105,7 @@ const CoursesSlide = () => {
                     color: '#888888',
                   }}
                 >
-                  20 estudiantes
+                  {item.Students.length} estudiantes
                 </Text>
               </View>
             </View>

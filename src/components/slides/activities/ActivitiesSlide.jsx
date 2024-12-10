@@ -4,7 +4,7 @@ import { FlatList, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 const ActivitiesSlide = () => {
-  const { activities } = useSelector((state) => state.teacher)
+  const activities = []
   const flatListRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
 

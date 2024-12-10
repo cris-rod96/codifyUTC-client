@@ -8,28 +8,31 @@ import CourseModal from '../../../components/modal/CourseModal'
 import { useCourseModal } from '../../../context/CourseModalContext'
 import { coursesAPI } from '../../../api/courses/courses.api'
 import { storageUtil } from '../../../utils/index.utils'
+import { useDispatch, useSelector } from 'react-redux'
+import { saveCourses } from '../../../redux/slices/teacher.slice'
 
 const Courses = () => {
   const { isVisible, toggleModal } = useCourseModal()
-  const [courses, setCourses] = useState([]) // Simulación de cursos
+  const dispatch = useDispatch()
+  const { courses } = useSelector((state) => state.teacher)
 
-  useEffect(() => {
-    storageUtil
-      .getSecureData('user_info')
-      .then((res) => {
-        if (res) {
-          const data = JSON.parse(res)
-          coursesAPI
-            .getAll(data.id)
-            .then((res) => {
-              const { code, courses: allCourses } = res.data
-              setCourses(allCourses)
-            })
-            .catch((err) => console.log(err))
-        }
-      })
-      .catch((err) => console.log(err))
-  }, [isVisible])
+  // useEffect(() => {
+  //   storageUtil
+  //     .getSecureData('user_info')
+  //     .then((res) => {
+  //       if (res) {
+  //         const { user } = JSON.parse(res)
+  //         coursesAPI
+  //           .getAll(user.id)
+  //           .then((res) => {
+  //             const { code, courses: allCourses } = res.data
+  //             dispatch(saveCourses(allCourses))
+  //           })
+  //           .catch((err) => console.log(err))
+  //       }
+  //     })
+  //     .catch((err) => console.log(err))
+  // }, [isVisible])
 
   return (
     <View className="flex flex-col h-full w-full bg-[#F5F9FF] px-5 py-5">

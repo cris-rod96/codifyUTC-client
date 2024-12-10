@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 import { msgUtil } from '../../utils/index.utils'
 
 const Course = ({ course }) => {
+  console.log(course)
   const navigation = useNavigation()
 
   const shareOnWhatsApp = () => {
@@ -76,14 +77,16 @@ const Course = ({ course }) => {
         <View className="flex flex-row items-center gap-2">
           <Ionicons name="people-circle-sharp" size={22} color={'#202244'} />
           <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
-            Estudiantes: <Text style={{ fontWeight: 'bold' }}>20</Text>
+            Estudiantes:{' '}
+            <Text style={{ fontWeight: 'bold' }}>{course.Students.length}</Text>
           </Text>
         </View>
 
         <View className="flex flex-row items-center gap-2">
           <Ionicons name="book-sharp" size={22} color={'#202244'} />
           <Text style={{ color: '#202244', fontFamily: 'Jost_600SemiBold' }}>
-            Clases: <Text style={{ fontWeight: 'bold' }}>20</Text>
+            Clases:{' '}
+            <Text style={{ fontWeight: 'bold' }}>{course.Classes?.length}</Text>
           </Text>
         </View>
 

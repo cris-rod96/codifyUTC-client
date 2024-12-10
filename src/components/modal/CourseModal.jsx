@@ -99,10 +99,15 @@ const CourseModal = ({ isVisible, toggleModal }) => {
   useEffect(() => {
     if (isVisible) {
       generateAccessCode() // Genera un código al abrir el modal
-      storageUtil.getSecureData('user_info').then((res) => {
-        const { id } = JSON.parse(res)
-        setCourse((prev) => ({ ...prev, TeacherId: id }))
-      })
+      storageUtil
+        .getSecureData('user_info')
+        .then((res) => {
+          const { user } = JSON.parse(res)
+          setCourse((prev) => ({ ...prev, TeacherId: user.id }))
+        })
+        .catch((err) => {
+          console.log('Ok')
+        })
     }
   }, [isVisible])
 
@@ -150,7 +155,7 @@ const CourseModal = ({ isVisible, toggleModal }) => {
               {imageUri ? (
                 <Image
                   source={{ uri: imageUri }}
-                  className="w-full h-full absolute object-cover "
+                  className="w-full h-full absolute object-contain"
                 />
               ) : (
                 <>
