@@ -1,43 +1,59 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useState } from 'react'
+import { useWindowDimensions } from 'react-native'
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view'
 import {
   ActivitiesByCourse,
   ClassesByCourse,
   StudentsByCourse,
-} from '../../views/index.views'
-
-const Tab = createMaterialTopTabNavigator()
+} from 'views/index.views'
 
 function CourseTabs({ route, navigation }) {
-  const { courseName } = route.params || {}
+  const layout = useWindowDimensions()
+  const { course } = route.params || {}
+
+  const [index, setIndex] = useState(0)
+  const [routes] = useState([
+    { key: 'classes', title: 'Clases' },
+    { key: 'activities', title: 'Actividades' },
+    { key: 'students', title: 'Estudiantes' },
+  ])
 
   useLayoutEffect(() => {
-    if (courseName) {
+    if (course) {
       navigation.setOptions({
-        title: courseName,
+        title: `${course.subject}`,
       })
     }
-  }, [courseName, navigation])
+  }, [course, navigation])
+
+  const renderScene = SceneMap({
+    classes: () => <ClassesByCourse courseId={course?.id} />,
+    activities: () => <ActivitiesByCourse courseId={course?.id} />,
+    students: () => <StudentsByCourse courseId={course?.id} />,
+  })
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="ClassesCourse"
-        component={ClassesByCourse}
-        options={{ tabBarLabel: 'Clases' }}
-      />
-      <Tab.Screen
-        name="ActivitiesCourse"
-        component={ActivitiesByCourse}
-        options={{ tabBarLabel: 'Actividades' }}
-      />
-      <Tab.Screen
-        name="Students"
-        component={StudentsByCourse}
-        options={{
-          tabBarLabel: 'Estudiantes',
-        }}
-      />
-    </Tab.Navigator>
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: layout.width }}
+      style={{ backgroundColor: '#F5F9FF' }}
+      sceneContainerStyle={{ backgroundColor: '#F5F9FF' }}
+      renderTabBar={(props) => (
+        <TabBar
+          {...props}
+          style={{
+            backgroundColor: '#741D1D', // Color de fondo de la barra de pestañas
+            borderBottomWidth: 0, // Quitar borde inferior si lo deseas
+          }}
+          inactiveColor="#DCDCDC"
+          activeColor="#FFF"
+          indicatorStyle={{
+            backgroundColor: '#741D1D', // Color de la indicador de la pestaña activa
+          }}
+        />
+      )}
+    />
   )
 }
 

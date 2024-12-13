@@ -21,6 +21,7 @@ function TabsTeacherNavigator() {
           display: isVisible || isVisibleCourseModal ? 'none' : 'flex',
           backgroundColor: '#F5F9FF',
         },
+        lazy: false,
       }}
     >
       <Tab.Screen

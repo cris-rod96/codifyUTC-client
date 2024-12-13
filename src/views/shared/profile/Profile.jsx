@@ -1,30 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
-import profile from '../../../../assets/profile.png'
+import profile from 'assets/profile.png'
 import { Ionicons } from '@expo/vector-icons'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import { storageUtil } from '../../../utils/index.utils'
-import Loading from '../../../components/loading/Loading'
+import Loading from 'components/loading/Loading'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from 'redux/slices/user.slice'
 const Profile = () => {
-  const [user, setUser] = useState(null)
+  const { user } = useSelector((state) => state.user)
   const navigation = useNavigation()
+  const dispatch = useDispatch()
 
   const closeSession = async () => {
-    await storageUtil.removeSecureData('user_info')
+    dispatch(logout())
     navigation.dispatch(
       CommonActions.navigate({
         name: 'Login',
-      }),
+      })
     )
   }
-
-  useEffect(() => {
-    storageUtil.getSecureData('user_info').then((res) => {
-      const data = JSON.parse(res)
-      console.log(data.user)
-      setUser(data.user)
-    })
-  }, [])
   return !user ? (
     <Loading message={'Espere por favor'} />
   ) : (

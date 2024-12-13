@@ -17,7 +17,6 @@ import Toast from 'react-native-toast-message'
 import toastConfig from '../../../config/toast/toast.config'
 import useLogin from '../../../hooks/useLogin'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import axios from 'axios'
 
 const Login = () => {
   const [loading, setLoading] = useState(false)

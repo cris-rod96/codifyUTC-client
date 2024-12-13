@@ -1,42 +1,49 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import CourseTabs from './CourseTabs'
-import { TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { useModal } from '../../context/ModalContext'
-import { useCourseModal } from '../../context/CourseModalContext'
-import { Courses } from '../../views/index.views'
+import { useCourseModal } from 'context/CourseModalContext'
+import { Courses } from 'views/index.views'
+import { createStackNavigator } from '@react-navigation/stack'
+import { useEffect } from 'react'
+import { useNavigation } from '@react-navigation/native'
 
-const Stack = createNativeStackNavigator()
+const Stack = createStackNavigator()
 
 function CourseNavigator() {
-  const { toggleModal } = useCourseModal()
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F5F9FF',
         },
-        headerTitleAlign: 'center',
         headerTitleStyle: {
           fontFamily: 'Jost_600SemiBold',
           fontSize: 21,
         },
       }}
-      j
     >
       <Stack.Screen
         name="Courses"
         component={Courses}
         options={{
-          headerTitle: 'Cursos',
-          headerRight: () => (
-            <TouchableOpacity className="mr-4 " onPressIn={toggleModal}>
-              <Ionicons name="add-circle-sharp" size={26} color={'#741D1D'} />
-            </TouchableOpacity>
-          ),
+          headerTitle: 'Mis Cursos',
+          headerLeft: () => null,
         }}
       />
-      <Stack.Screen name="DetailCourse" component={CourseTabs} />
+      <Stack.Screen
+        name="DetailCourse"
+        component={CourseTabs}
+        options={{
+          headerStyle: {
+            backgroundColor: '#741D1D',
+          },
+
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            color: 'white',
+          },
+
+          headerTintColor: 'white',
+        }}
+      />
     </Stack.Navigator>
   )
 }

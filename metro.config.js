@@ -13,6 +13,13 @@ config.resolver = {
     redux: `${__dirname}/src/redux`,
     services: `${__dirname}/src/services`,
     views: `${__dirname}/src/views`,
+    context: `${__dirname}/src/context`,
+    api: `${__dirname}/src/api`,
+    config: `${__dirname}/src/config`,
+    hooks: `${__dirname}/src/hooks`,
+    icons: `${__dirname}/assets/icons`,
+    mocks: `${__dirname}/src/mocks`,
+    navigation: `${__dirname}/src/navigation`,
     assets: `${__dirname}/assets`,
   },
 }

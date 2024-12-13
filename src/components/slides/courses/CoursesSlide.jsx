@@ -67,6 +67,10 @@ const CoursesSlide = () => {
           initialNumToRender={1}
           windowSize={3}
           keyExtractor={(item) => item.id}
+          getItemLayout={(data, index) => ({
+            length: 254,
+            offset: 254 * index,
+          })}
           renderItem={({ item }) => (
             <View
               className="flex flex-col w-[250px] h-[150px] bg-white mr-4 rounded-xl border border-gray-200"

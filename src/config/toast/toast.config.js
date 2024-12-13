@@ -70,14 +70,14 @@ const toastConfig = {
     <BaseToast
       {...props}
       style={{
-        borderLeftColor: 'blue',
-        backgroundColor: 'blue',
+        borderLeftColor: '#5676ff',
       }}
       contentContainerStyle={{ paddingHorizontal: 15 }}
       text1Style={{
-        fontSize: 15,
-        fontWeight: '400',
-        color: 'white', // Cambié el color para que el texto sea visible
+        fontFamily: 'Mulish_600SemiBold',
+        fontSize: 12,
+        fontWeight: '300',
+        color: '#202244', // Cambié el color para que el texto sea visible
       }}
       // Agregar icono al lado izquierdo del toast
       leadingIcon={() => (

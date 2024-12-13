@@ -1,71 +1,113 @@
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { Text, ScrollView, View, TextInput } from 'react-native'
-import Course from '../../../components/cards/Course'
+import {
+  Text,
+  ScrollView,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native'
+import Course from 'components/cards/Course'
 import LottieView from 'lottie-react-native'
-import emptyData from '../../../../assets/no-data.json'
-import CourseModal from '../../../components/modal/CourseModal'
-import { useCourseModal } from '../../../context/CourseModalContext'
-import { coursesAPI } from '../../../api/courses/courses.api'
-import { storageUtil } from '../../../utils/index.utils'
-import { useDispatch, useSelector } from 'react-redux'
-import { saveCourses } from '../../../redux/slices/teacher.slice'
+import emptyData from 'assets/no-data.json'
+import CourseModal from 'components/modal/CourseModal'
+import { useCourseModal } from 'context/CourseModalContext'
+// import { coursesAPI } from '../../../api/courses/courses.api'
+// import { storageUtil } from '../../../utils/index.utils'
+import { useDispatch, useSelector, useStore } from 'react-redux'
+import { deleteCourse, saveCourses } from 'redux/slices/teacher.slice'
+import Loading from 'components/loading/Loading'
+import { coursesAPI } from 'api/courses/courses.api'
+import {
+  saveAllClassesInCourses,
+  saveAllStudents,
+} from 'redux/slices/teacher.slice'
 
 const Courses = () => {
-  const { isVisible, toggleModal } = useCourseModal()
+  const { user } = useSelector((state) => state.user)
+  // const { isVisible, toggleModal } = useCourseModal()
+  const [showModal, setShowModal] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const dispatch = useDispatch()
   const { courses } = useSelector((state) => state.teacher)
 
-  // useEffect(() => {
-  //   storageUtil
-  //     .getSecureData('user_info')
-  //     .then((res) => {
-  //       if (res) {
-  //         const { user } = JSON.parse(res)
-  //         coursesAPI
-  //           .getAll(user.id)
-  //           .then((res) => {
-  //             const { code, courses: allCourses } = res.data
-  //             dispatch(saveCourses(allCourses))
-  //           })
-  //           .catch((err) => console.log(err))
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }, [isVisible])
+  const handleDeleteCourse = (CourseId) => {
+    dispatch(deleteCourse(CourseId))
+  }
 
-  return (
-    <View className="flex flex-col h-full w-full bg-[#F5F9FF] px-5 py-5">
-      {/* Mostrar barra de búsqueda solo si hay cursos */}
-      {courses.length > 0 && (
-        <View className="flex flex-col gap-5">
-          {/* Buscador */}
-          <View className="flex flex-row items-center bg-white rounded-3xl border border-gray-200 shadow-lg shadow-gray-300">
-            <View className="w-10 h-10 flex items-center justify-center">
-              <Ionicons name="search" size={20} color={'#DCDCDC'} />
+  const toggleModal = () => {
+    setShowModal(!showModal)
+  }
+
+  const updateCourses = () => {
+    coursesAPI
+      .getAll(user.id)
+      .then((res) => {
+        const { courses } = res.data
+        dispatch(saveCourses(courses))
+        dispatch(saveAllStudents(courses))
+        dispatch(saveAllClassesInCourses(courses))
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  useEffect(() => {
+    if (courses !== null) {
+      setIsLoading(false)
+    } else {
+      setIsLoading(true)
+    }
+  }, [courses])
+
+  return isLoading ? (
+    <Loading message={'Obteniendo cursos'} />
+  ) : (
+    <View className="flex flex-col h-full w-full bg-[#F5F9FF] py-5 relative">
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        className="absolute bottom-4 right-2 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300"
+        onPress={toggleModal}
+      >
+        <Ionicons name="add" size={25} color={'white'} />
+      </TouchableOpacity>
+
+      <View className="flex flex-col px-5 gap-1">
+        {courses.length > 0 && (
+          <View className="flex flex-col gap-5">
+            {/* Buscador */}
+            <View className="flex flex-row items-center bg-white rounded-2xl border border-gray-200 shadow-lg shadow-gray-300 px-2">
+              <View className="w-8 h-8 flex items-center justify-center">
+                <Ionicons name="search" size={20} color={'#DCDCDC'} />
+              </View>
+              <TextInput
+                placeholder="Buscar curso"
+                className="bg-transparent py-5 flex-1"
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 13,
+                  color: '#B4BDC4',
+                }}
+              />
             </View>
-            <TextInput
-              placeholder="Buscar curso"
-              className="bg-transparent py-5 flex-1"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 16,
-                color: '#B4BDC4',
-              }}
-            />
           </View>
-        </View>
-      )}
+        )}
+      </View>
 
       {/* Área desplazable para cursos */}
       {courses.length > 0 ? (
-        <ScrollView className="flex-1 mt-5">
+        <ScrollView className="flex-1 mt-5 px-3">
           {courses.map((course) => (
-            <Course key={course.id} course={course} />
+            <Course
+              key={course.id}
+              course={course}
+              deleteCourse={handleDeleteCourse}
+            />
           ))}
         </ScrollView>
       ) : (
-        <View className="flex-1 justify-center items-center">
+        <View className="flex-1 justify-center items-center px-5">
           <LottieView
             autoPlay
             loop
@@ -97,7 +139,11 @@ const Courses = () => {
         </View>
       )}
 
-      <CourseModal isVisible={isVisible} toggleModal={toggleModal} />
+      <CourseModal
+        isVisible={showModal}
+        toggleModal={toggleModal}
+        updateCourses={updateCourses}
+      />
     </View>
   )
 }

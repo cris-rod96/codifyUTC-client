@@ -1,25 +1,28 @@
 const messageWhatsapp = (course, teacherName) => {
   const msg = `
-  Hola,
+¡Hola! 👋
 
-Has sido invitado a unirte al curso "${course.subject}" ofrecido por nuestra plataforma educativa.
+Te invitamos a ser parte de nuestro nuevo curso: *"${course.subject}"* ofrecido por nuestra innovadora plataforma educativa.
 
-Detalles del curso:
-- Curso: ${course.subject}
-- Semestre: ${course.semester} Sistemas
-- Código de acceso: ${course.access_code}
+📚 **Detalles del curso:**  
+- **Curso:** ${course.subject}  
+- **Semestre:** ${course.semester} Sistemas  
+- **Código de acceso:** ${course.access_code}  
 
-Este curso te brinda acceso a:
-- Clases en línea con materiales exclusivos.
-- Recursos adicionales para reforzar tu aprendizaje.
-- Un entorno interactivo donde podras aprender mientras resuelves retos y juegos de aprendizaje.
+✨ Este curso está diseñado para brindarte:  
+✅ Clases en línea con materiales exclusivos.  
+✅ Acceso a recursos interactivos que potenciarán tu aprendizaje.  
+✅ Un entorno innovador para resolver desafíos y actividades prácticas.
 
-Para unirte, simplemente utiliza el siguiente código de acceso al registrarte en nuestra aplicación.
+¡Es muy sencillo! Únete ahora utilizando el código de acceso al registrarte en nuestra plataforma.
 
-Si tienes alguna pregunta, no dudes en contactarnos. ¡Esperamos verte pronto en el curso!
+Si tienes dudas o necesitas más información, ¡estamos aquí para ayudarte!  
+
+🌟 ¡Te esperamos para comenzar juntos esta experiencia educativa!  
 
 Atentamente,  
-${teacherName} - Codify UTC
+${teacherName}  
+*Codify UTC*
   `
 
   return msg

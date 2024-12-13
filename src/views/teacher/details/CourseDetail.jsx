@@ -3,13 +3,13 @@ import { useLayoutEffect } from 'react'
 import { View } from 'react-native'
 
 const CourseDetail = ({ route }) => {
-  const { courseName } = route.params
+  const { course } = route.params
   const navigation = useNavigation()
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: courseName,
+      title: course.id,
     })
-  }, [courseName])
+  }, [course])
   return <View>CourseDetail</View>
 }
 

@@ -30,7 +30,7 @@ const ClassNavigator = () => {
           fontFamily: 'Jost_600SemiBold',
           fontSize: 21,
         },
-
+        headerLeft: () => null,
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
     >
@@ -38,17 +38,12 @@ const ClassNavigator = () => {
         name="Classes"
         component={Classes}
         options={{
-          headerTitle: 'Clases',
+          headerTitle: 'Mis Clases',
+          headerTitleAlign: 'left',
           headerTitleStyle: {
             fontFamily: 'Jost_600SemiBold',
             fontSize: 21,
           },
-
-          headerRight: () => (
-            <TouchableOpacity className="mr-4" onPressIn={toggleModal}>
-              <Ionicons name="add-circle-sharp" size={26} color={'#741D1D'} />
-            </TouchableOpacity>
-          ),
         }}
       />
       <Stack.Screen name="DetailClass" component={ClassTabs} />

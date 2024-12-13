@@ -20,6 +20,8 @@ import NetInfo from '@react-native-community/netinfo'
 import { Provider } from 'react-redux'
 import store from './src/redux/store'
 import { AccessCodeModalProvider } from './src/context/AccessCodeModalContext'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from './src/config/index.config'
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(false)

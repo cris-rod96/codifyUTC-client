@@ -13,4 +13,8 @@ export const coursesAPI = {
       },
     })
   },
+
+  deleteCourse: (id) => {
+    return instance.delete(`${model}/${id}`)
+  },
 }

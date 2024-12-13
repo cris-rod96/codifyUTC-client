@@ -7,7 +7,7 @@ export const studentsAPI = {
     return instance.get(`${model}/students/all`)
   },
 
-  getAllStudentsByCourse: (CourseId) => {
-    return instance.get(`${model}/students/course/${CourseId}`)
+  getAllStudentsByCourse: (course_id) => {
+    return instance.get(`course-students/course/${course_id}`)
   },
 }

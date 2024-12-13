@@ -18,10 +18,11 @@ import {
   saveAllClassesInCourses,
   saveAllStudents,
 } from '../../../redux/slices/teacher.slice'
+import { coursesAPI } from '../../../api/courses/courses.api'
 const Home = () => {
   const dispatch = useDispatch()
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { user } = useSelector((state) => state.user)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Obtener todos los datos relacionados al Docente
   // Cursos
@@ -32,19 +33,16 @@ const Home = () => {
   // Si entra a un determinado curso mostrar las clases y los estudiantes que pertenecen a ese curso
 
   useEffect(() => {
-    storageUtil
-      .getSecureData('user_info')
+    setIsLoading(true)
+    // Obtener los cursos del docente
+    const { id } = user
+    coursesAPI
+      .getAll(id)
       .then((res) => {
-        if (res) {
-          const data = JSON.parse(res)
-          console.log(data)
-          const { courses, classes, activities } = data.user
-          dispatch(saveCourses(courses))
-          dispatch(saveAllClassesInCourses(courses))
-          dispatch(saveAllStudents(courses))
-          // dispatch(saveActivities(activities))
-          setUser(data.user)
-        }
+        const { courses } = res.data
+        dispatch(saveCourses(courses))
+        dispatch(saveAllStudents(courses))
+        dispatch(saveAllClassesInCourses(courses))
       })
       .catch((err) => {
         console.log(err)
@@ -54,11 +52,9 @@ const Home = () => {
       })
   }, [])
 
-  if (isLoading) {
-    return <Loading message={'Cargando información'} />
-  }
-
-  return (
+  return isLoading ? (
+    <Loading message={'Cargando información'} />
+  ) : (
     <ScrollView className="flex-1">
       <View className="flex-1 flex-col h-screen gap-10 p-5 bg-[#F5F9FF] ">
         {/* Encabezado */}

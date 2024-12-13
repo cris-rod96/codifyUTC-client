@@ -44,6 +44,15 @@ const teacherSlice = createSlice({
       const validActivities = action.payload || []
       state.activities = validActivities
     },
+
+    // DeleCourse
+    deleteCourse: (state, action) => {
+      const courseId = action.payload
+      state.courses = state.courses.filter((course) => course.id !== courseId)
+      state.classes = state.classes.filter(
+        (courseClass) => courseClass.CourseId !== courseId
+      )
+    },
   },
 })
 
@@ -53,6 +62,7 @@ export const {
   saveClasses,
   saveAllStudents,
   saveAllClassesInCourses,
+  deleteCourse,
 } = teacherSlice.actions
 
 export default teacherSlice.reducer
