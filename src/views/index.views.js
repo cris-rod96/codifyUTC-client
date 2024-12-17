@@ -44,4 +44,5 @@ export {
   Completed,
   Overdue,
   Pending,
+  QuizzCodeFeedback,
 } from './student/index.student'

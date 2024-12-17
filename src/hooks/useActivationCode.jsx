@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { userApi } from '../api/user/user.api'
+import { useState } from 'react'
+import { usersAPI } from 'api/index.api'
 
 const useActivationCode = () => {
   const [data, setData] = useState({
@@ -24,7 +24,7 @@ const useActivationCode = () => {
       }
     }
 
-    return userApi
+    return usersAPI
       .activateAccount({
         email: data.email,
         code,

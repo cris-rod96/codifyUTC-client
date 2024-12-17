@@ -1,6 +1,6 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import GeneralRanking from '../../views/student/tabs/ranking/GeneralRanking'
-import CourseRanking from '../../views/student/tabs/ranking/CourseRanking'
+import GeneralRanking from 'views/student/tabs/ranking/GeneralRanking'
+import CourseRanking from 'views/student/tabs/ranking/CourseRanking'
 
 const Tabs = createMaterialTopTabNavigator()
 

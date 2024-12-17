@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { userApi } from '../api/user/user.api'
+import { usersAPI } from 'api/index.api'
 
 const useRecuperationCode = () => {
   const [data, setData] = useState({
@@ -24,7 +24,7 @@ const useRecuperationCode = () => {
       }
     }
 
-    return userApi
+    return usersAPI
       .verifyCode({
         method: data.method,
         value: data.value,

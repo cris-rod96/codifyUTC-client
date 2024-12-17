@@ -1,390 +1,275 @@
-import { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import {
-  View,
-  Text,
-  StatusBar,
-  TouchableOpacity,
-  Image,
-  TextInput,
   FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  Image,
+  Alert,
+  StatusBar,
 } from 'react-native'
-import Loading from '../../../components/loading/Loading'
-import { useDispatch, useSelector } from 'react-redux'
-import { storageUtil } from '../../../utils/index.utils'
-import { classesAPI } from '../../../api/classes/classes.api'
-import { saveAllClassesByCourse } from '../../../redux/slices/student.slice'
-import { Ionicons } from '@expo/vector-icons'
-import image from '../../../../assets/web-dev.jpg'
-import AccessCodeModal from '../../../components/modal/AccessCodeModal'
-import { useAccesssCodeModal } from '../../../context/AccessCodeModalContext'
+import { useSelector } from 'react-redux'
+import { coursesAPI, classesAPI } from 'api/index.api'
+import { Octicons } from '@expo/vector-icons'
+import {
+  AccessCodeModal,
+  LeaveCourseModal,
+  ByeModal,
+} from 'components/modal/index.modals'
+import LottieView from 'lottie-react-native'
+import emptyData from 'assets/no-data.json'
 
-const Class = () => {
-  // Contexto del modal
-  const { isVisible, toggleModal } = useAccesssCodeModal()
-  const toggleUpdateClass = () => {}
-
-  //Redux - Clases
-  const { classes } = useSelector((state) => state.student)
-  const dispatch = useDispatch()
-
-  // Loadinng
-  const [showLoading, setShowLoading] = useState(true)
-
-  // Id del curso del estudiante
+const ClassStudent = ({ navigation }) => {
+  const { user } = useSelector((state) => state.user)
+  const [showAccessCodeModal, setShowAccessCodeModal] = useState(false)
+  const [showLeaveCourseModal, setShowLeaveCourseModal] = useState(false)
+  const [accessCode, setAccessCode] = useState(null)
   const [courseId, setCourseId] = useState(null)
-  // Mostrar listass de cursos en el caso de que el estudiante no este en uno
-  const [courses, setCourses] = useState([])
-  const [showCourses, setShowCourses] = useState(false)
 
-  setTimeout(() => {
-    setShowLoading(false)
-  }, 1500)
-
-  // Listar todos los cursos
-
-  useEffect(() => {
-    setShowLoading(true)
-    if (showCourses) {
-      // Obtener el listado de todos los cursos registrados
-
-      // Simularemos la carga
-      setTimeout(() => {
-        setShowLoading(false)
-      }, 1500)
+  const toggleAccessCodeModal = (access_code = null, course_id = null) => {
+    if (!showAccessCodeModal) {
+      setAccessCode(access_code)
+      setCourseId(course_id)
     }
-  }, [showCourses])
+    setShowAccessCodeModal((prev) => !prev)
+  }
 
-  // OBtener las clases del curso
+  const toggleLeaveCourseModal = () => setShowLeaveCourseModal((prev) => !prev)
+
+  // Método para abandonar el curso
+  const leaveCourse = () => {}
+
+  const [courses, setCourses] = useState([])
+  const [userCourse, setUserCourse] = useState(null)
+  const [classes, setClasses] = useState([])
+
   useEffect(() => {
-    if (courseId !== null) {
+    if (userCourse) {
       classesAPI
-        .getByCourse(courseId)
+        .getByCourse(userCourse.id)
         .then((res) => {
-          const { code, classes } = res.data
-          dispatch(saveAllClassesByCourse(classes))
+          const { classes } = res.data
+          setClasses(classes)
         })
         .catch((err) => {
-          console.log('Error', err)
+          console.log(err)
         })
     }
-  }, [courseId])
+  }, [userCourse])
 
-  // Al cargar verificamos los datos de session del estudiante y obtenemos el id del curso
   useEffect(() => {
-    if (courseId === null) {
-      storageUtil
-        .getSecureData('user_info')
-        .then((res) => {
-          if (res !== null) {
-            const { user } = JSON.parse(res)
-            if (user.courses.length > 0) {
-              setCourseId(user.courses[0].id)
-            }
-          }
-        })
-        .catch((err) => console.log(err))
-    }
-  }, [])
+    coursesAPI
+      .getAllWithStudents()
+      .then((res) => {
+        const { courses: allCourses } = res.data
+        setCourses(allCourses)
+        const enrolledCourse = allCourses.find((course) =>
+          course.Students.some((student) => student.id === user.id)
+        )
+        setUserCourse(enrolledCourse)
+      })
+      .catch((err) => {
+        console.log(err.message)
+      })
+  }, [user.id])
 
-  return showLoading ? (
-    <Loading message={'Cargando clases...'} />
-  ) : (
-    <View className="flex-1 bg-[#F5F9FF]">
-      <StatusBar barStyle={'dark-content'} backgroundColor={'#F5F9FF'} />
-      <View className="w-[85%] mx-auto py-10 flex flex-col">
-        {/* Si el estudiante no esta en un curso */}
-        {!courseId && !showCourses && (
-          <TouchableOpacity
-            className="p-6 bg-white border-dashed border-2 border-gray-300 flex flex-col gap-3"
-            onPress={() => setShowCourses(true)}
-          >
+  const renderCourse = ({ item }) => {
+    // const isBlocked = !userCourses.some((course) => course.id == item.id)
+    return (
+      <TouchableOpacity
+        className={`w-full bg-white rounded-xl overflow-hidden border border-gray-200 mb-5 relative`}
+        onPress={() => toggleAccessCodeModal(item.access_code, item.id)}
+      >
+        {/* Portada */}
+        <View className="relative w-full h-[200px]">
+          <Image
+            source={{ uri: item.poster }}
+            className="w-full h-full object-contain"
+          />
+        </View>
+        <View className="px-5 py-3 flex flex-row items-center justify-between">
+          <View className="flex flex-col">
             <Text
               style={{
-                fontFamily: 'Jost_700Bold',
+                fontFamily: 'Mulish_700Bold',
                 fontSize: 13,
-                color: '#202244',
-                textAlign: 'center',
+                color: '#741D1D',
               }}
             >
-              Actualmente no estas registrado en ningún curso
+              {item.semester} Sistemas
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 16,
+                color: '#202244',
+              }}
+            >
+              {item.subject}
+            </Text>
+          </View>
+          <Octicons name="lock" size={21} color={'#202244'} />
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  const renderClass = ({ item }) => {}
+  return (
+    <View className="flex-1 px-3 py-5">
+      <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
+      {userCourse ? (
+        classes.length > 0 ? (
+          <View>
+            <Text>Hay clases</Text>
+          </View>
+        ) : (
+          <View className="flex flex-1 justify-center items-center px-3">
+            <View className="px-5 py-6  rounded-xl flex flex-col justify-center items-center">
+              <LottieView
+                autoPlay
+                loop
+                source={emptyData}
+                style={{ width: 200, height: 200 }}
+              />
+              <View className="flex flex-row gap-1">
+                <Text
+                  style={{
+                    fontFamily: 'Jost_600SemiBold',
+                    fontSize: 16,
+                    color: '#202244',
+                  }}
+                >
+                  El curso
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Jost_600SemiBold',
+                    fontSize: 16,
+                    color: '#202244',
+                  }}
+                >
+                  {userCourse.subject}
+                  actualmente no tiene clases
+                </Text>
+              </View>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_400Regular',
+                  fontSize: 15,
+                  color: '#B4BDC4',
+                  textAlign: 'center',
+                }}
+              >
+                Consulta con tu docente o estate al pendiente de las
+                actualizaciones vía email.
+              </Text>
+            </View>
+            <TouchableOpacity
+              className="w-[200px] py-3 mt-5 bg-[#741D1D] flex flex-row gap-2 justify-center items-center rounded-full"
+              onPress={toggleLeaveCourseModal}
+            >
+              <Octicons name="sign-out" size={21} color={'white'} />
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 14,
+                  color: 'white',
+                }}
+              >
+                Abandonar Curso
+              </Text>
+            </TouchableOpacity>
+
+            <LeaveCourseModal
+              showLeaveCourseModal={showLeaveCourseModal}
+              toggleLeaveCourseModal={toggleLeaveCourseModal}
+              courseId={userCourse.id}
+            />
+          </View>
+        )
+      ) : (
+        <View className="flex flex-col">
+          {/* Mostrar mensaje de no curso encontrado */}
+          <View className="bg-[#741D1D]/70 px-3 py-5 border border-dashed border-gray-200 rounded-xl flex justify-center items-center mb-5">
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 14,
+                color: 'white',
+              }}
+            >
+              Sin clases ni cursos registrados
             </Text>
             <Text
               style={{
                 fontFamily: 'Mulish_400Regular',
                 fontSize: 12,
-                color: '#545454',
-                textAlign: 'center',
+                color: '#E8F1FF',
               }}
             >
-              Accede a un curso para ver las clases
+              Accede a un curso para ver su contenido.
             </Text>
-            <Text
-              style={{
-                fontFamily: 'Mulish_400Regular',
-                fontSize: 11,
-                color: '#545454',
-                textAlign: 'center',
-              }}
-            >
-              Recuerda que tu Docente debe proporcionar un código de acceso
-            </Text>
-            <Text
+          </View>
+
+          {/* Buscador */}
+          <View className="bg-white w-full h-[50px] rounded-xl border border-gray-200 flex flex-row">
+            <View className="w-12 h-full flex justify-center items-center">
+              <Octicons name="search" size={20} color={'#202244'} />
+            </View>
+            <TextInput
+              className="w-full px-2 placeholder:text-md placeholder:text-[#B4BDC4]"
+              placeholder="Desarrollo Web"
               style={{
                 fontFamily: 'Mulish_700Bold',
-                fontSize: 11,
-                color: '#741D1D',
-                textAlign: 'center',
-              }}
-            >
-              Presiona para mostrar los cursos
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Mostrar listado de cursos */}
-        {showCourses &&
-          (courses.length > 0 ? (
-            <View className="flex flex-col gap-3 bg-[#F5F9FF]">
-              <TextInput
-                placeholder="Buscar curso"
-                className="px-3 py-5 bg-white  border border-gray-200 shadow-lg shadow-gray-300 mb-5 rounded-lg"
-                style={{ fontFamily: 'Mulish_400Regular', fontSize: 14 }}
-              />
-              {/* Simular un curso usar flatlist */}
-              <TouchableOpacity
-                className="w-full  bg-white border border-gray-200 rounded-xl shadow-sm shadow-gray-300 relative"
-                onPress={toggleModal}
-              >
-                <View className="h-[180px] w-full relative bg-red-500 rounded-t-xl overflow-hidden">
-                  <Image
-                    source={image}
-                    className="absolute w-full h-full object-cover rounded-t-xl"
-                  />
-                </View>
-
-                {/* Contenido */}
-                <View className="flex flex-col gap-3 px-6 py-4">
-                  <View className="flex flex-row items-center justify-between">
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 18,
-                        color: '#202244',
-                        fontWeight: '600',
-                      }}
-                    >
-                      Desarrollo Web
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 14,
-                        color: '#fffff',
-                        fontWeight: '500',
-                      }}
-                    >
-                      Tercero Sistemas
-                    </Text>
-                  </View>
-
-                  <View className="flex flex-row gap-3 items-center justify-center">
-                    <View className="flex flex-col justify-center items-center border border-white rounded-lg px-3 py-1 bg-white">
-                      <Text
-                        style={{
-                          fontFamily: 'Jost_600SemiBold',
-                          fontSize: 18,
-                          color: '#202244',
-                        }}
-                      >
-                        19
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Mulish_400Regular',
-                          fontSize: 12,
-                          color: '#202244',
-                        }}
-                      >
-                        Clases
-                      </Text>
-                    </View>
-                    <View className="flex flex-col justify-center items-center border border-white rounded-lg px-3 py-1 bg-white">
-                      <Text
-                        style={{
-                          fontFamily: 'Jost_600SemiBold',
-                          fontSize: 18,
-                          color: '#202244',
-                        }}
-                      >
-                        30
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Mulish_400Regular',
-                          fontSize: 12,
-                          color: '#202244',
-                        }}
-                      >
-                        Estudiantes
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Candado */}
-                <Ionicons
-                  name="lock-closed-sharp"
-                  size={20}
-                  color={'#741D1D'}
-                  className="absolute right-3 -top-3"
-                />
-
-                {/*Mascara de bloqueo*/}
-                <View className="absolute top-0 left-0 w-full h-full bg-black opacity-50 rounded-xl"></View>
-              </TouchableOpacity>
-
-              <AccessCodeModal
-                isVisible={isVisible}
-                toggleModal={toggleModal}
-                toggleUpdateClass={toggleUpdateClass}
-              />
-            </View>
-          ) : (
-            <View className="p-6 bg-white border-dashed border-2 border-gray-300 flex flex-col gap-3">
-              <Text
-                style={{
-                  fontFamily: 'Jost_700Bold',
-                  fontSize: 13,
-                  color: '#202244',
-                  textAlign: 'center',
-                }}
-              >
-                Actualmente no hay cursos disponibles
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 12,
-                  color: '#545454',
-                  textAlign: 'center',
-                }}
-              >
-                Consulta con tu docente
-              </Text>
-            </View>
-          ))}
-
-        {/* Mostrar las clases */}
-        {courseId &&
-          !showCourses &&
-          (classes.length > 0 ? (
-            <FlatList
-              data={classes}
-              keyExtractor={(item, index) => `${item.title}-${index}`}
-              renderItem={({ item, index }) => {
-                const isExpanded = expanded === index
-                return (
-                  <View>
-                    <View className="bg-white border border-gray-300 rounded-lg shadow-md my-2">
-                      <TouchableOpacity
-                        onPress={() => toggleAccordion(index)}
-                        className="px-4 py-4 bg-gray-100 rounded-t-lg flex flex-row justify-between items-center"
-                      >
-                        <View>
-                          <Text
-                            className="text-lg font-semibold text-gray-800"
-                            style={{
-                              fontFamily: 'Jost_600SemiBold',
-                              fontSize: 16,
-                              color: '#202244',
-                            }}
-                          >
-                            Introducción a React Native
-                          </Text>
-                          <View className="flex flex-row gap-1">
-                            <Text
-                              style={{
-                                fontFamily: 'Mulish_400Regular',
-                                fontSize: 9,
-                                color: '#545454',
-                              }}
-                            >
-                              05 de Diciembre del 2024 -
-                            </Text>
-
-                            <Text
-                              style={{
-                                fontFamily: 'Mulish_400Regular',
-                                fontSize: 9,
-                                color: '#741D1D',
-                              }}
-                            >
-                              3 Actividades
-                            </Text>
-                          </View>
-                        </View>
-                        <Ionicons
-                          name={
-                            isExpanded
-                              ? 'chevron-up-outline'
-                              : 'chevron-down-outline'
-                          }
-                          size={24}
-                          color="gray"
-                        />
-                      </TouchableOpacity>
-
-                      {isExpanded && (
-                        <Animated.View
-                          style={{
-                            height: animatedHeight,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <View className="px-4 py-3 bg-white">
-                            {content.map((item, index) => (
-                              <Text
-                                key={index}
-                                className="text-gray-700 text-sm my-1"
-                              >
-                                {item}
-                              </Text>
-                            ))}
-                          </View>
-                        </Animated.View>
-                      )}
-                    </View>
-                  </View>
-                )
+                fontSize: 12,
               }}
             />
-          ) : (
-            <View className="p-6 bg-white border-dashed border-2 border-gray-300 flex flex-col gap-3">
+          </View>
+
+          <View>
+            <View className="flex flex-row gap-2 items-center justify-center py-5">
+              <Octicons name="stack" size={20} />
               <Text
                 style={{
-                  fontFamily: 'Jost_700Bold',
-                  fontSize: 13,
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 18,
                   color: '#202244',
-                  textAlign: 'center',
                 }}
               >
-                Actualmente no hay clases disponibles
+                Cursos Disponibles
               </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 12,
-                  color: '#545454',
-                  textAlign: 'center',
-                }}
-              >
-                Consulta con tu docente
-              </Text>
+              <Octicons name="stack" size={20} />
             </View>
-          ))}
-      </View>
+            {/* Lista de cursos */}
+            <FlatList
+              data={courses}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              renderItem={renderCourse}
+            />
+          </View>
+
+          <AccessCodeModal
+            isVisible={showAccessCodeModal}
+            toggleModal={toggleAccessCodeModal}
+            access_code={accessCode}
+            user_id={user.id}
+            course_id={courseId}
+          />
+        </View>
+      )}
+      {/* <Text className="text-xl font-bold mb-4">
+        {userCourses.length > 0
+          ? 'Tus clases'
+          : 'No estás registrado en ningún curso. Ver opciones:'}
+      </Text>
+
+       
+      */}
     </View>
   )
 }
 
-export default Class
+export default ClassStudent

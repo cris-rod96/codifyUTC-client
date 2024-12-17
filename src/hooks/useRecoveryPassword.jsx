@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { validationService } from '../services/index.services'
-import { userApi } from '../api/user/user.api'
+import { validationService } from 'services/index.services'
+import { usersAPI } from 'api/index.api'
 
 const useRecoveryPassword = () => {
   const [selectedField, setSelectedField] = useState(null)
@@ -69,7 +69,7 @@ const useRecoveryPassword = () => {
             value: phone,
           }
 
-    return userApi
+    return usersAPI
       .recoveryPassword(data)
       .then((res) => {
         const { message } = res.data

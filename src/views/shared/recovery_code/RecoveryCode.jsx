@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useState, useEffect, useRef } from 'react'
 import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { userApi } from '../../../api/user/user.api'
 import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
-import toastConfig from '../../../config/toast/toast.config'
-import useRecuperationCode from '../../../hooks/useRecuperationCode'
+import { toastConfig } from 'config/index.config'
+import { useRecuperationCode } from 'hooks/index.hooks'
 
 const RecoveryCode = ({ route }) => {
   const { data, addInfoData, onSubmit } = useRecuperationCode()

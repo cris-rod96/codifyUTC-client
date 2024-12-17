@@ -1,30 +1,29 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import {
-  ActivitiesStudent,
-  ClassStudent,
-  HomeStudent,
-} from '../../views/index.views'
-import { Ionicons } from '@expo/vector-icons'
+import { ClassStudent, HomeStudent } from 'views/index.views'
+import { Octicons } from '@expo/vector-icons'
 import ProfileNavigator from '../shared/ProfileNavigator'
 import RankingTabs from './RankingTabs'
-import { useState } from 'react'
-import { useAccesssCodeModal } from '../../context/AccessCodeModalContext'
-import ActivitiesTabs from './ActivitiesTabs'
-import ActvityNavigator from './ActvityNavigator'
+import {
+  CardStyleInterpolators,
+  createStackNavigator,
+} from '@react-navigation/stack'
+import Activities from '../../views/student/activities/Activities'
 
 const Tabs = createBottomTabNavigator()
 
 const TabStudentNavigator = () => {
-  const { isVisible } = useAccesssCodeModal()
   return (
     <Tabs.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#741D1D',
-        tabBarInactiveTintColor: '#545454',
-        tabBarStyle: {
-          display: isVisible ? 'none' : 'flex',
+        tabBarInactiveTintColor: '#202244',
+        sceneStyle: {
           backgroundColor: '#F5F9FF',
         },
+        tabBarStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
     >
       <Tabs.Screen
@@ -34,7 +33,7 @@ const TabStudentNavigator = () => {
           tabBarLabel: 'Inicio',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-sharp" size={size} color={color} />
+            <Octicons name="home" size={21} color={color} />
           ),
         }}
       />
@@ -44,29 +43,43 @@ const TabStudentNavigator = () => {
         options={{
           tabBarLabel: 'Clases',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book-sharp" size={size} color={color} />
+            <Octicons name="stack" size={21} color={color} />
           ),
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitle: 'Mis Clases',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
         }}
       />
       <Tabs.Screen
         name="Activities"
-        component={ActvityNavigator}
+        component={Activities}
         options={{
-          headerShown: false,
           tabBarLabel: 'Actividades',
-          headerTitleAlign: 'center',
           headerStyle: {
-            backgroundColor: '#F5F9FF',
+            backgroundColor: '#741D1D',
           },
           headerTitle: 'Actividades',
+          headerTitleAlign: 'center',
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
 
           headerTitleStyle: {
             fontFamily: 'Jost_600SemiBold',
             fontSize: 21,
+            color: 'white',
           },
-
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="game-controller-sharp" size={size} color={color} />
+            <Octicons name="rocket" size={21} color={color} />
           ),
         }}
       />
@@ -87,7 +100,7 @@ const TabStudentNavigator = () => {
           },
 
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="trophy-sharp" size={size} color={color} />
+            <Octicons name="star" size={21} color={color} />
           ),
         }}
       />
@@ -99,7 +112,7 @@ const TabStudentNavigator = () => {
           headerShown: false,
           tabBarLabel: 'Perfil',
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="person-sharp" size={size} color={color} />
+            <Octicons name="person" size={21} color={color} />
           ),
         }}
       />

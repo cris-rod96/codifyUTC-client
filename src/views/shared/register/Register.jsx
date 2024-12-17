@@ -12,9 +12,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
-import useRegister from '../../../hooks/useRegister'
+import { useRegister } from 'hooks/index.hooks'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../../config/toast/toast.config'
+import { toastConfig } from 'config/index.config'
 import { useNavigation } from '@react-navigation/native'
 
 const Register = () => {

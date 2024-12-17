@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native'
 import Select from 'react-native-picker-select'
-import { pickerImagesUtil } from '../../utils/index.utils'
+import { pickerImagesUtil } from 'utils/index.utils'
 
 const ClassModal = ({ isVisible, toggleModal }) => {
   const [imageUri, setImageUri] = useState(null)

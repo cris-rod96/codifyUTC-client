@@ -11,10 +11,10 @@ import {
   navigatorOptions,
   recoveryOptions,
   setupOptions,
-} from '../config/index.config'
+} from 'config/index.config'
 import { useEffect, useState } from 'react'
-import { storageUtil } from '../utils/index.utils'
-import Loading from '../components/loading/Loading'
+import { storageUtil } from 'utils/index.utils'
+import Loading from 'components/loading/Loading'
 import {
   ActivationCode,
   ChangePassword,
@@ -28,7 +28,7 @@ import {
   Welcome1,
   Welcome2,
   Welcome3,
-} from '../views/index.views'
+} from 'views/index.views'
 
 const Stack = createStackNavigator()
 

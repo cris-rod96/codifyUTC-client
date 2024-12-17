@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { authApi } from 'api/auth/auth.api'
+import { authAPI } from 'api/index.api.js'
 import { geoUtil } from 'utils/index.utils'
 import { useDispatch } from 'react-redux'
 import { saveUser } from 'redux/slices/user.slice'
@@ -35,7 +35,7 @@ const useLogin = (setLoading) => {
     try {
       const loginLocation = await geoUtil.getLoginLocation()
 
-      const res = await authApi.login(email, password, loginLocation)
+      const res = await authAPI.login(email, password, loginLocation)
       const { token, user } = res.data
       if (user) {
         // await storageUtil.saveSecureData(

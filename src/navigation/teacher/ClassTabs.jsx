@@ -1,11 +1,11 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import { useLayoutEffect } from 'react'
-import { ActivitiesByClass, TopicsByClass } from '../../views/index.views'
+import { ActivitiesByClass, TopicsByClass } from 'views/index.views'
 
 const Tabs = createMaterialTopTabNavigator()
 
 const ClassTabs = ({ route, navigation }) => {
-  const { class_name } = route.params
+  const { class_name, id } = route.params
   useLayoutEffect(() => {
     navigation.setOptions({
       title: class_name,
@@ -17,6 +17,10 @@ const ClassTabs = ({ route, navigation }) => {
         tabBarStyle: {
           backgroundColor: '#F5F9FF',
         },
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        swipeEnabled: false,
       }}
     >
       <Tabs.Screen
@@ -25,15 +29,16 @@ const ClassTabs = ({ route, navigation }) => {
           tabBarLabel: 'Temas',
         }}
       >
-        {() => <TopicsByClass class_name={class_name} />}
+        {() => <TopicsByClass class_name={class_name} id={id} />}
       </Tabs.Screen>
       <Tabs.Screen
         name="ActivitiesClass"
-        component={ActivitiesByClass}
         options={{
           tabBarLabel: 'Actividades',
         }}
-      />
+      >
+        {() => <ActivitiesByClass class_id={id} />}
+      </Tabs.Screen>
     </Tabs.Navigator>
   )
 }

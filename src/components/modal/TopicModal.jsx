@@ -10,8 +10,8 @@ import {
   ScrollView,
 } from 'react-native'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast/toast.config'
-import { topicsAPI } from '../../api/topic/topic.api'
+import toastConfig from 'config/toast/toast.config'
+import { topicsAPI } from 'api/topic/topic.api'
 import LoadingRegisterTopics from './LoadingRegisterTopcis'
 
 const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {

@@ -1,6 +1,6 @@
 import { instance } from '../base.api'
 
-export const userApi = {
+const UserApi = {
   verifyUser: (email, nick_name) => {
     return instance.get(`/users/verify?email=${email}&nick_name=${nick_name}`)
   },
@@ -29,3 +29,5 @@ export const userApi = {
     return instance.put('/users/change-password', { method, value, password })
   },
 }
+
+export default UserApi

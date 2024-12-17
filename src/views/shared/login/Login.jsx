@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import { useState, useEffect } from 'react'
 import {
   Keyboard,
@@ -14,11 +14,13 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../../config/toast/toast.config'
-import useLogin from '../../../hooks/useLogin'
+import { toastConfig } from 'config/index.config'
+import { useLogin } from 'hooks/index.hooks'
 import { CommonActions, useNavigation } from '@react-navigation/native'
+import { useLoading } from 'context/LoadingContext'
 
 const Login = () => {
+  const { showLoading, hideLoading } = useLoading()
   const [loading, setLoading] = useState(false)
   const navigation = useNavigation()
   const { credentials, handleChange, onSubmit } = useLogin(setLoading)
@@ -134,7 +136,7 @@ const Login = () => {
               <View className="flex flex-col gap-3 mt-5">
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
                   <View className="w-14 flex flex-row items-center justify-center h-full ">
-                    <Ionicons name="mail-outline" size={20} color={'#545454'} />
+                    <Octicons name="mail" size={20} color={'#545454'} />
                   </View>
                   <TextInput
                     autoCapitalize="none"
@@ -153,11 +155,7 @@ const Login = () => {
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
                   {/* Icono del candado */}
                   <View className="w-14 flex items-center justify-center h-full">
-                    <Ionicons
-                      name="lock-closed-outline"
-                      size={20}
-                      color={'#545454'}
-                    />
+                    <Octicons name="lock" size={20} color={'#545454'} />
                   </View>
 
                   {/* Campo de contraseña */}
@@ -181,17 +179,9 @@ const Login = () => {
                     onPress={() => setIsPasswordVisible(!isPasswordVisible)}
                   >
                     {isPasswordVisible ? (
-                      <Ionicons
-                        name="eye-outline"
-                        size={22}
-                        color={'#545454'}
-                      />
+                      <Octicons name="eye" size={21} color={'#545454'} />
                     ) : (
-                      <Ionicons
-                        name="eye-off-outline"
-                        size={22}
-                        color={'#545454'}
-                      />
+                      <Octicons name="eye-closed" size={21} color={'#545454'} />
                     )}
                   </TouchableOpacity>
                 </View>
@@ -229,11 +219,11 @@ const Login = () => {
                   </Text>
 
                   {!loading && (
-                    <Ionicons
-                      name="chevron-forward"
-                      size={22}
+                    <Octicons
+                      name="chevron-right"
+                      size={21}
                       color={'white'}
-                      className="absolute right-4"
+                      className="absolute right-5"
                     />
                   )}
                 </TouchableOpacity>

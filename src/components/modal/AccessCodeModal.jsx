@@ -1,5 +1,5 @@
-import { Ionicons } from '@expo/vector-icons'
-import { useState } from 'react'
+import { Ionicons, Octicons } from '@expo/vector-icons'
+import { useEffect, useState } from 'react'
 import {
   Modal,
   Text,
@@ -8,30 +8,71 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native'
+import { courseStudentAPI } from '../../api/course-student/course-studen.api'
+import Toast from 'react-native-toast-message'
+import toastConfig from '../../config/toast/toast.config'
 
-const AccessCodeModal = ({ isVisible, toggleModal, toggleUpdateClass }) => {
+const AccessCodeModal = ({
+  isVisible,
+  toggleModal,
+  toggleUpdateClass,
+  access_code,
+  user_id,
+  course_id,
+}) => {
+  const [accessCode, setAccessCode] = useState('')
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const handleAccess = () => {
-    setLoading(true)
-    setMessage(null)
-
-    // Simular una petición
-    setTimeout(() => {
-      setLoading(false)
-      setMessage('Acceso exitoso') // Cambia a un mensaje según el resultado real
-      toggleUpdateClass()
-      toggleModal()
-    }, 2000) // Simulación de 2 segundos
+  const showToast = (type, title, message) => {
+    Toast.show({
+      type: type,
+      text1: title,
+      text2: message,
+      position: 'top',
+    })
   }
+
+  const handleClose = () => {
+    setAccessCode('')
+    toggleModal()
+  }
+
+  const handleChange = (value) => {
+    setAccessCode(value)
+  }
+
+  const handleSubmit = async () => {
+    if (accessCode.trim() === '') {
+      showToast('error', 'Error', 'El código de acceso es obligatorio')
+      return
+    }
+
+    courseStudentAPI
+      .register({
+        CourseId: course_id,
+        StudentId: user_id,
+        access_code: accessCode,
+      })
+      .then((res) => {
+        const { message } = res.data
+        showToast('success', 'Registro exitoso', message)
+      })
+      .catch((err) => {
+        console.log(err.response.data.message)
+      })
+  }
+
+  useEffect(() => {
+    console.log(access_code)
+  }, [isVisible])
 
   return (
     <Modal
       animationType="fade"
       transparent={true}
       visible={isVisible}
-      onRequestClose={toggleModal}
+      onRequestClose={handleClose}
     >
       {/* Fondo semitransparente */}
       <View className="flex-1 bg-black bg-opacity-50 justify-center items-center">
@@ -40,9 +81,9 @@ const AccessCodeModal = ({ isVisible, toggleModal, toggleUpdateClass }) => {
           {/* Botón de cierre */}
           <TouchableOpacity
             className="absolute top-3 right-3"
-            onPress={toggleModal}
+            onPress={handleClose}
           >
-            <Ionicons name="close-circle-sharp" size={28} color="#741D1D" />
+            <Octicons name="x-circle-fill" size={20} color="#741D1D" />
           </TouchableOpacity>
 
           {/* Título */}
@@ -60,7 +101,9 @@ const AccessCodeModal = ({ isVisible, toggleModal, toggleUpdateClass }) => {
 
           {/* Input para el código */}
           <TextInput
-            placeholder="Introduce tu código"
+            keyboardType="numeric"
+            onChangeText={(value) => handleChange(value)}
+            placeholder="Introduce el código"
             placeholderTextColor="#9E9E9E"
             className={`w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-black ${
               !message && 'mb-4'
@@ -87,8 +130,8 @@ const AccessCodeModal = ({ isVisible, toggleModal, toggleUpdateClass }) => {
           {/* Botón de acceso */}
           <TouchableOpacity
             className="w-full bg-[#741D1D] flex-row items-center justify-center py-3 rounded-full"
-            onPress={handleAccess}
-            disabled={loading}
+            onPress={handleSubmit}
+            // disabled={loading}
           >
             {loading ? (
               <ActivityIndicator size="small" color="white" />
@@ -115,6 +158,7 @@ const AccessCodeModal = ({ isVisible, toggleModal, toggleUpdateClass }) => {
           </TouchableOpacity>
         </View>
       </View>
+      <Toast config={toastConfig} position="top" />
     </Modal>
   )
 }

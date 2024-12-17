@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { userApi } from '../api/user/user.api'
+import { usersAPI } from 'api/index.api'
 
 const useSetup = () => {
   const initialState = {
@@ -61,7 +61,7 @@ const useSetup = () => {
       type: 'image/jpeg',
     })
 
-    return userApi
+    return usersAPI
       .register(formData)
       .then((res) => {
         console.log(res)

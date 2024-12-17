@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { userApi } from '../api/user/user.api'
+import { usersAPI } from 'api/index.api'
 
 const useChangePassword = () => {
   const [data, setData] = useState({
@@ -50,7 +50,7 @@ const useChangePassword = () => {
       }
     }
 
-    return userApi
+    return usersAPI
       .changePassword({
         method: data.method,
         value: data.value,

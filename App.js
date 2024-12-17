@@ -1,27 +1,15 @@
-import {
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  StatusBar,
-  Alert,
-  BackHandler,
-} from 'react-native'
 import { useEffect, useState } from 'react'
 import './global.css'
 
 import { NavigationContainer } from '@react-navigation/native'
-import RootNavigator from './src/navigation/RootNavigator'
-import useFontsLoader from './src/hooks/useFontsLoader'
-import { ModalProvider } from './src/context/ModalContext'
-import { CourseModalProvider } from './src/context/CourseModalContext'
-import NetInfo from '@react-native-community/netinfo'
+import RootNavigator from 'navigation/RootNavigator'
+import { useFontsLoader } from 'hooks/index.hooks'
+// import NetInfo from '@react-native-community/netinfo'
 import { Provider } from 'react-redux'
-import store from './src/redux/store'
-import { AccessCodeModalProvider } from './src/context/AccessCodeModalContext'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from './src/config/index.config'
+import store from 'redux/store'
+import { LoadingProvider, useLoading } from 'context/LoadingContext'
+import Loading from 'components/loading/Loading'
+import { StatusBar } from 'react-native'
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(false)
@@ -59,22 +47,13 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <CourseModalProvider>
-        <ModalProvider>
-          <AccessCodeModalProvider>
-            <NavigationContainer>
-              <RootNavigator />
-            </NavigationContainer>
-          </AccessCodeModalProvider>
-        </ModalProvider>
-      </CourseModalProvider>
+      <LoadingProvider>
+        <NavigationContainer>
+          <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
+          <Loading />
+          <RootNavigator />
+        </NavigationContainer>
+      </LoadingProvider>
     </Provider>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F9FF',
-  },
-})

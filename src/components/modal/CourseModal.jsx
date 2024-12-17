@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Modal,
   ScrollView,
@@ -11,15 +11,10 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import Select from 'react-native-picker-select'
-import {
-  codeUtil,
-  pickerImagesUtil,
-  storageUtil,
-} from '../../utils/index.utils'
+import { codeUtil, pickerImagesUtil, storageUtil } from 'utils/index.utils'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast/toast.config'
-import { coursesAPI } from '../../api/courses/courses.api'
-import Loading from '../loading/Loading'
+import toastConfig from 'config/toast/toast.config'
+import { coursesAPI } from 'api/courses/courses.api'
 
 const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
   const [isMounted, setIsMounted] = useState(false)

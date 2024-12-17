@@ -1,7 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack'
-import { ActivitiesStudent } from '../../views/index.views'
 import ActivitiesTabs from './ActivitiesTabs'
-import QuizzCodeFeedback from '../../views/student/feedbacks/QuizzCodeFeedback'
+import { QuizzCodeFeedback } from 'views/index.views'
 
 const Stack = createStackNavigator()
 const ActvityNavigator = () => {

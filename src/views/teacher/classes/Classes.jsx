@@ -1,233 +1,281 @@
 import React, { useEffect, useState } from 'react'
 import {
-  ScrollView,
+  Alert,
+  FlatList,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
+  TextInput,
 } from 'react-native'
 import { useSelector } from 'react-redux'
-import Loading from '../../../components/loading/Loading'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { lectureUtils } from '../../../utils/index.utils'
-import { classesAPI } from '../../../api/classes/classes.api'
+import { classesAPI } from 'api/index.api'
+import { useLoading } from 'context/LoadingContext'
+import LottieView from 'lottie-react-native'
+import emptyData from 'assets/no-data.json'
+import { FontAwesome6, Octicons } from '@expo/vector-icons'
 
 const Classes = () => {
+  const { showLoading, hideLoading } = useLoading()
+  const [courses, setCourses] = useState()
+  const [selectedFilter, setSelectedFilter] = useState('Todos')
+  const [isMounted, setIsMounted] = useState(false)
   const [classes, setClasses] = useState([])
   const { user } = useSelector((state) => state.user)
-  const [isLoading, setIsLoading] = useState(true)
+
+  const handleSelectedFilter = (item) => {
+    setSelectedFilter(item === selectedFilter ? null : item)
+  }
+
+  // Modal para agregar una clase
+  const openClassModal = () => {}
 
   useEffect(() => {
-    const { id } = user
-    classesAPI
-      .getByUser(id)
-      .then((res) => {
-        const { classes: arrClasses } = res.data
-        setClasses(arrClasses)
-      })
-      .catch((err) => {
-        console.log(err)
-        console.log(err.response.data.message)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [user.id])
-  return isLoading ? (
-    <Loading message={'Cargando clases..'} />
-  ) : (
-    <View className="bg-[#F5F9FF] flex-1 px-5 pt-10">
-      {/* Floating Button */}
-      <TouchableOpacity className="absolute bottom-4 right-2 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300">
-        <Ionicons name="add" size={25} color={'white'} />
-      </TouchableOpacity>
+    // showLoading('Cargando clases. Espere un momento...')
+    if (user) {
+      const { id } = user
+      classesAPI
+        .getByUser(id)
+        .then((res) => {
+          const { classes } = res.data
+          setClasses(classes)
+          const arrCourses = []
+          for (let myClass of classes) {
+            if (!arrCourses.includes(myClass.courseName)) {
+              arrCourses.push(myClass.courseName)
+            }
+          }
+          setCourses(['Todos', ...arrCourses])
+        })
+        .catch((err) => {})
+        .finally(() => {
+          // hideLoading()
+          setIsMounted(true)
+        })
+    }
+  }, [user])
 
-      {classes.length > 0 ? (
-        <View className="flex-1 flex-col w-full ">
-          {/* BUSCADOR */}
-          <View className="w-full flex flex-row items-center bg-white border border-gray-200 rounded-2xl px-2 shadow-lg shadow-gray-300 mb-10 ">
-            <View className="w-8 h-8 flex items-center justify-center">
-              <MaterialIcons name="search" size={20} color={'#DCDCDC'} />
+  if (!isMounted) {
+    return <View className="flex-1 h-screen w-full bg-[#F5F9FF]"></View>
+  }
+  return (
+    isMounted &&
+    (classes.length > 0 ? (
+      <View className="flex-1 bg-[#F5F9FF] px-5 pt-5 flex-col py-10">
+        {/* Buscador y Filtros */}
+        <View className="flex flex-col gap-1">
+          {/* Buscador */}
+          <View className="flex flex-row pl-3 bg-white border border-gray-200 rounded-2xl h-[55px] overflow-hidden mb-5">
+            <View className="w-8 flex justify-center items-center">
+              <Octicons name="search" size={20} color={'#000000'} />
             </View>
             <TextInput
-              placeholder='Buscar "Materia" o "Tema"'
-              className="py-5 bg-transparent flex-1"
+              placeholder="Buscar tema"
+              className="h-full bg-white w-full border-none px-2 placeholder:text-[#B4BDC4]"
               style={{
                 fontFamily: 'Mulish_700Bold',
                 fontSize: 13,
-                color: '#B4BDC4',
+                color: '#202244',
               }}
             />
           </View>
-          {/* Lista de Clases */}
-          {/* Contenedor principal */}
-          <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-            <View className="w-full bg-white rounded-2xl shadow-lg shadow-gray-300 mb-10">
-              {classes.length > 0 ? (
-                classes.map((currentClass, index) => (
-                  <View className="border-b border-[#E8F1FF]">
-                    {/* Nombre de la clase */}
-                    <View className="w-full flex items-center justify-center h-[50px] bg-[#741D1D]">
+
+          {/* Filtros */}
+          <View className="px-2 mb-10">
+            <FlatList
+              data={courses}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => {
+                const isSelected = item === selectedFilter
+                return (
+                  <TouchableOpacity
+                    className={`px-5 py-2 mr-2 ${
+                      isSelected ? 'bg-[#741D1D]' : 'bg-[#E8F1FF]' // Cambio de fondo no seleccionado
+                    } rounded-full`}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: 'Mulish_700Bold',
+                        fontSize: 10,
+                        color: isSelected ? 'white' : '#202244',
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              }}
+            />
+          </View>
+
+          {/* Lista de clases */}
+          <FlatList
+            data={classes}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 80 }}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                className="bg-white border border-gray-200 rounded-2xl mb-10 overflow-hidden"
+                onLongPress={() => Alert.alert('Deseas eliminar este curso')}
+              >
+                {/* Header */}
+                <View className="flex flex-row justify-between items-center px-5 py-4 bg-[#741D1D]">
+                  <View className="flex flex-col">
+                    <Text
+                      style={{
+                        fontFamily: 'Mulish_700Bold',
+                        fontSize: 10,
+                        color: '#E8F1FF',
+                      }}
+                    >
+                      {item.courseName}
+                    </Text>
+                    <View className="flex flex-row gap-1 items-center">
                       <Text
                         style={{
-                          fontFamily: 'Jost_700Bold',
-                          fontSize: 16,
+                          fontFamily: 'Jost_600SemiBold',
+                          fontSize: 15,
                           color: 'white',
                         }}
                       >
-                        {currentClass.courseName}
+                        Clase {index + 1} -
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Jost_600SemiBold',
+                          fontSize: 15,
+                          color: '#F5F9FF',
+                        }}
+                      >
+                        {item.topic}
                       </Text>
                     </View>
-                    <View className="px-5 " key={index}>
-                      {/* Header */}
-
-                      <TouchableOpacity
-                        className="flex flex-row items-center justify-between pt-5"
-                        // onPress={() =>
-                        //   goToClass(currentClass.id, currentClass.topic)
-                        // }
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 12,
+                      color: '#F5F9FF',
+                    }}
+                  >
+                    3 Mins
+                  </Text>
+                </View>
+                {item.Topics.length > 0 ? (
+                  <View className="flex flex-col">
+                    {item.Topics.map((topic, index) => (
+                      <View
+                        className="p-5 flex flex-row items-center justify-between border-b border-gray-200"
+                        onLongPress={() => console.log('Presionado largo')}
                       >
-                        <View className="flex flex-row items-center gap-1">
-                          <Text
-                            style={{
-                              fontFamily: 'Jost_600SemiBold',
-                              fontSize: 14,
-                              color: '#202244',
-                            }}
-                          >
-                            Clase 0{index + 1} -
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: 'Jost_600SemiBold',
-                              fontSize: 14,
-                              color: '#741D1D',
-                            }}
-                          >
-                            {currentClass.topic}
-                          </Text>
-                        </View>
-                        {currentClass.Topics &&
-                          currentClass.Topics.length > 0 && (
+                        <View className="flex flex-row gap-1">
+                          <View className="w-10 h-10 flex justify-center items-center rounded-full bg-[#F5F9FF] border border-[#E8F1FF]">
                             <Text
                               style={{
-                                fontFamily: 'Mulish_800ExtraBold',
-                                fontSize: 12,
-                                color: '#741D1D',
+                                fontFamily: 'Jost_600SemiBold',
+                                fontSize: 14,
+                                color: '#202244',
                               }}
                             >
-                              {lectureUtils.getTotalEstimatedReadingTime(
-                                currentClass
-                              )}{' '}
-                              Mins
+                              {index + 1}
                             </Text>
-                          )}
-                      </TouchableOpacity>
-
-                      {/* Topics */}
-
-                      {currentClass.Topics && currentClass.Topics.length > 0 ? (
-                        currentClass.Topics.map((topic, index) => (
-                          <View className="flex flex-col">
-                            <View className="flex flex-row items-center justify-between py-5">
-                              <View className="flex flex-row items-center gap-2">
-                                <View className="w-12 h-12 flex items-center justify-center rounded-full bg-[#F5F9FF]">
-                                  <Text
-                                    style={{
-                                      fontFamily: 'Jost_600SemiBold',
-                                      fontSize: 14,
-                                      color: '#202244',
-                                    }}
-                                  >
-                                    0{index + 1}
-                                  </Text>
-                                </View>
-
-                                {/* Title Container */}
-                                <View className="flex flex-col justify-center">
-                                  {/* Title */}
-                                  <Text
-                                    style={{
-                                      fontFamily: 'Jost_600SemiBold',
-                                      fontSize: 14,
-                                      color: '#202244',
-                                    }}
-                                  >
-                                    {topic.title}
-                                  </Text>
-                                  {/* Time Reader Lecture */}
-                                  <Text
-                                    style={{
-                                      fontFamily: 'Mulish_700Bold',
-                                      fontSize: 11,
-                                      color: '#545454',
-                                    }}
-                                  >
-                                    {lectureUtils.estimateReadingTime(
-                                      topic.content
-                                    )}{' '}
-                                    Mins
-                                  </Text>
-                                </View>
-                              </View>
-
-                              <TouchableOpacity
-                                className="flex justify-start items-start"
-                                // onPress={toggleContentTopicModal}
-                              >
-                                <Ionicons
-                                  name="eye"
-                                  size={22}
-                                  color="#741D1D"
-                                />
-                              </TouchableOpacity>
-                            </View>
                           </View>
-                        ))
-                      ) : (
-                        <TouchableOpacity
-                          className="my-5  border border-dashed border-gray-200 flex justify-center items-center py-3 bg-[#F5F9FF] rounded-lg px-5"
-                          // onPress={() => openTopicModal(currentClass.id)}
-                        >
-                          <Text
-                            style={{
-                              fontFamily: 'Jost_700Bold',
-                              fontSize: 12,
-                              color: '#202244',
-                            }}
-                          >
-                            Clase sin contenido
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: 'Mulish_400Regular',
-                              fontSize: 11,
-                              color: '#545454',
-                              textAlign: 'center',
-                            }}
-                          >
-                            Agrega contenido a tu clase para que tus estudiantes
-                            puedan encontrarlo
-                          </Text>
-                        </TouchableOpacity>
-                      )}
+                          <View className="flex flex-col">
+                            <Text
+                              style={{
+                                fontFamily: 'Jost_600SemiBold',
+                                fontSize: 13,
+                                color: '#202244',
+                              }}
+                            >
+                              {topic.title}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: 'Mulish_700Bold',
+                                fontSize: 11,
+                                color: '#545454',
+                              }}
+                            >
+                              3 Mins
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View className="flex flex-row gap-3 items-center justify-center">
+                          <TouchableOpacity>
+                            <FontAwesome6
+                              name="edit"
+                              size={16}
+                              color="#167F71"
+                            />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity>
+                            <FontAwesome6
+                              name="trash"
+                              size={16}
+                              color="#741D1D"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <View className="p-5">
+                    <View className="border border-dashed border-gray-200 rounded-lg p-5 flex flex-col gap-2">
+                      <Text
+                        style={{
+                          fontFamily: 'Jost_600SemiBold',
+                          fontSize: 14,
+                          color: '#202244',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Sin contenido que mostrar
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Mulish_400Regular',
+                          fontSize: 12,
+                          color: '#545454',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Agrega contenido a tu clase para que tus estudiantes las
+                        vean.
+                      </Text>
                     </View>
                   </View>
-                ))
-              ) : (
-                <View className="py-5 w-[90%] mx-auto border border-dashed border-gray-200">
-                  <Text>No hay clases</Text>
-                </View>
-              )}
-            </View>
-          </ScrollView>
+                )}
+              </TouchableOpacity>
+            )}
+          />
         </View>
-      ) : (
-        <TouchableOpacity className="flex flex-col items-center bg-white p-6 rounded-lg border border-dashed border-gray-300">
+      </View>
+    ) : (
+      <View className="flex-1 bg-[#F5F9FF] justify-center items-center px-5">
+        <TouchableOpacity
+          className="w-full bg-white border border-dashed border-gray-200 rounded-xl px-5 py-10 shadow-lg shadow-[#741D1D]"
+          onPress={() => openClassModal()}
+        >
+          <LottieView
+            source={emptyData}
+            autoPlay
+            loop
+            style={{
+              width: 200,
+              height: 150,
+              margin: 'auto',
+            }}
+          />
           <Text
             style={{
-              fontFamily: 'Jost_700Bold',
-              fontSize: 15,
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 16,
               color: '#202244',
               textAlign: 'center',
             }}
@@ -237,17 +285,16 @@ const Classes = () => {
           <Text
             style={{
               fontFamily: 'Mulish_400Regular',
-              fontSize: 12,
+              fontSize: 13,
               color: '#545454',
               textAlign: 'center',
             }}
           >
-            Agrega las clases para que tus estudiantes puedan encontrarlas
-            facilmente
+            Agrega clases a tus cursos para que los estudiantes puedan verlas
           </Text>
         </TouchableOpacity>
-      )}
-    </View>
+      </View>
+    ))
   )
 }
 

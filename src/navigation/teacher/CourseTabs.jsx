@@ -39,6 +39,7 @@ function CourseTabs({ route, navigation }) {
       initialLayout={{ width: layout.width }}
       style={{ backgroundColor: '#F5F9FF' }}
       sceneContainerStyle={{ backgroundColor: '#F5F9FF' }}
+      swipeEnabled={false}
       renderTabBar={(props) => (
         <TabBar
           {...props}

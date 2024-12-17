@@ -1,24 +1,19 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { Ionicons } from '@expo/vector-icons'
+import { Octicons } from '@expo/vector-icons'
 import CourseNavigator from './CourseNavigator'
 import ProfileNavigator from '../shared/ProfileNavigator'
 import ClassNavigator from './ClassNavigator'
-import { useModal } from '../../context/ModalContext'
-import { useCourseModal } from '../../context/CourseModalContext'
-import { Activities, Classes, Home } from '../../views/index.views'
+import { Activities, Home } from 'views/index.views'
 
 const Tab = createBottomTabNavigator()
 
 function TabsTeacherNavigator() {
-  const { isVisible } = useModal()
-  const { isVisible: isVisibleCourseModal } = useCourseModal()
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#741D1D',
-        tabBarInactiveTintColor: '#545454',
+        tabBarInactiveTintColor: '#202244',
         tabBarStyle: {
-          display: isVisible || isVisibleCourseModal ? 'none' : 'flex',
           backgroundColor: '#F5F9FF',
         },
         lazy: false,
@@ -31,7 +26,7 @@ function TabsTeacherNavigator() {
           tabBarLabel: 'Inicio',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-sharp" size={size} color={color} />
+            <Octicons name="home" size={21} color={color} />
           ),
         }}
       />
@@ -43,7 +38,7 @@ function TabsTeacherNavigator() {
 
           tabBarLabel: 'Cursos',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="school-sharp" size={size} color={color} />
+            <Octicons name="mortar-board" size={21} color={color} />
           ),
         }}
       />
@@ -54,7 +49,7 @@ function TabsTeacherNavigator() {
           headerShown: false,
           tabBarLabel: 'Clases',
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="book-sharp" size={size} color={color} />
+            <Octicons name="stack" size={21} color={color} />
           ),
         }}
       />
@@ -74,7 +69,7 @@ function TabsTeacherNavigator() {
           },
 
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="game-controller-sharp" size={size} color={color} />
+            <Octicons name="rocket" size={21} color={color} />
           ),
         }}
       />
@@ -85,7 +80,7 @@ function TabsTeacherNavigator() {
           headerShown: false,
           tabBarLabel: 'Perfil',
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="person-sharp" size={size} color={color} />
+            <Octicons name="person" size={21} color={color} />
           ),
         }}
       />

@@ -5,8 +5,8 @@ import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
 
-import { toastConfig } from '../../../config/index.config'
-import useActivationCode from '../../../hooks/useActivationCode'
+import { toastConfig } from 'config/index.config'
+import { useActivationCode } from 'hooks/index.hooks'
 
 const ActivationCode = ({ route }) => {
   const { data, addInfoData, onSubmit } = useActivationCode()

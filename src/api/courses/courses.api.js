@@ -2,7 +2,7 @@ import { instance } from '../base.api'
 
 const model = 'courses'
 
-export const coursesAPI = {
+const coursesAPI = {
   getAll: (teacher_id) => {
     return instance.get(`${model}/teacher/${teacher_id}`)
   },
@@ -14,7 +14,13 @@ export const coursesAPI = {
     })
   },
 
+  getAllWithStudents: () => {
+    return instance.get(`${model}/with_students`)
+  },
+
   deleteCourse: (id) => {
     return instance.delete(`${model}/${id}`)
   },
 }
+
+export default coursesAPI

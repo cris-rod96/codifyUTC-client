@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import profile from 'assets/profile.png'
 import { useSelector } from 'react-redux'
-const StudentSlide = () => {
+const StudentsSlide = () => {
   const { students } = useSelector((state) => state.teacher)
 
   return (
@@ -99,4 +99,4 @@ const StudentSlide = () => {
   )
 }
 
-export default StudentSlide
+export default StudentsSlide

@@ -1,0 +1,8 @@
+export { default as useActivationCode } from './useActivationCode'
+export { default as useChangePassword } from './useChangePassword'
+export { default as useFontsLoader } from './useFontsLoader'
+export { default as useLogin } from './useLogin'
+export { default as useRegister } from './useRegister'
+export { default as useRecoveryPassword } from './useRecoveryPassword'
+export { default as useSetup } from './useSetup'
+export { default as useRecuperationCode } from './useRecuperationCode'

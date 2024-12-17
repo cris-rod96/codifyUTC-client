@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons'
 import { Image, Modal, Text, TouchableOpacity, View } from 'react-native'
 import { useState } from 'react'
-import quizzLogo from '../../../assets/quizz.png'
-import lightningLogo from '../../../assets/lightning.png'
-import puzzleLogo from '../../../assets/puzzle.png'
-import brainLogo from '../../../assets/brain.png'
+import quizzLogo from 'assets/quizz.png'
+import lightningLogo from 'assets/lightning.png'
+import puzzleLogo from 'assets/puzzle.png'
+import brainLogo from 'assets/brain.png'
 
 const SelectActivityModal = ({ onClose, onContinue }) => {
   const [selectedActivity, setSelectedActivity] = useState(null)

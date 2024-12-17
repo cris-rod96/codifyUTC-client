@@ -6,14 +6,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  FontAwesome,
-  Ionicons,
-  MaterialIcons,
-  FontAwesome5,
-} from '@expo/vector-icons'
+import { FontAwesome, Ionicons, Octicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { msgUtil, storageUtil } from '../../utils/index.utils'
+import { msgUtil, storageUtil } from 'utils/index.utils'
 import { useEffect, useState } from 'react'
 
 const Course = ({ course, deleteCourse }) => {
@@ -122,7 +117,7 @@ const Course = ({ course, deleteCourse }) => {
         <View className="flex flex-row gap-2">
           {/* Tarjeta Estudiantes */}
           <View className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm">
-            <Ionicons name="people-circle-sharp" size={24} color="#333" />
+            <Octicons name="people" size={24} color="#333" />
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
@@ -142,7 +137,7 @@ const Course = ({ course, deleteCourse }) => {
           </View>
           {/* Tarjeta Clases */}
           <View className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm">
-            <Ionicons name="newspaper" size={24} color="#333" />
+            <Octicons name="stack" size={24} color="#333" />
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
@@ -164,7 +159,7 @@ const Course = ({ course, deleteCourse }) => {
 
         {/* Código de acceso */}
         <View className="flex flex-col justify-center items-center border border-gray-300 p-2 mt-3 bg-gray-100 rounded-md shadow-sm">
-          <Ionicons name="key" size={24} color="#741D1D" />
+          <Octicons name="key" size={22} color="#741D1D" />
           <Text
             style={{
               fontFamily: 'Mulish_700Bold',
@@ -192,7 +187,7 @@ const Course = ({ course, deleteCourse }) => {
           className="bg-green-600 p-2 rounded-lg flex-row items-center flex-auto shadow-md justify-center gap-2"
           onPress={shareOnWhatsApp}
         >
-          <FontAwesome name="share-alt" size={20} color="white" />
+          <Octicons name="share-android" size={18} color="white" />
           <Text
             style={{
               fontFamily: 'Mulish_500Medium',
@@ -208,7 +203,7 @@ const Course = ({ course, deleteCourse }) => {
           className="bg-red-600 p-2 rounded-lg flex-row items-center flex-auto shadow-md justify-center gap-2"
           onPress={handleDeleteCourse}
         >
-          <FontAwesome name="trash" size={20} color="white" />
+          <Octicons name="trash" size={20} color="white" />
           <Text
             style={{
               fontFamily: 'Mulish_500Medium',

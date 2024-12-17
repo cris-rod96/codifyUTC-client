@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { userApi } from '../api/user/user.api'
-import { validationService } from '../services/index.services'
+import { useState } from 'react'
+import { usersAPI } from 'api/index.api'
+import { validationService } from 'services/index.services'
 
 const useRegister = () => {
   const initialState = {
@@ -40,7 +40,7 @@ const useRegister = () => {
         message: message,
       }
 
-    return userApi
+    return usersAPI
       .verifyUser(email, nick_name)
       .then((res) => {
         const { exist } = res.data

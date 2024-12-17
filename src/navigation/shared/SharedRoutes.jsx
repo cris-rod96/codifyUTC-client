@@ -8,7 +8,7 @@ import {
   navigatorOptions,
   recoveryOptions,
   setupOptions,
-} from '../../config/index.config'
+} from 'config/index.config'
 import {
   ActivationCode,
   ChangePassword,
@@ -22,7 +22,7 @@ import {
   Welcome1,
   Welcome2,
   Welcome3,
-} from '../../views/index.views'
+} from 'views/index.views'
 
 const SharedStack = createStackNavigator()
 

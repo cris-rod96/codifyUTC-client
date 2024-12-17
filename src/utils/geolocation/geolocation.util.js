@@ -8,7 +8,7 @@ const getPublicIp = async () => {
 const getLoginLocation = async () => {
   const ip = await getPublicIp()
   const response = await axios.get(
-    `https://ipinfo.io/${ip}?token=76b497b2b53abb`,
+    `https://ipinfo.io/${ip}?token=76b497b2b53abb`
   )
   const { city } = response.data
 

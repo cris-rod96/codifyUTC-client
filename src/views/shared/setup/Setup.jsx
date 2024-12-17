@@ -11,17 +11,15 @@ import {
   ScrollView,
 } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import profileLogo from '../../../../assets/profile.png'
-import ecuFlag from '../../../../assets/flag_ecuador.png'
+import profileLogo from 'assets/profile.png'
+import ecuFlag from 'assets/flag_ecuador.png'
 import { Ionicons } from '@expo/vector-icons'
-import RNPickerSelect from 'react-native-picker-select'
 import { useEffect, useState } from 'react'
-import { userApi } from '../../../api/user/user.api'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../../config/toast/toast.config'
+import { toastConfig } from 'config/index.config'
 import Select from 'react-native-picker-select'
-import useSetup from '../../../hooks/useSetup'
-import { pickerImagesUtil } from '../../../utils/index.utils'
+import { useSetup } from 'hooks/index.hooks'
+import { pickerImagesUtil } from 'utils/index.utils'
 
 const Setup = ({ route, navigation }) => {
   const { addRegisterData, handleChange, user, onSubmit } = useSetup()

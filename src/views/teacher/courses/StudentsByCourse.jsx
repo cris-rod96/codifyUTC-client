@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import profile from '../../../../assets/profile.png'
+import profile from 'assets/profile.png'
 import { useIsFocused, useRoute } from '@react-navigation/native'
-import { studentsAPI } from '../../../api/students/students.api'
-import Loading from '../../../components/loading/Loading'
+import { studentsAPI } from 'api/index.api'
+import Loading from 'components/loading/Loading'
 
 const StudentsByCourse = ({ courseId }) => {
   const [isLoading, setLoading] = useState(true)

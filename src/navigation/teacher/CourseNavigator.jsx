@@ -1,9 +1,6 @@
 import CourseTabs from './CourseTabs'
-import { useCourseModal } from 'context/CourseModalContext'
 import { Courses } from 'views/index.views'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useEffect } from 'react'
-import { useNavigation } from '@react-navigation/native'
 
 const Stack = createStackNavigator()
 

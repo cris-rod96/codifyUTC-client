@@ -1,5 +1,4 @@
-import { Modal, Text } from 'react-native'
-import { View } from 'react-native-reanimated/lib/typescript/Animated'
+import { Modal, Text, View } from 'react-native'
 
 const AddActivity = () => {
   return (

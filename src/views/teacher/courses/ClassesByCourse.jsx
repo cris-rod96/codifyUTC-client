@@ -1,4 +1,4 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons, Octicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 import {
   Text,
@@ -9,14 +9,18 @@ import {
   ScrollView,
 } from 'react-native'
 import { useSelector } from 'react-redux'
-import AddClass from '../../../components/modal/AddClass'
-import { classesAPI } from '../../../api/classes/classes.api'
-import ContentTopicModal from '../../../components/modal/ContentTopicModal'
-import TopicModal from '../../../components/modal/TopicModal'
-import { lectureUtils } from '../../../utils/index.utils'
+import { classesAPI } from 'api/index.api'
+import {
+  TopicModal,
+  AddClass,
+  ContentTopicModal,
+} from 'components/modal/index.modals'
+import { lectureUtils } from 'utils/index.utils'
 import { useNavigation } from '@react-navigation/native'
+import { useLoading } from 'context/LoadingContext'
 
 const ClassesByCourse = ({ courseId }) => {
+  const { showLoading, hideLoading } = useLoading()
   const navigation = useNavigation()
   const [isVisible, setIsVisible] = useState(false)
   const [ClassId, setClassId] = useState(null)
@@ -42,17 +46,26 @@ const ClassesByCourse = ({ courseId }) => {
       screen: 'DetailClass',
       params: {
         class_name: name,
+        id: class_id,
       },
     })
   }
 
   useEffect(() => {
+    showLoading('Cargando las clases del curso. Espere un momento...')
     if (courseId) {
-      classesAPI.getByCourse(courseId).then((res) => {
-        const { classes } = res.data
-        console.log(classes)
-        setClasseInCourse(classes)
-      })
+      classesAPI
+        .getByCourse(courseId)
+        .then((res) => {
+          const { classes } = res.data
+          setClasseInCourse(classes)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+        .finally(() => {
+          hideLoading()
+        })
     }
   }, [])
 
@@ -63,7 +76,7 @@ const ClassesByCourse = ({ courseId }) => {
         className="absolute bottom-4 right-2 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300"
         onPress={toggleModal}
       >
-        <Ionicons name="add" size={25} color={'white'} />
+        <Octicons name="plus" size={25} color={'white'} />
       </TouchableOpacity>
       {!classeInCourse ||
         (classeInCourse.length === 0 ? (
@@ -98,7 +111,7 @@ const ClassesByCourse = ({ courseId }) => {
             <View className="px-5">
               <View className="w-full flex flex-row items-center bg-white border border-gray-200 rounded-2xl px-2 shadow-lg shadow-gray-300 mb-10 ">
                 <View className="w-8 h-8 flex items-center justify-center">
-                  <MaterialIcons name="search" size={20} color={'#DCDCDC'} />
+                  <Octicons name="search" size={20} color={'#DCDCDC'} />
                 </View>
                 <TextInput
                   placeholder='Buscar "Materia" o "Tema"'
@@ -122,7 +135,7 @@ const ClassesByCourse = ({ courseId }) => {
                   classeInCourse.map((currentClass, index) => (
                     <View
                       className="border-b border-[#E8F1FF] px-5 "
-                      key={index}
+                      key={currentClass.id}
                     >
                       {/* Header */}
                       <TouchableOpacity
@@ -219,7 +232,7 @@ const ClassesByCourse = ({ courseId }) => {
                                 className="flex justify-start items-start"
                                 onPress={toggleContentTopicModal}
                               >
-                                <Ionicons
+                                <Octicons
                                   name="eye"
                                   size={22}
                                   color="#741D1D"

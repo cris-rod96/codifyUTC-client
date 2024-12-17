@@ -1,7 +1,6 @@
-import { Platform, StatusBar, Text, TouchableOpacity, View } from 'react-native'
+import { StatusBar, Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { useEffect } from 'react'
 const Welcome1 = () => {
   const navigation = useNavigation()
   StatusBar.setHidden(true)

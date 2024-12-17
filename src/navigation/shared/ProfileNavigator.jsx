@@ -3,7 +3,7 @@ import {
   createStackNavigator,
   CardStyleInterpolators,
 } from '@react-navigation/stack'
-import { Profile, EditProfile } from '../../views/index.views'
+import { Profile, EditProfile } from 'views/index.views'
 
 const ProfileStack = createStackNavigator()
 const ProfileNavigator = () => {

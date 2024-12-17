@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import {
   Text,
@@ -7,32 +7,35 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native'
-import Course from 'components/cards/Course'
+import { CourseCard } from 'components/cards/index.cards'
 import LottieView from 'lottie-react-native'
 import emptyData from 'assets/no-data.json'
 import CourseModal from 'components/modal/CourseModal'
-import { useCourseModal } from 'context/CourseModalContext'
 // import { coursesAPI } from '../../../api/courses/courses.api'
 // import { storageUtil } from '../../../utils/index.utils'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { deleteCourse, saveCourses } from 'redux/slices/teacher.slice'
-import Loading from 'components/loading/Loading'
-import { coursesAPI } from 'api/courses/courses.api'
+import { coursesAPI } from 'api/index.api'
 import {
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
+import { useLoading } from 'context/LoadingContext'
 
 const Courses = () => {
   const { user } = useSelector((state) => state.user)
-  // const { isVisible, toggleModal } = useCourseModal()
+  const { showLoading, hideLoading } = useLoading()
   const [showModal, setShowModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const dispatch = useDispatch()
   const { courses } = useSelector((state) => state.teacher)
 
   const handleDeleteCourse = (CourseId) => {
+    showLoading('Actualizando cursos. Espere un momento...')
     dispatch(deleteCourse(CourseId))
+
+    setTimeout(() => {
+      hideLoading()
+    }, 1500)
   }
 
   const toggleModal = () => {
@@ -40,6 +43,7 @@ const Courses = () => {
   }
 
   const updateCourses = () => {
+    showLoading('Cargando cursos. Espere un momento...')
     coursesAPI
       .getAll(user.id)
       .then((res) => {
@@ -51,26 +55,23 @@ const Courses = () => {
       .catch((err) => {
         console.log(err)
       })
+      .finally(() => {
+        hideLoading()
+      })
   }
 
   useEffect(() => {
-    if (courses !== null) {
-      setIsLoading(false)
-    } else {
-      setIsLoading(true)
-    }
-  }, [courses])
+    updateCourses()
+  }, [])
 
-  return isLoading ? (
-    <Loading message={'Obteniendo cursos'} />
-  ) : (
+  return (
     <View className="flex flex-col h-full w-full bg-[#F5F9FF] py-5 relative">
       {/* Floating Action Button */}
       <TouchableOpacity
         className="absolute bottom-4 right-2 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300"
         onPress={toggleModal}
       >
-        <Ionicons name="add" size={25} color={'white'} />
+        <Octicons name="plus" size={25} color={'white'} />
       </TouchableOpacity>
 
       <View className="flex flex-col px-5 gap-1">
@@ -79,7 +80,7 @@ const Courses = () => {
             {/* Buscador */}
             <View className="flex flex-row items-center bg-white rounded-2xl border border-gray-200 shadow-lg shadow-gray-300 px-2">
               <View className="w-8 h-8 flex items-center justify-center">
-                <Ionicons name="search" size={20} color={'#DCDCDC'} />
+                <Octicons name="search" size={20} color={'#DCDCDC'} />
               </View>
               <TextInput
                 placeholder="Buscar curso"
@@ -99,7 +100,7 @@ const Courses = () => {
       {courses.length > 0 ? (
         <ScrollView className="flex-1 mt-5 px-3">
           {courses.map((course) => (
-            <Course
+            <CourseCard
               key={course.id}
               course={course}
               deleteCourse={handleDeleteCourse}

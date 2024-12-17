@@ -10,8 +10,8 @@ import {
 } from 'react-native'
 import { TextInput } from 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast/toast.config'
-import { classesAPI } from '../../api/classes/classes.api'
+import toastConfig from 'config/toast/toast.config.js'
+import { classesAPI } from 'api/classes/classes.api'
 
 const AddClass = ({ isVisible, toggleModal, CourseId }) => {
   const [loading, setLoading] = useState(false)

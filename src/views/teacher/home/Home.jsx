@@ -1,60 +1,46 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, ScrollView, Image } from 'react-native'
 import profile from 'assets/profile.png'
-import { storageUtil } from 'utils/index.utils'
 import {
-  StudentSlide,
+  StudentsSlide,
   ClasseSlide,
   CoursesSlide,
 } from 'components/slides/index.slides'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  saveActivities,
-  saveClasses,
-  saveCourses,
-} from 'redux/slices/teacher.slice'
-import Loading from '../../../components/loading/Loading'
+import { saveCourses } from 'redux/slices/teacher.slice'
 import {
   saveAllClassesInCourses,
   saveAllStudents,
-} from '../../../redux/slices/teacher.slice'
-import { coursesAPI } from '../../../api/courses/courses.api'
+} from 'redux/slices/teacher.slice'
+import { coursesAPI } from 'api/index.api.js'
+import { useLoading } from 'context/LoadingContext'
 const Home = () => {
+  const { showLoading, hideLoading } = useLoading()
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.user)
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Obtener todos los datos relacionados al Docente
-  // Cursos
-  // Clases
-  // Actividades
-
-  // Si entra a cursos mostrar todos los cursos
-  // Si entra a un determinado curso mostrar las clases y los estudiantes que pertenecen a ese curso
 
   useEffect(() => {
-    setIsLoading(true)
-    // Obtener los cursos del docente
-    const { id } = user
-    coursesAPI
-      .getAll(id)
-      .then((res) => {
-        const { courses } = res.data
-        dispatch(saveCourses(courses))
-        dispatch(saveAllStudents(courses))
-        dispatch(saveAllClassesInCourses(courses))
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    showLoading('Cargando datos de la cuenta. Espera un momento...')
+    if (user) {
+      const { id } = user
+      coursesAPI
+        .getAll(id)
+        .then((res) => {
+          const { courses } = res.data
+          dispatch(saveCourses(courses))
+          dispatch(saveAllStudents(courses))
+          dispatch(saveAllClassesInCourses(courses))
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+        .finally(() => {
+          hideLoading()
+        })
+    }
   }, [])
 
-  return isLoading ? (
-    <Loading message={'Cargando información'} />
-  ) : (
+  return (
     <ScrollView className="flex-1">
       <View className="flex-1 flex-col h-screen gap-10 p-5 bg-[#F5F9FF] ">
         {/* Encabezado */}
@@ -97,7 +83,7 @@ const Home = () => {
         {/* Sección de clases */}
         <ClasseSlide />
         {/* Sección de Actividades */}
-        <StudentSlide />
+        <StudentsSlide />
       </View>
     </ScrollView>
   )

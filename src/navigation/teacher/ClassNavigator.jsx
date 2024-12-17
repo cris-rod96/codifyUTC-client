@@ -3,21 +3,17 @@ import {
   createStackNavigator,
 } from '@react-navigation/stack'
 import ClassTabs from './ClassTabs'
-import { TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { useModal } from '../../context/ModalContext'
 import {
   BrainBoost,
   Classes,
   LightningCode,
   PuzzleMaster,
   QuizzCode,
-} from '../../views/index.views'
+} from 'views/index.views'
 
 const Stack = createStackNavigator()
 
 const ClassNavigator = () => {
-  const { toggleModal } = useModal()
   return (
     <Stack.Navigator
       screenOptions={{
@@ -25,12 +21,10 @@ const ClassNavigator = () => {
           backgroundColor: '#F5F9FF',
         },
 
-        headerTitleAlign: 'center',
         headerTitleStyle: {
           fontFamily: 'Jost_600SemiBold',
           fontSize: 21,
         },
-        headerLeft: () => null,
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
     >
@@ -44,9 +38,25 @@ const ClassNavigator = () => {
             fontFamily: 'Jost_600SemiBold',
             fontSize: 21,
           },
+          headerLeft: () => null,
         }}
       />
-      <Stack.Screen name="DetailClass" component={ClassTabs} />
+      <Stack.Screen
+        name="DetailClass"
+        component={ClassTabs}
+        options={{
+          headerStyle: {
+            backgroundColor: '#741D1D',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#F5F9FF',
+          },
+
+          headerTintColor: '#F5F9FF',
+        }}
+      />
       <Stack.Screen name="QuizzCode" component={QuizzCode} />
       <Stack.Screen name="LightningCode" component={LightningCode} />
       <Stack.Screen name="PuzzleMaster" component={PuzzleMaster} />

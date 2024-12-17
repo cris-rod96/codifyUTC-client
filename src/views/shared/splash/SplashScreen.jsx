@@ -39,29 +39,3 @@ const SplashScreen = () => {
 }
 
 export default SplashScreen
-
-// const navigation = useNavigation()
-
-// StatusBar.setHidden(true)
-
-// // useEffect(() => {
-// //   // StatusBar.setHidden(true)
-// //   storageUtil
-// //     .getSecureData('user_info')
-// //     .then((res) => {
-// //       if (res) {
-// //         navigation.navigate('Landing')
-// //       } else {
-// //         storageUtil.getSecureData('welcome').then((res) => {
-// //           if (res) {
-// //             navigation.navigate('Login')
-// //           } else {
-// //             navigation.navigate('Welcome')
-// //           }
-// //         })
-// //       }
-// //     })
-// //     .catch((err) => {
-// //       console.log(err)
-// //     })
-// // }, [])

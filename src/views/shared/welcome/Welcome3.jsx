@@ -1,12 +1,12 @@
 import { Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { storageUtil } from '../../../utils/index.utils'
+import { storageUtil } from 'utils/index.utils'
 const Welcome3 = () => {
   const navigation = useNavigation()
 
   const goToLogin = async () => {
-    const welcome = await storageUtil.saveSecureData('welcome', 'true')
+    await storageUtil.saveSecureData('welcome', 'true')
     navigation.navigate('Login')
   }
 
