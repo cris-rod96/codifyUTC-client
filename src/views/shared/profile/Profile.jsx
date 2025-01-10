@@ -6,18 +6,20 @@ import { CommonActions, useNavigation } from '@react-navigation/native'
 import Loading from 'components/loading/Loading'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout } from 'redux/slices/user.slice'
+import { storageUtil } from '../../../utils/index.utils'
 const Profile = () => {
   const { user } = useSelector((state) => state.user)
   const navigation = useNavigation()
-  const dispatch = useDispatch()
 
-  const closeSession = async () => {
-    dispatch(logout())
-    navigation.dispatch(
-      CommonActions.navigate({
-        name: 'Login',
+  const closeSession = () => {
+    storageUtil
+      .removeSecureData('session_info')
+      .then((res) => {
+        navigation.navigate('Login')
       })
-    )
+      .catch((err) => {
+        console.log(err.message)
+      })
   }
   return !user ? (
     <Loading message={'Espere por favor'} />
@@ -27,10 +29,12 @@ const Profile = () => {
         className="w-5/6 h-[450px] relative bg-white rounded-xl border border-gray-200 shadow"
         style={{ overflow: 'visible' }}
       >
-        <View className="w-32 h-32 rounded-full bg-red-400 -top-16 absolute left-[96px] ">
+        <View className="w-32 h-32 rounded-full bg-red-400 -top-16 absolute left-[96px] border-2 border-[#741D1D]">
           <Image
-            source={profile}
-            className="w-full h-full object-cover absolute"
+            source={
+              user.profile_picture ? { uri: user.profile_picture } : profile
+            }
+            className="w-full h-full object-contain absolute rounded-full"
           />
 
           <TouchableOpacity className="absolute w-10 h-10 rounded-lg bg-[#741D1D] bottom-2 -right-1 flex items-center justify-center z-10">

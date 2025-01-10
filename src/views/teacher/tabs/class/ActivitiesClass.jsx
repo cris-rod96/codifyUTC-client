@@ -4,11 +4,13 @@ import ActivityCard from '../../../components/cards/ActivityCard'
 
 import quizzLogo from '../../../../assets/quizz.png'
 import SelectActivityModal from '../../../components/modal/SelectActivityModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TestModal from '../../../components/modal/TestModal'
 import { useNavigation } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 
 const ActivitiesClass = () => {
+  const { activities } = useSelector((state) => state.teacher)
   const [modalVisible, setModalVisible] = useState(false)
   const [newModalVisible, setNewModalVisible] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState(null)
@@ -68,26 +70,23 @@ const ActivitiesClass = () => {
       {/* Actividades */}
       <View className="flex-1 pt-4 py-20">
         <ScrollView className="p-4">
-          <ActivityCard
-            logo={quizzLogo}
-            title="Quizz Code"
-            activityName={'Algebra Lineal'}
-            createdAt={'10/10/2023'}
-            availableUntil={'10/10/2023'}
-            status={'Activa'}
-            questions={5}
-            time={10}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onClose={() => {}}
-          />
+          {/* {activities.map((activity) => {
+            return (
+              <ActivityCard
+                activity={activity}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                onClose={() => {}}
+              />
+            )
+          })} */}
         </ScrollView>
       </View>
 
       {modalVisible && (
         <SelectActivityModal
           onClose={toggleModal}
-          onContinue={handleContinue}
+          // onContinue={handleContinue}
         />
       )}
 

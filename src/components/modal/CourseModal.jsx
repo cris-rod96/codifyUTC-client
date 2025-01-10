@@ -14,9 +14,11 @@ import Select from 'react-native-picker-select'
 import { codeUtil, pickerImagesUtil, storageUtil } from 'utils/index.utils'
 import Toast from 'react-native-toast-message'
 import toastConfig from 'config/toast/toast.config'
-import { coursesAPI } from 'api/courses/courses.api'
+import { coursesAPI } from 'api/index.api'
+import { useSelector } from 'react-redux'
 
 const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
+  const { user } = useSelector((state) => state.user)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [imageUri, setImageUri] = useState(null)
@@ -32,6 +34,7 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
 
   const handleChange = (name, value) => {
     setCourse({ ...course, [name]: value })
+    console.log(course)
   }
 
   const pickImage = async () => {
@@ -104,15 +107,10 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
     if (isVisible) {
       setIsMounted(true)
       generateAccessCode() // Genera un código al abrir el modal
-      storageUtil
-        .getSecureData('session_info')
-        .then((res) => {
-          const { user } = JSON.parse(res)
-          setCourse((prev) => ({ ...prev, TeacherId: user.id }))
-        })
-        .catch((err) => {
-          console.log('Ok')
-        })
+      setCourse((prev) => ({
+        ...prev,
+        TeacherId: user.id,
+      }))
     } else {
       setTimeout(() => setIsMounted(false), 300)
     }

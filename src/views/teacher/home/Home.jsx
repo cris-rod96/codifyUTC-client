@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, Image } from 'react-native'
 import profile from 'assets/profile.png'
 import {
@@ -14,21 +14,33 @@ import {
 } from 'redux/slices/teacher.slice'
 import { coursesAPI } from 'api/index.api.js'
 import { useLoading } from 'context/LoadingContext'
+import { storageUtil } from '../../../utils/index.utils'
 const Home = () => {
+  const { user } = useSelector((state) => state.user)
   const { showLoading, hideLoading } = useLoading()
   const dispatch = useDispatch()
-  const { user } = useSelector((state) => state.user)
+
+  // const getUserInfo = () => {
+  //   storageUtil
+  //     .getSecureData('session_info')
+  //     .then((res) => {
+  //       const { user } = JSON.parse(res)
+  //       setUser(user)
+  //     })
+  //     .catch((err) => {
+  //       console.log(err.message)
+  //     })
+  // }
 
   useEffect(() => {
     showLoading('Cargando datos de la cuenta. Espera un momento...')
     if (user) {
-      const { id } = user
       coursesAPI
-        .getAll(id)
+        .getAll(user.id)
         .then((res) => {
           const { courses } = res.data
           dispatch(saveCourses(courses))
-          dispatch(saveAllStudents(courses))
+          // dispatch(saveAllStudents(courses))
           dispatch(saveAllClassesInCourses(courses))
         })
         .catch((err) => {

@@ -10,5 +10,9 @@ const topicsAPI = {
   getByClass: (class_id) => {
     return instance.get(`${model}/class/${class_id}`)
   },
+
+  delete: (topic_id) => {
+    return instance.delete(`${model}/${topic_id}`)
+  },
 }
 export default topicsAPI

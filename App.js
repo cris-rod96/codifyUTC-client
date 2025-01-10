@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler'
 import { useEffect, useState } from 'react'
 import './global.css'
 
@@ -9,7 +10,7 @@ import { Provider } from 'react-redux'
 import store from 'redux/store'
 import { LoadingProvider, useLoading } from 'context/LoadingContext'
 import Loading from 'components/loading/Loading'
-import { StatusBar } from 'react-native'
+import { Platform, StatusBar, UIManager } from 'react-native'
 
 export default function App() {
   const [isConnected, setIsConnected] = useState(false)

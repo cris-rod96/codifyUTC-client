@@ -10,6 +10,8 @@ import { FontAwesome, Ionicons, Octicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { msgUtil, storageUtil } from 'utils/index.utils'
 import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { saveCourseId } from '../../redux/slices/id.slice'
 
 const Course = ({ course, deleteCourse }) => {
   const [currentUser, setCurrentUser] = useState(null)
@@ -56,6 +58,14 @@ const Course = ({ course, deleteCourse }) => {
       ]
     )
   }
+  const dispatch = useDispatch()
+
+  const viewClassesInCourse = (id) => {
+    dispatch(saveCourseId(id))
+    navigation.navigate('TabClass', {
+      screen: 'Classes',
+    })
+  }
 
   useEffect(() => {
     storageUtil.getSecureData('session_info').then((res) => {
@@ -65,20 +75,16 @@ const Course = ({ course, deleteCourse }) => {
   }, [])
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      className="bg-white rounded-lg shadow-lg p-4 m-2"
-      onPress={() => navigation.navigate('DetailCourse', { course })}
-    >
+    <View className="bg-white rounded-lg shadow-lg m-2 overflow-hidden">
       {/* FOTO DEL CURSO */}
       <Image
         source={{ uri: course.poster }}
-        className="h-48 w-full rounded-lg mb-4 shadow-md"
+        className="h-[180px] w-full rounded-t-lg mb-4 shadow-md"
         resizeMode="cover"
       />
 
       {/* Información principal */}
-      <View className="mb-4">
+      <View className="mb-4 px-3 ">
         <View className="flex flex-row items-start justify-between mb-3">
           <View>
             <Text
@@ -136,7 +142,10 @@ const Course = ({ course, deleteCourse }) => {
             </Text>
           </View>
           {/* Tarjeta Clases */}
-          <View className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm">
+          <TouchableOpacity
+            className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm"
+            onPress={() => viewClassesInCourse(course.id)}
+          >
             <Octicons name="stack" size={24} color="#333" />
             <Text
               style={{
@@ -154,7 +163,7 @@ const Course = ({ course, deleteCourse }) => {
             >
               Clases
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Código de acceso */}
@@ -181,10 +190,10 @@ const Course = ({ course, deleteCourse }) => {
       </View>
 
       {/* Acciones */}
-      <View className="flex-row justify-between mt-2 gap-2">
+      <View className="flex-row justify-between mt-2">
         {/* Botón Compartir */}
         <TouchableOpacity
-          className="bg-green-600 p-2 rounded-lg flex-row items-center flex-auto shadow-md justify-center gap-2"
+          className="bg-green-600 py-3 flex-row items-center flex-auto shadow-md justify-center gap-2"
           onPress={shareOnWhatsApp}
         >
           <Octicons name="share-android" size={18} color="white" />
@@ -200,7 +209,7 @@ const Course = ({ course, deleteCourse }) => {
 
         {/* Botón Eliminar */}
         <TouchableOpacity
-          className="bg-red-600 p-2 rounded-lg flex-row items-center flex-auto shadow-md justify-center gap-2"
+          className="bg-red-600 py-3 flex-row items-center flex-auto shadow-md justify-center gap-2"
           onPress={handleDeleteCourse}
         >
           <Octicons name="trash" size={20} color="white" />
@@ -214,7 +223,7 @@ const Course = ({ course, deleteCourse }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   )
 }
 

@@ -6,7 +6,7 @@ import lightningLogo from 'assets/lightning.png'
 import puzzleLogo from 'assets/puzzle.png'
 import brainLogo from 'assets/brain.png'
 
-const SelectActivityModal = ({ onClose, onContinue }) => {
+const SelectActivityModal = ({ isVisible, onClose, onContinue }) => {
   const [selectedActivity, setSelectedActivity] = useState(null)
 
   // Actividades disponibles
@@ -18,16 +18,23 @@ const SelectActivityModal = ({ onClose, onContinue }) => {
   ]
 
   // Manejar selección
-  const handleSelect = (id) => {
-    setSelectedActivity(id)
+  const handleSelect = (title) => {
+    setSelectedActivity(title)
+  }
+
+  const handleContinue = () => {
+    if (selectedActivity) {
+      onContinue(selectedActivity)
+      setSelectedActivity(null)
+    }
   }
 
   return (
     <Modal
-      visible={true}
+      visible={isVisible}
       animationType="slide"
       transparent={true}
-      onRequestClose={() => {}}
+      onRequestClose={onClose}
     >
       <View className="flex-1 justify-center items-center bg-black/60 px-4">
         <View className="bg-white w-full rounded-3xl p-6 shadow-2xl">
@@ -52,9 +59,9 @@ const SelectActivityModal = ({ onClose, onContinue }) => {
             {activities.map((activity) => (
               <TouchableOpacity
                 key={activity.id}
-                onPress={() => handleSelect(activity.id)}
+                onPress={() => handleSelect(activity.title)}
                 className={`w-[48%] flex flex-col items-center justify-center ${
-                  selectedActivity === activity.id
+                  selectedActivity === activity.title
                     ? 'bg-blue-100'
                     : 'bg-gray-50'
                 } border border-gray-200 rounded-2xl p-5 shadow-sm`}
@@ -81,7 +88,7 @@ const SelectActivityModal = ({ onClose, onContinue }) => {
           {/* Botón Continuar */}
           <TouchableOpacity
             disabled={!selectedActivity}
-            onPress={() => onContinue(selectedActivity)}
+            onPress={handleContinue}
             className={`mt-6 w-full p-4 rounded-xl ${
               selectedActivity ? 'bg-blue-600' : 'bg-gray-300'
             }`}

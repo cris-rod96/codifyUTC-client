@@ -7,7 +7,7 @@ const CourseDetail = ({ route }) => {
   const navigation = useNavigation()
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: course.id,
+      title: course.name,
     })
   }, [course])
   return <View>CourseDetail</View>

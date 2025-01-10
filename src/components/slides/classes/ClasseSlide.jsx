@@ -1,3 +1,4 @@
+
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList, Text, TouchableOpacity, View } from 'react-native'
@@ -76,6 +77,7 @@ const ClassesSlide = () => {
                 shadowRadius: 2,
                 elevation: 2, // Sombras ligeras para Android
               }}
+              key={item.id}
             >
               {/* Imagen del curso */}
               <View className="w-full h-[75px] bg-red-400 rounded-t-xl"></View>

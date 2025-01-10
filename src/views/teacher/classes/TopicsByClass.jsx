@@ -99,6 +99,7 @@ const TopicsByClass = ({ class_name, id }) => {
   }
 
   useEffect(() => {
+    if (id == null) return
     // showLoading('Cargando contenido de la clase. Espere un momento...')
     topicsAPI
       .getByClass(id)
@@ -107,13 +108,13 @@ const TopicsByClass = ({ class_name, id }) => {
         setTopics(topics)
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err.message)
       })
       .finally(() => {
         setIsMounted(true)
         hideLoading()
       })
-  }, [])
+  }, [id])
 
   return (
     <>

@@ -42,7 +42,7 @@ const ClassesByCourse = ({ courseId }) => {
   const [classeInCourse, setClasseInCourse] = useState([])
 
   const goToClass = (class_id, name) => {
-    navigation.navigate('Clases', {
+    navigation.navigate('TabClass', {
       screen: 'DetailClass',
       params: {
         class_name: name,
@@ -52,7 +52,7 @@ const ClassesByCourse = ({ courseId }) => {
   }
 
   useEffect(() => {
-    showLoading('Cargando las clases del curso. Espere un momento...')
+    // showLoading('Cargando las clases del curso. Espere un momento...')
     if (courseId) {
       classesAPI
         .getByCourse(courseId)
@@ -106,10 +106,10 @@ const ClassesByCourse = ({ courseId }) => {
             </Text>
           </TouchableOpacity>
         ) : (
-          <View className="flex-1 flex-col pt-5 w-full ">
+          <View className="flex-1 flex-col w-full ">
             {/* BUSCADOR */}
-            <View className="px-5">
-              <View className="w-full flex flex-row items-center bg-white border border-gray-200 rounded-2xl px-2 shadow-lg shadow-gray-300 mb-10 ">
+            <View className="border-b border-gray-200">
+              <View className="w-full flex flex-row items-center bg-white border border-gray-200 px-2 shadow-lg shadow-gray-300 ">
                 <View className="w-8 h-8 flex items-center justify-center">
                   <Octicons name="search" size={20} color={'#DCDCDC'} />
                 </View>
@@ -126,11 +126,8 @@ const ClassesByCourse = ({ courseId }) => {
             </View>
             {/* Lista de Clases */}
             {/* Contenedor principal */}
-            <ScrollView
-              className="px-5 flex-1"
-              showsVerticalScrollIndicator={false}
-            >
-              <View className="w-full bg-white rounded-2xl shadow-lg shadow-gray-300 mb-10">
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+              <View className="w-full bg-white shadow-lg shadow-gray-300 mb-10">
                 {classeInCourse.length > 0 ? (
                   classeInCourse.map((currentClass, index) => (
                     <View

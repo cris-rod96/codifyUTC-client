@@ -16,6 +16,9 @@ function TabsTeacherNavigator() {
         tabBarStyle: {
           backgroundColor: '#F5F9FF',
         },
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
         lazy: false,
       }}
     >
@@ -47,6 +50,9 @@ function TabsTeacherNavigator() {
         component={ClassNavigator}
         options={{
           headerShown: false,
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
           tabBarLabel: 'Clases',
           tabBarIcon: ({ size, color }) => (
             <Octicons name="stack" size={21} color={color} />
@@ -60,6 +66,9 @@ function TabsTeacherNavigator() {
           tabBarLabel: 'Actividades',
           headerTitleAlign: 'center',
           headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          sceneStyle: {
             backgroundColor: '#F5F9FF',
           },
 

@@ -12,20 +12,30 @@ import {
   ScrollView,
   StatusBar,
   ActivityIndicator,
+  Image,
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import { useLogin } from 'hooks/index.hooks'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { useLoading } from 'context/LoadingContext'
+import { storageUtil } from '../../../utils/index.utils'
+import { useDispatch, useSelector } from 'react-redux'
+import { saveUser } from '../../../redux/slices/user.slice'
+import SendCodeModal from '../../../components/modal/SendCodeModal'
+import EmailSentModal from '../../../components/modal/EmailSentModal'
+import logo from 'assets/logo.png'
 
 const Login = () => {
-  const { showLoading, hideLoading } = useLoading()
   const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
   const navigation = useNavigation()
   const { credentials, handleChange, onSubmit } = useLogin(setLoading)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
+
+  const [showSendCodeModal, setShowSendCodeModal] = useState(false)
+  const toggleSendCodeModal = () => setShowSendCodeModal((prev) => !prev)
 
   const showToast = (type, title, message) => {
     Toast.show({
@@ -77,6 +87,25 @@ const Login = () => {
     }
   }, [])
 
+  useEffect(() => {
+    storageUtil
+      .getSecureData('session_info')
+      .then((res) => {
+        const { user } = JSON.parse(res)
+        dispatch(saveUser(user))
+        if (user) {
+          const home =
+            user.role === 'Docente'
+              ? 'TabsTeacherNavigator'
+              : 'TabStudentNavigator'
+          navigation.navigate(home)
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [])
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -109,7 +138,13 @@ const Login = () => {
           <View className="flex-1 py-5 bg-[#F5F9FF]">
             {/* Logo visible cuando el teclado no está visible */}
             {!keyboardVisible && (
-              <View className="w-[90%] mx-auto h-[250px] "></View>
+              <View className="w-[90%] mx-auto h-[250px] ">
+                <Image
+                  source={logo}
+                  className="w-full h-full"
+                  resizeMode="contain"
+                />
+              </View>
             )}
 
             <View className="w-[85%] mx-auto py-5 flex flex-col ">
@@ -228,34 +263,65 @@ const Login = () => {
                   )}
                 </TouchableOpacity>
 
-                <View className="mt-5 flex flex-row justify-center items-center gap-2">
-                  <Text
-                    style={{
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                      color: '#545454',
-                    }}
-                  >
-                    ¿No tienes una cuenta?
-                  </Text>
-                  <TouchableOpacity onPress={goToRegister}>
+                <View className="flex flex-col gap-2">
+                  <View className="mt-5 flex flex-row justify-center items-center gap-2">
                     <Text
-                      className="underline"
                       style={{
-                        fontFamily: 'Mulish_800ExtraBold',
+                        fontFamily: 'Mulish_700Bold',
                         fontSize: 14,
-                        color: '#741D1D',
+                        color: '#545454',
                       }}
                     >
-                      Registrate
+                      ¿No tienes una cuenta?
                     </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={goToRegister}>
+                      <Text
+                        className="underline"
+                        style={{
+                          fontFamily: 'Mulish_800ExtraBold',
+                          fontSize: 14,
+                          color: '#741D1D',
+                        }}
+                      >
+                        Registrate
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className="flex flex-col justify-center items-center gap-2">
+                    <Text
+                      style={{
+                        fontFamily: 'Jost_600SemiBold',
+                        fontSize: 16,
+                        color: '#545454',
+                      }}
+                    >
+                      {'o deseas'}
+                    </Text>
+                    <TouchableOpacity onPress={toggleSendCodeModal}>
+                      <Text
+                        className="underline"
+                        style={{
+                          fontFamily: 'Mulish_800ExtraBold',
+                          fontSize: 14,
+                          color: '#741D1D',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Activar cuenta registrada
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
+      <SendCodeModal
+        isVisible={showSendCodeModal}
+        toggleModal={toggleSendCodeModal}
+      />
       <Toast config={toastConfig} position="bottom" />
     </KeyboardAvoidingView>
   )

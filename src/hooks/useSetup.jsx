@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { usersAPI } from 'api/index.api'
 
 const useSetup = () => {
+  const [contactData, setContactData] = useState({
+    email: '',
+    full_name: '',
+  })
   const initialState = {
     full_name: '',
     email: '',
@@ -64,8 +68,11 @@ const useSetup = () => {
     return usersAPI
       .register(formData)
       .then((res) => {
-        console.log(res)
         const { message } = res.data
+        setContactData({
+          email: user.email,
+          full_name: user.full_name,
+        })
         setUser(initialState)
         return {
           ok: true,
@@ -85,7 +92,7 @@ const useSetup = () => {
       })
   }
 
-  return { user, handleChange, addRegisterData, onSubmit }
+  return { user, handleChange, addRegisterData, onSubmit, contactData }
 }
 
 export default useSetup

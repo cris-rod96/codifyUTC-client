@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usersAPI } from 'api/index.api'
 
-const useChangePassword = () => {
+const useChangePassword = (setLoading) => {
   const [data, setData] = useState({
     method: '',
     value: '',
@@ -50,6 +50,8 @@ const useChangePassword = () => {
       }
     }
 
+    setLoading(true)
+
     return usersAPI
       .changePassword({
         method: data.method,
@@ -73,6 +75,9 @@ const useChangePassword = () => {
           title: 'Error',
           message,
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 

@@ -2,7 +2,6 @@ import { Image, Text, TextInput, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import profile from '../../../../../assets/profile.png'
 import { useEffect } from 'react'
-import * as ScreenOrientation from 'expo-screen-orientation'
 
 const CourseRanking = () => {
   // useEffect(() => {

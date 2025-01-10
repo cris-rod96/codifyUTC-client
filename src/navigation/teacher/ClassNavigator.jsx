@@ -57,10 +57,34 @@ const ClassNavigator = () => {
           headerTintColor: '#F5F9FF',
         }}
       />
-      <Stack.Screen name="QuizzCode" component={QuizzCode} />
-      <Stack.Screen name="LightningCode" component={LightningCode} />
-      <Stack.Screen name="PuzzleMaster" component={PuzzleMaster} />
-      <Stack.Screen name="BrainBoost" component={BrainBoost} />
+      <Stack.Screen
+        name="QuizzCode"
+        component={QuizzCode}
+        options={{
+          headerTitle: 'Quizz Code',
+        }}
+      />
+      <Stack.Screen
+        name="LightningCode"
+        component={LightningCode}
+        options={{
+          headerTitle: 'Lightning Code',
+        }}
+      />
+      <Stack.Screen
+        name="PuzzleMaster"
+        component={PuzzleMaster}
+        options={{
+          headerTitle: 'Puzzle Master',
+        }}
+      />
+      <Stack.Screen
+        name="BrainBoost"
+        component={BrainBoost}
+        options={{
+          headerTitle: 'Brain Boost',
+        }}
+      />
     </Stack.Navigator>
   )
 }

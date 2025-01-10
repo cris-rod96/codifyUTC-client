@@ -3,7 +3,6 @@ import {
   TransitionSpecs,
   CardStyleInterpolators,
 } from '@react-navigation/stack'
-import TabsTeacherNavigator from './teacher/TabsTeacherNavigator'
 import TabStudentNavigator from './student/TabStudentNavigator'
 
 import {
@@ -12,7 +11,7 @@ import {
   recoveryOptions,
   setupOptions,
 } from 'config/index.config'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { storageUtil } from 'utils/index.utils'
 import Loading from 'components/loading/Loading'
 import {
@@ -28,21 +27,521 @@ import {
   Welcome1,
   Welcome2,
   Welcome3,
+  TeacherActivities,
+  Courses,
+  Home,
+  Classes,
+  TopicsByClass,
+  ActivitiesByClass,
+  Profile,
 } from 'views/index.views'
+import { useNavigation } from '@react-navigation/native'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { Octicons } from '@expo/vector-icons'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import QuizzCode from '../views/teacher/games/QuizzCode'
+import EditProfile from '../views/shared/edit/EditProfile'
+import DetailActivity from '../views/teacher/activities/DetailActivity'
+import CourseTabs from './teacher/CourseTabs'
+import ClassTabs from './teacher/ClassTabs'
+import { Button, TouchableOpacity } from 'react-native'
+import { useDispatch } from 'react-redux'
+import { saveCourseId } from '../redux/slices/id.slice'
+import DetailClass from '../views/student/class/DetailClass'
+import { HomeStudent, ClassStudent, ActivitiesStudent } from 'views/index.views'
+import Feedback from '../components/feedback/Feedback'
+import { DetailClassTeacher } from '../views/index.views'
 
 const Stack = createStackNavigator()
+const Tabs = createBottomTabNavigator()
+const TopTabs = createMaterialTopTabNavigator()
+
+const TeacherTabs = () => {
+  return (
+    <Tabs.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#741d1d',
+        tabBarInactiveTintColor: '#202244',
+        tabBarStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        lazy: true,
+      }}
+    >
+      <Tabs.Screen
+        name="Home"
+        component={Home}
+        options={{
+          tabBarLabel: 'Inicio',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="home" size={21} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="TabCourse"
+        component={CourseNavigator}
+        options={{
+          tabBarLabel: 'Cursos',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="mortar-board" size={21} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="TabClass"
+        component={ClassNavigator}
+        options={{
+          tabBarLabel: 'Clases',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="stack" size={21} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="TabActivity"
+        component={ActivitiesNavigator}
+        options={{
+          tabBarLabel: 'Actividades',
+          headerTitle: 'Actividades',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          sceneStyle: {
+            backgroundColor: '#f5f9ff',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+
+          tabBarIcon: ({ size, color }) => (
+            <Octicons name="rocket" size={21} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="Perfil"
+        component={ProfileNavigator}
+        options={{
+          headerShown: true,
+          headerTitle: 'Perfil',
+          tabBarLabel: 'Perfil',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          tabBarIcon: ({ size, color }) => (
+            <Octicons name="person" size={21} color={color} />
+          ),
+        }}
+      />
+    </Tabs.Navigator>
+  )
+}
+
+const ClassStudentNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 21,
+          color: '#202244',
+        },
+      }}
+    >
+      <Stack.Screen
+        name="ClassStudent"
+        component={ClassStudent}
+        options={{
+          headerTitle: 'Clases disponibles',
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+          headerLeft: () => null,
+        }}
+      />
+
+      <Stack.Screen
+        name="DetailClass"
+        component={DetailClass}
+        options={{
+          headerShown: true,
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+const StudentsTabs = () => {
+  return (
+    <Tabs.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: '#741D1D',
+        tabBarInactiveTintColor: '#202244',
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        tabBarStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+      }}
+    >
+      <Tabs.Screen
+        name="HomeStudent"
+        component={HomeStudent}
+        options={{
+          tabBarLabel: 'Inicio',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="home" size={21} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ClassStudent"
+        component={ClassStudentNavigator}
+        options={{
+          tabBarLabel: 'Clases',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="stack" size={21} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitle: 'Clases disponibles',
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="ActivitiesStudent"
+        component={ActivitiesStudentNavigator}
+        options={{
+          tabBarLabel: 'Actividades',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="rocket" size={21} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitle: 'Actividades',
+          headerShown: false,
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="ProfileStudent"
+        component={ProfileNavigator}
+        options={{
+          tabBarLabel: 'Configuración',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="gear" size={21} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitle: 'Configuración',
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+        }}
+      />
+    </Tabs.Navigator>
+  )
+}
+
+const ClassTopTabs = ({ route, navigation }) => {
+  const [classId, setClassId] = useState(null)
+  const { class_name, id } = route.params
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: class_name,
+    })
+    setClassId(id)
+  }, [route])
+  return (
+    <TopTabs.Navigator
+      screenOptions={{
+        tabBarStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        swipeEnabled: false,
+        lazy: true,
+      }}
+    >
+      <TopTabs.Screen
+        name="TopicsClass"
+        options={{
+          tabBarLabel: 'Temas',
+        }}
+      >
+        {() => <TopicsByClass class_name={class_name} id={classId} />}
+      </TopTabs.Screen>
+
+      <TopTabs.Screen
+        name="ActivitiesClass"
+        options={{
+          tabBarLabel: 'Actividades',
+        }}
+      >
+        {() => <ActivitiesByClass class_id={classId} />}
+      </TopTabs.Screen>
+    </TopTabs.Navigator>
+  )
+}
+
+const CourseNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          color: '#202244',
+          fontSize: 21,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="Courses"
+        component={Courses}
+        options={{
+          headerTitle: 'Cursos',
+          headerLeft: () => null,
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+const ClassNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 21,
+          color: '#202244',
+        },
+      }}
+    >
+      <Stack.Screen
+        name="Classes"
+        component={Classes}
+        options={{
+          headerTitle: 'Clases',
+          headerLeft: () => null,
+        }}
+        initialParams={{ course_id: null }}
+      />
+
+      <Stack.Screen
+        name="DetailClassTeacher"
+        component={DetailClassTeacher}
+        options={{
+          headerShown: true,
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+const ActivitiesNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 21,
+          color: '#202244',
+        },
+        headerShown: false,
+      }}
+      initialRouteName="TeacherActivities"
+    >
+      <Stack.Screen
+        name="TeacherActivities"
+        component={TeacherActivities}
+        options={{
+          headerTitle: 'Actividades',
+          headerStyle: {
+            backgroundColor: '#f5f9ff',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+          headerShown: true,
+          headerLeft: () => null,
+        }}
+      />
+      <Stack.Screen
+        name="DetailActivity"
+        component={DetailActivity}
+        options={{
+          headerShown: true,
+          headerTitle: 'Detalle',
+        }}
+      />
+      <Stack.Screen
+        name="QuizzCode"
+        component={QuizzCode}
+        options={({ navigation }) => ({
+          headerTitle: 'Quizz Code',
+          headerLeft: () => null,
+        })}
+      />
+
+      {/* Luego colocar el resto */}
+    </Stack.Navigator>
+  )
+}
+
+const ActivitiesStudentNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+      }}
+    >
+      <Stack.Screen
+        name="StundentActivities"
+        component={ActivitiesStudent}
+        options={{
+          headerLeft: () => null,
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitle: 'Actividades',
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="Feedback"
+        component={Feedback}
+        options={{
+          headerShown: true,
+          headerTitle: 'Resultados',
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+const ProfileNavigator = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        headerTitleStyle: {
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 21,
+          color: '#202244',
+        },
+      }}
+    >
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{
+          headerTitle: 'Editar perfil',
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
 
 function RootNavigator() {
-  const [userType, setUserType] = useState(null)
+  const [role, setRole] = useState('')
+  const navigation = useNavigation()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     storageUtil
-      .getSecureData('user_info')
+      .getSecureData('session_info')
       .then((res) => {
         const infoUser = JSON.parse(res)
         const { user } = infoUser
-        setUserType(user.role)
+        if (user) {
+          setRole(user.role)
+        }
       })
       .catch((err) => {
         console.log(err)
@@ -58,7 +557,7 @@ function RootNavigator() {
 
   return (
     <Stack.Navigator
-      initialRouteName="Login"
+      initialRouteName={'Splash'}
       screenOptions={navigatorOptions(TransitionSpecs, CardStyleInterpolators)}
     >
       {/* RUTAS COMPARTIDAS */}
@@ -69,7 +568,22 @@ function RootNavigator() {
       <Stack.Screen name="Welcome3" component={Welcome3} />
       <Stack.Screen name="ThirdSession" component={ThirdSession} />
       <Stack.Screen name="Register" component={Register} />
-      <Stack.Screen name="Setup" component={Setup} />
+      <Stack.Screen
+        name="Setup"
+        component={Setup}
+        options={{
+          headerShown: true,
+          headerTitle: 'Completar perfil',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+        }}
+      />
       <Stack.Screen
         name="RecoveryPassword"
         component={RecoveryPassword}
@@ -87,14 +601,12 @@ function RootNavigator() {
         options={setupOptions}
       />
 
-      <Stack.Screen
-        name="TabsTeacherNavigator"
-        component={TabsTeacherNavigator}
-      />
-      <Stack.Screen
-        name="TabStudentNavigator"
-        component={TabStudentNavigator}
-      />
+      {/* Rutas del docente */}
+
+      <Stack.Screen name="TabsTeacherNavigator" component={TeacherTabs} />
+
+      {/* Rutas del estudiante */}
+      <Stack.Screen name="TabStudentNavigator" component={StudentsTabs} />
     </Stack.Navigator>
   )
 }

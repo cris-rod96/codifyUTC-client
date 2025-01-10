@@ -6,6 +6,7 @@ import {
   ScrollView,
   StatusBar,
   Image,
+  Alert,
 } from 'react-native'
 import ActivityCard from '../../../components/cards/ActivityCard'
 
@@ -14,9 +15,8 @@ import lightningLogo from 'assets/lightning.png'
 import puzzleLogo from 'assets/puzzle.png'
 import brainLogo from 'assets/brain.png'
 
-import SelectActivityModal from '../../../components/modal/SelectActivityModal'
+import SelectActivityModal from 'components/modal/SelectActivityModal'
 import { useEffect, useState } from 'react'
-import TestModal from '../../../components/modal/TestModal'
 import { useNavigation } from '@react-navigation/native'
 import activitiesAPI from '../../../api/activities/activities.api'
 import { useLoading } from 'context/LoadingContext'
@@ -78,29 +78,52 @@ const ActivitiesByClass = ({ class_id }) => {
   const [isMounted, setIsMounted] = useState(false)
   const { showLoading, hideLoading } = useLoading()
 
+  const [isVisible, setIsVisible] = useState(false)
+
   const [modalVisible, setModalVisible] = useState(false)
   const [newModalVisible, setNewModalVisible] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState(null)
   const navigation = useNavigation()
 
-  const handleContinue = (activity) => {
-    setSelectedActivity(activity)
-    setModalVisible(false)
+  const palette = {
+    'Quizz Code': {
+      bgColor: '#D99152',
+      textColor: '#fff',
+    },
+    'Lightning Code': {
+      bgColor: '#741D1D',
+      textColor: '#fff',
+    },
+    'Puzzle Master': {
+      bgColor: '#2E1A1A',
+      textColor: '#fff',
+    },
+    'Brain Boost': {
+      bgColor: '#8C3A3A',
+      textColor: '#fff',
+    },
+  }
+
+  const handleContinue = (typeActivity) => {
+    setSelectedActivity(typeActivity)
+    setIsVisible(false)
     setNewModalVisible(true)
 
-    if (activity === 'quizz') {
-      navigation.navigate('QuizzCode')
+    if (typeActivity === 'Quizz Code') {
+      navigation.navigate('QuizzCode', {
+        class_id,
+      })
     }
 
-    if (activity === 'lightning') {
+    if (typeActivity === 'Lightning Code') {
       navigation.navigate('LightningCode')
     }
 
-    if (activity === 'puzzle') {
+    if (typeActivity === 'Puzzle Master') {
       navigation.navigate('PuzzleMaster')
     }
 
-    if (activity === 'brain') {
+    if (typeActivity === 'Brain Boost') {
       navigation.navigate('BrainBoost')
     }
   }
@@ -118,17 +141,28 @@ const ActivitiesByClass = ({ class_id }) => {
     }
   }
 
-  const toggleModal = () => setModalVisible((prev) => !prev)
+  const toggleModal = () => setIsVisible((prev) => !prev)
 
-  const renderActivity = (item) => {
+  const renderActivity = (item, index) => {
     const logo = getImage(item.type)
+    const mb = activities.length - 1 === index ? 'mb-10' : 'mb-16'
     return (
-      <View className="bg-white w-full rounded-xl border border-gray-200 flex relative h-[200px]">
+      <TouchableOpacity
+        className={`bg-white w-full rounded-xl border border-gray-200 flex relative h-[200px] ${mb}`}
+        key={index}
+        onPress={() =>
+          Alert.alert('Próximamente: Detalle de la actividad: ', item.type)
+        }
+      >
         <Image
           source={logo}
           className="w-14 h-14 absolute -top-6 left-5 z-50"
         />
-        <View className="py-5 bg-[#741D1D] rounded-t-xl relative flex flex-row  justify-center items-center">
+        <View
+          className={`py-5 bg-[${
+            palette[item.type].bgColor
+          }] rounded-t-xl relative flex flex-row  justify-center items-center`}
+        >
           <Text
             style={{
               fontFamily: 'Jost_600SemiBold',
@@ -246,159 +280,64 @@ const ActivitiesByClass = ({ class_id }) => {
             Disponible hasta: {item.due_date}
           </Text>
         </View>
-      </View>
+      </TouchableOpacity>
     )
   }
 
   useEffect(() => {
-    // showLoading('Cargando actividades. Espere un momento...')
-    activitiesAPI
-      .getByClass(class_id)
-      .then((res) => {
-        console.log(res.data)
-      })
-      .catch((err) => {
-        console.log(err.message)
-      })
-      .finally(() => {
-        setIsMounted(true)
-        hideLoading()
-      })
+    if (class_id) {
+      // showLoading('Cargando actividades. Espere un momento...')
+      activitiesAPI
+        .getByClass(class_id)
+        .then((res) => {
+          const { activities } = res.data
+          setActivites(activities)
+        })
+        .catch((err) => {
+          console.log(err.message)
+        })
+        .finally(() => {
+          setIsMounted(true)
+          hideLoading()
+        })
+    }
+    console.log(class_id)
   }, [class_id])
   return (
     <>
       <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
+      <SelectActivityModal
+        isVisible={isVisible}
+        onClose={toggleModal}
+        onContinue={handleContinue}
+      />
       {isMounted &&
-        (activities.length === 0 ? (
-          <View className="px-5 py-20 relative">
-            <View className="bg-white w-full rounded-xl border border-gray-200 flex relative h-[200px]">
-              <Image
-                source={quizzLogo}
-                className="w-14 h-14 absolute -top-6 left-5 z-50"
-              />
-              <View className="py-5 bg-[#741D1D] rounded-t-xl relative flex flex-row  justify-center items-center">
-                <Text
-                  style={{
-                    fontFamily: 'Jost_600SemiBold',
-                    fontSize: 18,
-                    color: '#fff',
-                    textAlign: 'center',
-                  }}
-                >
-                  Quizz Code
-                </Text>
-
-                <TouchableOpacity className="absolute right-6">
-                  <Octicons name="trash" size={20} color="white" />
-                </TouchableOpacity>
+        (activities.length > 0 ? (
+          <View className="flex-1 relative">
+            <ScrollView
+              contentContainerStyle={{ flexGrow: 1 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View className="px-5 pt-10  relative">
+                {activities.map((activity, index) =>
+                  renderActivity(activity, index)
+                )}
               </View>
+            </ScrollView>
 
-              {/* Body */}
-              <View className="px-5 py-3 flex flex-col">
-                {/* Fecha de creacion */}
-                <View className="flex flex-row items-center gap-3 justify-center">
-                  <Octicons name="calendar" size={14} />
-                  <Text
-                    style={{
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 12,
-                      color: '#202244',
-                    }}
-                  >
-                    Fecha de creación: 20-10-2024
-                  </Text>
-                </View>
-
-                <View className="flex flex-row mt-4 gap-2">
-                  <View className="flex-1 flex flex-col gap-1 border-b border-gray-200 py-2">
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 20,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      10
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_700Bold',
-                        fontSize: 12,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Actividades
-                    </Text>
-                  </View>
-                  <View className="flex-1 flex flex-col gap-1 border-b border-gray-200 py-2">
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 20,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      5
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_700Bold',
-                        fontSize: 12,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Minutos
-                    </Text>
-                  </View>
-
-                  <View className="flex-1 flex flex-col gap-1 border-b border-gray-200 py-2">
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 20,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      0
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_700Bold',
-                        fontSize: 12,
-                        color: '#202244',
-                        textAlign: 'center',
-                      }}
-                    >
-                      Participantes
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Footer */}
-              <View className="absolute bottom-0 left-0 py-2 w-full bg-[#F5F9FF] rounded-b-xl flex flex-row items-center gap-1 justify-center">
-                <Octicons name="alert" size={14} color="#741D1D" />
-                <Text
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 11,
-                    color: '#741D1D',
-                    textAlign: 'center',
-                  }}
-                >
-                  Disponible hasta: 20-10-2024
-                </Text>
-              </View>
-            </View>
+            <TouchableOpacity
+              className="absolute bottom-5 right-3 w-10 h-10 rounded-full bg-[#741D1D] flex justify-center items-center"
+              onPress={toggleModal}
+            >
+              <Octicons name="plus" size={23} color="white" />
+            </TouchableOpacity>
           </View>
         ) : (
           <View className="flex flex-1 justify-center items-center px-5">
-            <View className="bg-white border border-dashed border-gray-200 w-full px-3 py-5 rounded-lg flex flex-col gap-2">
+            <TouchableOpacity
+              className="bg-white border border-dashed border-gray-200 w-full px-3 py-5 rounded-lg flex flex-col gap-2"
+              onPress={toggleModal}
+            >
               <Text
                 style={{
                   fontFamily: 'Jost_600SemiBold',
@@ -420,7 +359,7 @@ const ActivitiesByClass = ({ class_id }) => {
                 Agrega actividades a tu clase para que los estudiantes puedan
                 aprender con ellas de una manera divertida y efectiva.
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
         ))}
     </>

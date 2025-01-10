@@ -82,7 +82,7 @@ const ActivationCode = ({ route }) => {
     <View className="flex flex-col relative h-full w-full mx-auto pt-10 bg-[#F5F9FF] justify-center">
       {/* Información de usuario */}
       <View className="w-[90%] mx-auto">
-        <View className="flex flex-row my-5 items-center justify-center w-full">
+        <View className="flex flex-row items-center justify-center w-full">
           <Text
             style={{
               fontFamily: 'Jost_700Bold',

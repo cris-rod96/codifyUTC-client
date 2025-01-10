@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { usersAPI } from 'api/index.api'
 import { validationService } from 'services/index.services'
 
-const useRegister = () => {
+const useRegister = (setLoading) => {
   const initialState = {
     nick_name: '',
     email: '',
@@ -40,6 +40,8 @@ const useRegister = () => {
         message: message,
       }
 
+    setLoading(true)
+
     return usersAPI
       .verifyUser(email, nick_name)
       .then((res) => {
@@ -63,13 +65,15 @@ const useRegister = () => {
         }
       })
       .catch((err) => {
-        const { message } = err.response.data
         return {
           ok: false,
           toast: 'error',
           title: 'Error al validar usuario',
-          message,
+          message: 'Email y/o nick_name no disponibles',
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 

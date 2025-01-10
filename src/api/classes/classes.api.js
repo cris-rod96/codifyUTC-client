@@ -2,7 +2,7 @@ import { instance } from '../base.api'
 
 const model = 'classes'
 
-const ClassesAPI = {
+const classesAPI = {
   getByUser: (user_id) => {
     return instance.get(`${model}/user/${user_id}`)
   },
@@ -13,6 +13,10 @@ const ClassesAPI = {
   create: (data) => {
     return instance.post(`${model}`, data)
   },
+
+  delete: (id) => {
+    return instance.delete(`${model}/${id}`)
+  },
 }
 
-export default ClassesAPI
+export default classesAPI

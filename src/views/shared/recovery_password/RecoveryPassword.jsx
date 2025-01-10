@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   KeyboardAvoidingView,
@@ -11,15 +11,19 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Platform,
+  ActivityIndicator,
 } from 'react-native'
 import { userApi } from '../../../api/user/user.api'
 import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
 import useRecoveryPassword from '../../../hooks/useRecoveryPassword'
 import toastConfig from '../../../config/toast/toast.config'
+import LottieView from 'lottie-react-native'
+import forget from 'assets/forget_password.json'
 
 const RecoveryPassword = () => {
-  const { handleChange, onSubmit } = useRecoveryPassword()
+  const [loading, setLoading] = useState(false)
+  const { handleChange, onSubmit } = useRecoveryPassword(setLoading)
   const [selectedField, setSelectedField] = useState(null)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const navigation = useNavigation()
@@ -76,9 +80,16 @@ const RecoveryPassword = () => {
         <ScrollView>
           <View className="w-[90%] mx-auto">
             {!keyboardVisible && (
-              <View className="bg-[#F5F9FF] w-full h-[250px] relative">
-                {/* Imagen o Logo */}
-              </View>
+              <LottieView
+                source={forget}
+                autoPlay
+                loop
+                style={{
+                  width: 250,
+                  height: 250,
+                  margin: 'auto',
+                }}
+              />
             )}
 
             {/* Formulario */}
@@ -165,9 +176,14 @@ const RecoveryPassword = () => {
               </View>
 
               <TouchableOpacity
-                className="flex items-center justify-center relative bg-[#741D1D] py-4 rounded-full w-full mt-3"
+                className={`w-full py-4 rounded-full flex flex-row gap-3  items-center justify-center mt-3 ${
+                  loading ? 'bg-gray-400' : 'bg-[#741D1D]'
+                }`}
                 onPress={sendCode}
               >
+                {loading && (
+                  <ActivityIndicator size={'small'} color="#FFFFFF" />
+                )}
                 <Text
                   style={{
                     fontFamily: 'Jost_600SemiBold',
@@ -175,14 +191,17 @@ const RecoveryPassword = () => {
                     color: '#FFFFFF',
                   }}
                 >
-                  Continuar
+                  {loading ? 'Verificando' : 'Verificar'}
                 </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={22}
-                  color="white"
-                  className="absolute right-4"
-                />
+
+                {!loading && (
+                  <Octicons
+                    name="chevron-right"
+                    size={21}
+                    color="white"
+                    className="absolute right-5"
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>

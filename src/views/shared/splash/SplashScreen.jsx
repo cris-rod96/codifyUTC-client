@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
 import React, { useEffect } from 'react'
-import { StatusBar, Text, View } from 'react-native'
-
+import { Image, StatusBar, Text, View } from 'react-native'
+import logo from 'assets/logo.png'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 
 const SplashScreen = () => {
@@ -14,24 +14,29 @@ const SplashScreen = () => {
   }, [navigation])
 
   return (
-    <View className="flex-1 h-screen bg-red-900 justify-center items-center">
-      <StatusBar hidden />
-      <Text
-        className="text-white"
-        style={{ fontFamily: 'Jost_600SemiBold', fontSize: 30 }}
-      >
-        {'<Codify UTC/>'}
-      </Text>
+    <View className="flex-1 h-screen bg-[#F5F9FF] justify-center items-center">
+      <StatusBar
+        backgroundColor={'#F5F9FF'}
+        barStyle={'dark-content'}
+        animated={true}
+      />
+      <View className="mx-auto h-[200px] w-[80%]">
+        <Image source={logo} className="w-full h-full" resizeMode="cover" />
+      </View>
 
       <Animated.View
         entering={FadeInDown.delay(300).duration(800)}
-        className="absolute bottom-20"
+        className="absolute bottom-10 px-2"
       >
         <Text
-          className="text-white"
-          style={{ fontFamily: 'Mulish_700Bold', fontSize: 10 }}
+          style={{
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 16,
+            color: '#b0b0b0',
+            textAlign: 'center',
+          }}
         >
-          ¡Aprende a programar jugando!
+          Cargando...
         </Text>
       </Animated.View>
     </View>

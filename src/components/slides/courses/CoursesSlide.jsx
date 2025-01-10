@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useRef, useState } from 'react'
-import { FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import courseImage from 'assets/web-dev.jpg'
 
 const CoursesSlide = () => {
   const { courses } = useSelector((state) => state.teacher)
@@ -73,7 +74,7 @@ const CoursesSlide = () => {
           })}
           renderItem={({ item }) => (
             <View
-              className="flex flex-col w-[250px] h-[150px] bg-white mr-4 rounded-xl border border-gray-200"
+              className="flex flex-col w-[250px] h-[200px] bg-white mr-4 rounded-xl border border-gray-200"
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -81,8 +82,14 @@ const CoursesSlide = () => {
                 shadowRadius: 2,
                 elevation: 2,
               }}
+              key={item.id}
             >
-              <View className="w-full h-[75px] bg-red-400 rounded-t-xl"></View>
+              <View className="w-full h-[125px] bg-red-400 rounded-t-xl relative">
+                <Image
+                  className="absolute w-full h-full object-contain"
+                  source={item.poster ? { uri: item.poster } : courseImage}
+                />
+              </View>
               <View className="py-3 px-3 flex-1">
                 <Text
                   style={{

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { validationService } from 'services/index.services'
 import { usersAPI } from 'api/index.api'
 
-const useRecoveryPassword = () => {
+const useRecoveryPassword = (setLoading) => {
   const [selectedField, setSelectedField] = useState(null)
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -69,6 +69,8 @@ const useRecoveryPassword = () => {
             value: phone,
           }
 
+    setLoading(true)
+
     return usersAPI
       .recoveryPassword(data)
       .then((res) => {
@@ -90,6 +92,9 @@ const useRecoveryPassword = () => {
           title: 'Error',
           message,
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 

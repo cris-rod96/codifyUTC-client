@@ -8,7 +8,7 @@ import {
   View,
   ActivityIndicator,
 } from 'react-native'
-import { courseStudentAPI } from '../../api/course-student/course-studen.api'
+import { courseStudentsAPI } from 'api/index.api'
 import Toast from 'react-native-toast-message'
 import toastConfig from '../../config/toast/toast.config'
 
@@ -16,9 +16,9 @@ const AccessCodeModal = ({
   isVisible,
   toggleModal,
   toggleUpdateClass,
-  access_code,
   user_id,
   course_id,
+  successRegister,
 }) => {
   const [accessCode, setAccessCode] = useState('')
   const [message, setMessage] = useState(null)
@@ -48,7 +48,12 @@ const AccessCodeModal = ({
       return
     }
 
-    courseStudentAPI
+    if (accessCode.trim().length !== 6) {
+      showToast('error', 'Error', 'El código de acceso es de 6 números')
+      return
+    }
+
+    courseStudentsAPI
       .register({
         CourseId: course_id,
         StudentId: user_id,
@@ -56,22 +61,24 @@ const AccessCodeModal = ({
       })
       .then((res) => {
         const { message } = res.data
-        showToast('success', 'Registro exitoso', message)
+        successRegister()
       })
       .catch((err) => {
-        console.log(err.response.data.message)
+        if (err.response.data) {
+          const { message } = err.response.data
+          showToast('error', 'Código incorrecto', message)
+        }
       })
   }
-
   useEffect(() => {
-    console.log(access_code)
-  }, [isVisible])
+    console.log(course_id)
+  }, [course_id])
 
   return (
     <Modal
+      visible={isVisible}
       animationType="fade"
       transparent={true}
-      visible={isVisible}
       onRequestClose={handleClose}
     >
       {/* Fondo semitransparente */}

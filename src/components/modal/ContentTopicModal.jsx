@@ -5,6 +5,8 @@ import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 const ContentTopicModal = ({
   showContentTopicModal,
   toggleContentTopicModal,
+  currentTopic,
+  currentTopicContent,
 }) => {
   return (
     <Modal
@@ -26,27 +28,18 @@ const ContentTopicModal = ({
           <View className="flex flex-col px-5">
             <Text
               style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 12,
-                color: '#741D1D',
-              }}
-            >
-              Desarrollo Web
-            </Text>
-            <Text
-              style={{
                 fontFamily: 'Jost_600SemiBold',
                 fontSize: 20,
                 color: '#202244',
               }}
             >
-              Tema de la clase
+              {currentTopic}
             </Text>
           </View>
 
           {/* Contenido */}
 
-          <ScrollView className="px-5 ">
+          <ScrollView className="px-5 " showsVerticalScrollIndicator={false}>
             <View className="flex flex-col gap-5 py-10 ">
               <Text
                 style={{
@@ -57,118 +50,7 @@ const ContentTopicModal = ({
                   textAlign: 'justify',
                 }}
               >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
-              </Text>
-              <Text
-                style={{
-                  fontFamily: 'Mulish_400Regular',
-                  fontSize: 15,
-                  color: '#545454',
-                  lineHeight: 20,
-                  textAlign: 'justify',
-                }}
-              >
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Dignissimos dolore veniam officia nam! Sapiente inventore
-                provident exercitationem rem, ducimus obcaecati earum?
-                Perferendis, beatae! Doloremque, voluptatum voluptas. Sint
-                debitis aliquam numquam!
+                {currentTopicContent}
               </Text>
             </View>
           </ScrollView>

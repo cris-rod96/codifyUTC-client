@@ -1,6 +1,6 @@
 // Vistas del Docente
 export {
-  Activities,
+  TeacherActivities,
   ActivitiesByClass,
   ActivitiesByCourse,
   BrainBoost,
@@ -15,6 +15,7 @@ export {
   Students,
   StudentsByCourse,
   TopicsByClass,
+  DetailClassTeacher,
 } from './teacher/index.teacher'
 
 // Vistas compartidas

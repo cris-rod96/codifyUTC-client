@@ -1,6 +1,8 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -16,10 +18,12 @@ import { useRegister } from 'hooks/index.hooks'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import { useNavigation } from '@react-navigation/native'
+import logo from 'assets/logo.png'
 
 const Register = () => {
   const navigation = useNavigation()
-  const { data, handleChange, onSubmit } = useRegister()
+  const [loading, setLoading] = useState(false)
+  const { data, handleChange, onSubmit } = useRegister(setLoading)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
@@ -104,7 +108,13 @@ const Register = () => {
           <View className="flex-1 py-5 bg-[#F5F9FF]">
             {/* Logo Visible */}
             {!keyboardVisible && (
-              <View className="w-[90%] mx-auto h-[250px]"></View>
+              <View className="w-[90%] mx-auto h-[250px]">
+                <Image
+                  source={logo}
+                  className="w-full h-full"
+                  resizeMode="contain"
+                />
+              </View>
             )}
 
             <View className="w-[85%] mx-auto py-5 flex flex-col gap-2">
@@ -212,9 +222,14 @@ const Register = () => {
                 </View>
 
                 <TouchableOpacity
-                  className="bg-[#741D1D] py-4 rounded-full flex items-center justify-center mt-3"
+                  className={`py-4 rounded-full flex flex-row gap-3  items-center justify-center mt-3 ${
+                    loading ? 'bg-gray-400' : 'bg-[#741D1D]'
+                  }`}
                   onPress={verifyUser}
                 >
+                  {loading && (
+                    <ActivityIndicator size={'small'} color="#FFFFFF" />
+                  )}
                   <Text
                     style={{
                       fontFamily: 'Jost_600SemiBold',
@@ -222,15 +237,17 @@ const Register = () => {
                       color: 'white',
                     }}
                   >
-                    Registrarme
+                    {loading ? 'Validando' : 'Validar'}
                   </Text>
 
-                  <Ionicons
-                    name="chevron-forward"
-                    size={22}
-                    color={'white'}
-                    className="absolute right-4"
-                  />
+                  {!loading && (
+                    <Octicons
+                      name="chevron-right"
+                      size={21}
+                      color={'white'}
+                      className="absolute right-5"
+                    />
+                  )}
                 </TouchableOpacity>
 
                 <View className="mt-5 flex flex-row justify-center items-center gap-2">

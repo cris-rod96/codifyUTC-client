@@ -9,22 +9,25 @@ import {
   Switch,
 } from 'react-native'
 
-const AnswerModal = ({ onClose, placeholder, bgColor, onSave }) => {
+const AnswerModal = ({
+  onClose,
+  placeholder,
+  bgColor,
+  onSave,
+  answer,
+  handleAnswer,
+}) => {
   const [answerText, setAnswerText] = useState('')
-  const [isCorrect, setIsCorrect] = useState(false)
-
-  const toggleSwitch = () => setIsCorrect((previousState) => !previousState)
 
   const handleSave = () => {
-    onSave({ text: answerText, isCorrect })
-    onClose()
+    onSave(answer)
   }
   return (
     <Modal
       visible={true}
       animationType="slide"
       transparent={true}
-      onRequestClose={() => {}}
+      onRequestClose={onClose}
     >
       <View className="flex-1 justify-center items-center bg-black/60 px-4">
         <View className="bg-white w-full rounded-3xl p-6 shadow-2xl">
@@ -39,16 +42,18 @@ const AnswerModal = ({ onClose, placeholder, bgColor, onSave }) => {
           </View>
 
           <TextInput
-            className={`w-full h-[100px] rounded-3xl text-center placeholder:text-white`}
+            className={`w-full h-[100px] rounded-3xl text-center `}
             multiline
+            placeholderTextColor={'white'}
             placeholder={placeholder}
             style={{
               fontFamily: 'Mulish_600SemiBold',
               fontSize: 16,
               color: 'white',
-              backgroundColor: bgColor,
+              backgroundColor: bgColor || '#000',
             }}
-            onChangeText={setAnswerText}
+            value={answer.option}
+            onChangeText={(value) => handleAnswer('option', value)}
           />
 
           <View className="flex flex-row items-center justify-between mt-5">
@@ -62,10 +67,10 @@ const AnswerModal = ({ onClose, placeholder, bgColor, onSave }) => {
             </Text>
 
             <Switch
-              value={isCorrect}
-              onValueChange={toggleSwitch}
+              value={answer.isCorrect}
+              onValueChange={(value) => handleAnswer('isCorrect', value)}
               trackColor={{ false: '#767577', true: '#741D1D' }} // Track rojo cuando activado
-              thumbColor={isCorrect ? '#741D1D' : '#f4f3f4'} // Rojo para el thumb cuando activado
+              thumbColor={answer.isCorrect ? '#741D1D' : '#f4f3f4'} // Rojo para el thumb cuando activado
             />
           </View>
           {/* Botón para guardar */}

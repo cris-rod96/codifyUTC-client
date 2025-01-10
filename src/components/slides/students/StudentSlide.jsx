@@ -47,7 +47,10 @@ const StudentsSlide = () => {
           windowSize={3} // Carga solo los elementos cercanos
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View className="flex flex-col justify- items-center gap-3  mr-5  py-3">
+            <View
+              className="flex flex-col justify- items-center gap-3  mr-5  py-3"
+              key={item.id}
+            >
               {/* Foto */}
               <View className="w-[70px] h-[70px] rounded-full bg-red-500 relative">
                 <Image

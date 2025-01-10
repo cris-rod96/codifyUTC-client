@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 import toastConfig from 'config/toast/toast.config'
-import { topicsAPI } from 'api/topic/topic.api'
+import { topicsAPI } from 'api/index.api'
 import LoadingRegisterTopics from './LoadingRegisterTopcis'
 
 const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
@@ -31,6 +31,12 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
   const [topic, setTopic] = useState(initialState)
   const [arrContent, setArrContent] = useState([])
   const [externalResource, setExternalResource] = useState(false)
+
+  const resetData = () => {
+    setArrContent([])
+    setTopic(initialState)
+    setExternalResource(false)
+  }
 
   const showToast = (type, title, message) => {
     Toast.show({
@@ -65,17 +71,7 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
         // Mostrar mensaje general de éxito
         showToast('success', 'Éxito', message)
         setResults(results)
-        toggleTopicModal()
-        // Iterar sobre los resultados para mostrar mensajes individuales
-        // results.forEach((result) => {
-        //   if (result.success) {
-        //     console.log(`✅ Tema registrado: ${result.data.title}`)
-        //   } else {
-        //     console.warn(
-        //       `⚠️ No se pudo registrar el tema: ${result.data.title}. Motivo: ${result.message}`
-        //     )
-        //   }
-        // })
+        // toggleTopicModal()
       } else {
         showToast('error', 'Error', res.data.message || 'Algo salió mal.')
       }
@@ -126,7 +122,7 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
   const handleChange = (name, value) => {
     setTopic({
       ...topic,
-      [name]: value.trim(),
+      [name]: value,
     })
   }
 
@@ -148,6 +144,7 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
       delete topic.external_resource
     }
   }, [externalResource])
+
   return (
     <Modal
       visible={showTopicModal}
@@ -183,32 +180,13 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
               >
                 <Ionicons name="save" color="white" size={18} />
               </TouchableOpacity>
-              <TouchableOpacity className="flex flex-row  items-center justify-center w-10 h-10 rounded-full bg-[#383838]">
+              <TouchableOpacity
+                className="flex flex-row  items-center justify-center w-10 h-10 rounded-full bg-[#383838]"
+                onPress={resetData}
+              >
                 <Ionicons name="reload" size={18} color="white" />
               </TouchableOpacity>
             </View>
-          </View>
-
-          {/* Nota */}
-          <View className="mt-8 f=> {}lex flex-row items-center gap-2 px-3">
-            <Text
-              style={{
-                fontFamily: 'Jost_700Bold',
-                fontSize: 14,
-                color: '#741D1D',
-              }}
-            >
-              *Nota:
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'Mulish_400Regular',
-                fontSize: 12,
-                color: '#202244',
-              }}
-            >
-              Se agregará a la clase Variables
-            </Text>
           </View>
 
           {/* Body */}
@@ -252,8 +230,8 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
                   placeholder="Escribe o pega tu contenido aqui..."
                   textAlignVertical="top"
                   style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 12,
+                    fontFamily: 'Mulish_400Regular',
+                    fontSize: 14,
                     color: '#B4BDC4',
                   }}
                   onChangeText={(value) => handleChange('content', value)}

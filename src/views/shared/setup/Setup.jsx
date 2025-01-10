@@ -10,32 +10,26 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import profileLogo from 'assets/profile.png'
 import ecuFlag from 'assets/flag_ecuador.png'
-import { Ionicons } from '@expo/vector-icons'
+import { Feather, Ionicons, Octicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import Select from 'react-native-picker-select'
 import { useSetup } from 'hooks/index.hooks'
 import { pickerImagesUtil } from 'utils/index.utils'
+import EmailSentModal from '../../../components/modal/EmailSentModal'
 
 const Setup = ({ route, navigation }) => {
-  const { addRegisterData, handleChange, user, onSubmit } = useSetup()
+  const { addRegisterData, handleChange, user, onSubmit, contactData } =
+    useSetup()
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
   const [imageUri, setImageUri] = useState(null)
-  const initialState = {
-    email: '',
-    password: '',
-    full_name: '',
-    dni: '',
-    phone: '',
-    nick_name: '',
-    gender: '',
-  }
-  // const { email, password, nick_name,role } = route.params
+
+  const [showModal, setShowModal] = useState(false)
+  const toggleShowModal = () => setShowModal((prev) => !prev)
 
   const showToast = (type, title, message) => {
     Toast.show({
@@ -57,12 +51,7 @@ const Setup = ({ route, navigation }) => {
     showToast(toast, title, message)
 
     if (ok) {
-      setTimeout(() => {
-        navigation.navigate('ActivationCode', {
-          email: user.email,
-          full_name: user.full_name,
-        })
-      }, 2500)
+      toggleShowModal()
     }
   }
 
@@ -99,13 +88,18 @@ const Setup = ({ route, navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
     >
+      <EmailSentModal
+        isVisible={showModal}
+        toggleModal={toggleShowModal}
+        user={contactData}
+      />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View className="flex-1 pb-5 bg-[#F5F9FF] flex-col gap-3">
+          <View className="flex-1 py-5 bg-[#F5F9FF] flex-col gap-3">
             <View className="w-[90%] mx-auto flex flex-col justify-center items-center gap-3">
               {!keyboardVisible && (
                 <TouchableOpacity
-                  className="relative w-44 h-44 rounded-full border border-gray-300 mb-6"
+                  className="relative w-32 h-32 rounded-full border border-gray-300 mb-3"
                   onPress={pickImage}
                 >
                   <Image
@@ -119,14 +113,10 @@ const Setup = ({ route, navigation }) => {
               )}
 
               {/* Formulario */}
-              <View className="flex w-full mt-2 gap-3">
+              <View className="flex w-full gap-3">
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
                   <View className="w-14 flex flex-row items-center justify-center h-full ">
-                    <Ionicons
-                      name="person-outline"
-                      size={20}
-                      color={'#545454'}
-                    />
+                    <Octicons name="person" size={20} color={'#545454'} />
                   </View>
                   <TextInput
                     defaultValue={user.full_name}
@@ -145,29 +135,16 @@ const Setup = ({ route, navigation }) => {
 
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
                   <View className="w-14 flex flex-row items-center justify-center h-full ">
-                    <View className="w-10 h-10 relative">
-                      <Image
-                        source={ecuFlag}
-                        className="absolute w-full h-full object-cover"
-                      />
-                    </View>
+                    <Feather name="smartphone" size={20} color={'#545454'} />
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                      color: '#505050',
-                    }}
-                  >
-                    {'(+ 593)'}
-                  </Text>
                   <TextInput
                     autoComplete="off"
+                    placeholder="Teléfono"
                     defaultValue={user.phone}
                     autoCapitalize="none"
                     keyboardType="phone-pad"
                     onChangeText={(text) => handleChange('phone', text)}
-                    className="flex-1 bg-white  px-1 "
+                    className="flex-1 bg-white px-1 "
                     style={{
                       fontFamily: 'Mulish_700Bold',
                       fontSize: 14,
@@ -178,7 +155,7 @@ const Setup = ({ route, navigation }) => {
 
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
                   <View className="w-14 flex flex-row items-center justify-center h-full ">
-                    <Ionicons name="card-outline" size={20} color={'#545454'} />
+                    <Octicons name="id-badge" size={20} color={'#545454'} />
                   </View>
                   <TextInput
                     autoComplete="off"
@@ -220,6 +197,23 @@ const Setup = ({ route, navigation }) => {
                         fontFamily: 'Mulish_700Bold',
                         fontSize: 14,
                       },
+                    }}
+                  />
+                </View>
+
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Octicons name="shield-lock" size={20} color={'#545454'} />
+                  </View>
+                  <TextInput
+                    autoComplete="off"
+                    defaultValue={user.role}
+                    className="flex-1 bg-white px-1 "
+                    editable={false}
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
                     }}
                   />
                 </View>
