@@ -33,31 +33,37 @@ const Results = ({ userAnswers, toggleGame }) => {
     })
   }
 
+  const calculatePercentage = () => {
+    const percent = Math.ceil((score / scoreTotal) * 100)
+    return percent
+  }
+
   const selectAnimation = () => {
-    if (score >= 0 && score < 400) {
+    const percent = calculatePercentage()
+    if (percent >= 0 && percent < 25) {
       setAnimation(tryAgain)
       setMessage(
         'Tu puntaje fue bajo, ¡pero cada intento te acerca a ser mejor!'
       )
     }
-    if (score >= 400 && score < 600) {
+    if (percent > 25 && percent < 50) {
       setAnimation(progress)
       setMessage(
         '¡Vas avanzando! Con un poco más de práctica, lograrás grandes cosas.'
       )
     }
 
-    if (score >= 600 && score < 800) {
+    if (percent >= 50 && percent < 75) {
       setAnimation(goodJob)
       setMessage('¡Buen trabajo! Estás en el camino correcto.')
     }
 
-    if (score >= 800 && score < 1000) {
+    if (percent >= 75 && percent < 100) {
       setAnimation(goal)
       setMessage('¡Casi perfecto! Solo un poco más para alcanzar la cima.')
     }
 
-    if (score === 1000) {
+    if (percent === 100) {
       setAnimation(winner)
       setMessage('¡Increíble! Eres un maestro en esto, ¡felicidades!')
     }

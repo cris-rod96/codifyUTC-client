@@ -1,4 +1,4 @@
-import { Ionicons, Octicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import {
   FlatList,
   Image,
@@ -27,6 +27,8 @@ import { useNavigation } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 import { coursesAPI } from '../../../api/index.api'
 import Select from 'react-native-picker-select'
+import CoursesModal from '../../../components/modal/CoursesModal'
+import ClassesModal from '../../../components/modal/ClassesModal'
 
 const QuizzCode = ({ route }) => {
   const [dueDate, setDate] = useState(new Date())
@@ -37,10 +39,24 @@ const QuizzCode = ({ route }) => {
   const [showSuccess, setShowSuccess] = useState(false)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+
   const [courses, setCourses] = useState([])
+  const [itemCourses, setItemCourses] = useState(null)
+  const [nameCourse, setNameCourse] = useState(null)
+
   const [courseSelectedId, setCourseSelectedId] = useState(null)
   const [classes, setClasses] = useState([])
+  const [itemClasses, setItemClasses] = useState(null)
+  const [nameClass, setNameClass] = useState(null)
   const [selectClass, setSelectClass] = useState(true)
+
+  const [showSelectSubjectModal, setShowSelectSubjectModal] = useState(false)
+  const toggleShowSubjectModal = () =>
+    setShowSelectSubjectModal((prev) => !prev)
+
+  const [showSelectClassModal, setShowSelectClassModal] = useState(false)
+  const toggleShowSelectClassModal = () =>
+    setShowSelectClassModal((prev) => !prev)
 
   const toggleSuccess = () => setShowSuccess(!showSuccess)
 
@@ -294,26 +310,32 @@ const QuizzCode = ({ route }) => {
   }
 
   const createCourses = () => {
-    return courses.map((course) => ({
+    const mapCourses = courses.map((course) => ({
       label: course.subject,
       value: course.id,
     }))
+    setItemCourses(mapCourses)
+    toggleShowSubjectModal()
   }
 
   const createClasses = () => {
-    return classes.map((item) => ({
+    const mapClasses = classes.map((item) => ({
       label: item.topic,
       value: item.id,
     }))
+
+    setItemClasses(mapClasses)
+    toggleShowSelectClassModal()
   }
 
-  const handleCourseSelected = (value) => {
+  const handleCourseSelected = (value, name) => {
     setCourseSelectedId(value)
+    setNameCourse(name)
   }
 
-  const handleClassSelected = (value) => {
-    console.log(value)
+  const handleClassSelected = (value, name) => {
     setClassId(value)
+    setNameClass(name)
   }
 
   useEffect(() => {
@@ -355,6 +377,20 @@ const QuizzCode = ({ route }) => {
         success={success}
         classId={classId}
       /> */}
+
+      <CoursesModal
+        visible={showSelectSubjectModal}
+        items={itemCourses}
+        onClose={toggleShowSubjectModal}
+        handleCourseSelected={handleCourseSelected}
+      />
+
+      <ClassesModal
+        visible={showSelectClassModal}
+        items={itemClasses}
+        onClose={toggleShowSelectClassModal}
+        handleClassSelected={handleClassSelected}
+      />
       {/* Header */}
       <View className="w-full h-[50px] px-5 flex flex-row justify-between items-center bg-[#f5f9ff] border-b border-gray-200">
         <View className="flex flex-row items-center gap-3">
@@ -392,52 +428,55 @@ const QuizzCode = ({ route }) => {
 
           {selectClass && (
             <>
-              <View className="h-[58px] rounded-lg bg-white shadow-md shadow-gray-300 flex items-center mb-5">
-                <Select
-                  className="w-full h-full"
-                  onValueChange={(value) => handleCourseSelected(value)}
-                  items={createCourses()}
-                  placeholder={{
-                    label: 'Selecciona el curso',
-                    value: null,
-                    color: '#545454',
-                  }}
+              <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative mb-5">
+                <View className="w-14 flex flex-row items-center justify-center h-full ">
+                  <MaterialCommunityIcons
+                    name="room-service"
+                    size={20}
+                    color={'#545454'}
+                  />
+                </View>
+                <Text
                   style={{
-                    inputAndroid: {
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                      color: '#505050',
-                    },
-                    placeholder: {
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                    },
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#505050',
                   }}
-                />
-              </View>
+                >
+                  {nameCourse || 'Selecciona el Curso'}
+                </Text>
 
-              <View className="h-[58px] rounded-lg bg-white shadow-md shadow-gray-300 flex items-center mb-5">
-                <Select
-                  className="w-full h-full"
-                  onValueChange={(value) => handleClassSelected(value)}
-                  items={createClasses()}
-                  placeholder={{
-                    label: 'Selecciona la clase',
-                    value: null,
-                    color: '#545454',
-                  }}
+                <TouchableOpacity
+                  className="absolute right-5"
+                  onPress={createCourses}
+                >
+                  <Octicons name="chevron-down" size={18} color={'#202244'} />
+                </TouchableOpacity>
+              </View>
+              <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative mb-5">
+                <View className="w-14 flex flex-row items-center justify-center h-full ">
+                  <MaterialCommunityIcons
+                    name="room-service"
+                    size={20}
+                    color={'#545454'}
+                  />
+                </View>
+                <Text
                   style={{
-                    inputAndroid: {
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                      color: '#505050',
-                    },
-                    placeholder: {
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
-                    },
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#505050',
                   }}
-                />
+                >
+                  {nameClass || 'Selecciona la clase'}
+                </Text>
+
+                <TouchableOpacity
+                  className="absolute right-5"
+                  onPress={createClasses}
+                >
+                  <Octicons name="chevron-down" size={18} color={'#202244'} />
+                </TouchableOpacity>
               </View>
             </>
           )}

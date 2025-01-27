@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker'
 
 const requestPermission = async (type) => {
-  let permission
+  let permission = null
   if (type === 'mediaLibrary') {
     permission = await ImagePicker.getMediaLibraryPermissionsAsync()
   }
@@ -20,7 +20,7 @@ const requestPermission = async (type) => {
     alert(
       'Permiso denegado',
       `Necesitamos acceso a tu ${
-        type === 'camera' ? 'camara' : 'galeria'
+        type === 'camera' ? 'cámara' : 'galeria'
       } para continuar.`
     )
     return false

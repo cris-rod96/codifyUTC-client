@@ -91,14 +91,17 @@ const Login = () => {
     storageUtil
       .getSecureData('session_info')
       .then((res) => {
-        const { user } = JSON.parse(res)
-        dispatch(saveUser(user))
-        if (user) {
-          const home =
-            user.role === 'Docente'
-              ? 'TabsTeacherNavigator'
-              : 'TabStudentNavigator'
-          navigation.navigate(home)
+        const info = res
+        if (info) {
+          const { user } = info
+          dispatch(saveUser(user))
+          if (user) {
+            const home =
+              user.role === 'Docente'
+                ? 'TabsTeacherNavigator'
+                : 'TabStudentNavigator'
+            navigation.navigate(home)
+          }
         }
       })
       .catch((err) => {
@@ -116,10 +119,7 @@ const Login = () => {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <StatusBar
-            barStyle={keyboardVisible ? 'light-content' : 'dark-content'}
-            backgroundColor={keyboardVisible ? '#741D1D' : '#F5F9FF'}
-          />
+          <StatusBar barStyle={'light-content'} backgroundColor={'#741D1D'} />
           {/* Header visible cuando el teclado está abierto */}
           {keyboardVisible && (
             <View className="bg-[#741D1D] h-[50px] w-full flex justify-center items-center ">

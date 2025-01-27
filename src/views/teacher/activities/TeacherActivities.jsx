@@ -285,7 +285,7 @@ const TeacherActivities = () => {
           ))}
         </ScrollView>
       ) : (
-        <View className="flex-1 justify-center items-center">
+        <View className="flex-1 bg-[#F5F9FF] justify-center items-center px-5">
           <LottieView
             autoPlay
             loop
@@ -295,7 +295,7 @@ const TeacherActivities = () => {
           <Text
             style={{
               fontFamily: 'Jost_700Bold',
-              fontSize: 18,
+              fontSize: 16,
               color: '#202244',
               marginTop: 20,
             }}
@@ -305,7 +305,7 @@ const TeacherActivities = () => {
           <Text
             style={{
               fontFamily: 'Mulish_400Regular',
-              fontSize: 14,
+              fontSize: 12,
               color: '#545454',
               textAlign: 'center',
               marginVertical: 10,

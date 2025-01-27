@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './global.css'
 
 import { NavigationContainer } from '@react-navigation/native'
@@ -8,21 +8,14 @@ import { useFontsLoader } from 'hooks/index.hooks'
 // import NetInfo from '@react-native-community/netinfo'
 import { Provider } from 'react-redux'
 import store from 'redux/store'
-import { LoadingProvider, useLoading } from 'context/LoadingContext'
+import { LoadingProvider } from 'context/LoadingContext'
 import Loading from 'components/loading/Loading'
-import { Platform, StatusBar, UIManager } from 'react-native'
+import { StatusBar } from 'react-native'
 
 export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
-  const [showSplash, setShowSplash] = useState(true)
   const fontsLoaded = useFontsLoader()
-
-  useEffect(() => {
-    setTimeout(() => {
-      setShowSplash(false)
-      // StatusBar.setHidden(false)
-    }, 3500)
-  }, [])
 
   if (!fontsLoaded) {
     return null
@@ -48,13 +41,10 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <LoadingProvider>
-        <NavigationContainer>
-          <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
-          <Loading />
-          <RootNavigator />
-        </NavigationContainer>
-      </LoadingProvider>
+      <NavigationContainer>
+        <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
+        <RootNavigator />
+      </NavigationContainer>
     </Provider>
   )
 }

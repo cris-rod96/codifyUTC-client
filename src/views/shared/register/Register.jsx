@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import { useNavigation } from '@react-navigation/native'
 import logo from 'assets/logo.png'
+import { storageUtil } from '../../../utils/index.utils'
 
 const Register = () => {
   const navigation = useNavigation()
@@ -64,6 +65,12 @@ const Register = () => {
     showToast(toast, title, message)
 
     if (ok) {
+      await storageUtil.saveSecureData('data_register', {
+        email: data.email,
+        password: data.password,
+        nick_name: data.nick_name,
+        role,
+      })
       setTimeout(() => {
         navigation.navigate('Setup', {
           email: data.email,

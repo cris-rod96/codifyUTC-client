@@ -26,7 +26,7 @@ const Profile = () => {
   ) : (
     <View className="flex flex-col items-center justify-center h-full w-full bg-[#F5F9FF]">
       <View
-        className="w-5/6 h-[450px] relative bg-white rounded-xl border border-gray-200 shadow"
+        className="w-5/6 h-[500px] relative bg-white rounded-xl border border-gray-200 shadow"
         style={{ overflow: 'visible' }}
       >
         <View className="w-32 h-32 rounded-full bg-red-400 -top-16 absolute left-[96px] border-2 border-[#741D1D]">

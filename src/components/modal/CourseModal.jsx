@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import {
   Modal,
@@ -16,12 +16,24 @@ import Toast from 'react-native-toast-message'
 import toastConfig from 'config/toast/toast.config'
 import { coursesAPI } from 'api/index.api'
 import { useSelector } from 'react-redux'
+import {
+  SelectSectionModal,
+  SelectCourseModal,
+} from 'components/modal/index.modals'
 
 const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
   const { user } = useSelector((state) => state.user)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [imageUri, setImageUri] = useState(null)
+
+  const [showSectionModal, setShowSectionModal] = useState(false)
+  const [showSelectCourseModal, setShowSelectCourseModal] = useState(false)
+
+  const toggleShowSectionModal = () => setShowSectionModal((prev) => !prev)
+  const toggleShowSelectCourseModal = () =>
+    setShowSelectCourseModal((prev) => !prev)
+
   const initialState = {
     semester: '',
     subject: '',
@@ -127,6 +139,16 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
         <View className="flex h-full  bg-[#F5F9FF]">
           {/* Header */}
           <View className="flex flex-row justify-between items-center border-b border-gray-300 py-5 px-3">
+            <SelectSectionModal
+              visible={showSectionModal}
+              onClose={toggleShowSectionModal}
+              handleChange={handleChange}
+            />
+            <SelectCourseModal
+              visible={showSelectCourseModal}
+              onClose={toggleShowSelectCourseModal}
+              handleChange={handleChange}
+            />
             <View className="flex flex-row items-center gap-2">
               <TouchableOpacity onPress={toggleModal}>
                 <Ionicons name="arrow-back" size={26} color="black" />
@@ -191,47 +213,30 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
 
               {/* Formulario */}
               <View className="flex flex-col gap-3">
-                <View className="mt-5 h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm flex justify-center items-center">
-                  <Select
-                    onValueChange={(value) => handleChange('semester', value)}
-                    items={[
-                      { label: 'Primero', value: 'Primero' },
-                      { label: 'Segundo', value: 'Segundo' },
-                      {
-                        label: 'Tercero',
-                        value: 'Tercero',
-                      },
-                      {
-                        label: 'Cuarto',
-                        value: 'Cuarto',
-                      },
-                      {
-                        label: 'Quinto',
-                        value: 'Quinto',
-                      },
-                    ]}
-                    placeholder={{
-                      label: 'Selecciona el semestre',
-                      value: null,
-                      color: '#9EA0A4',
-                    }}
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <MaterialCommunityIcons
+                      name="clock"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+                  <Text
                     style={{
-                      inputIOS: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#202244',
-                      },
-                      inputAndroid: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#000',
-                      },
-                      placeholder: {
-                        fontSize: 10,
-                        fontFamily: 'Mulish_700Bold',
-                      },
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
                     }}
-                  />
+                  >
+                    {course.section || 'Periodo'}
+                  </Text>
+
+                  <TouchableOpacity
+                    className="absolute right-5"
+                    onPress={toggleShowSectionModal}
+                  >
+                    <Octicons name="chevron-down" size={18} color={'#202244'} />
+                  </TouchableOpacity>
                 </View>
 
                 <TextInput
@@ -245,39 +250,30 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
                   defaultValue={course.subject}
                 />
 
-                <View className="h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm flex justify-center items-center">
-                  <Select
-                    onValueChange={(value) => handleChange('section', value)}
-                    items={[
-                      { label: 'Matutina', value: 'Matutina' },
-                      { label: 'Vespertina', value: 'Vespertina' },
-                      {
-                        label: 'Nocturna',
-                        value: 'Nocturna',
-                      },
-                    ]}
-                    placeholder={{
-                      label: 'Selecciona el periodo',
-                      value: null,
-                      color: '#9EA0A4',
-                    }}
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <MaterialCommunityIcons
+                      name="room-service"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+                  <Text
                     style={{
-                      inputIOS: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#202244',
-                      },
-                      inputAndroid: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#000',
-                      },
-                      placeholder: {
-                        fontSize: 10,
-                        fontFamily: 'Mulish_700Bold',
-                      },
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
                     }}
-                  />
+                  >
+                    {course.semester || 'Semestre'}
+                  </Text>
+
+                  <TouchableOpacity
+                    className="absolute right-5"
+                    onPress={toggleShowSelectCourseModal}
+                  >
+                    <Octicons name="chevron-down" size={18} color={'#202244'} />
+                  </TouchableOpacity>
                 </View>
 
                 <View className="flex flex-col gap-2 mt-3">

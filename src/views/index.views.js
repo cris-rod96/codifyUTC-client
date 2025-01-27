@@ -34,6 +34,7 @@ export {
   Welcome1,
   Welcome2,
   Welcome3,
+  OnBoarding,
 } from './shared/index.shared'
 
 // Vistas del Estudiante

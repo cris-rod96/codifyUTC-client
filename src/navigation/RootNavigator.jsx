@@ -1,9 +1,8 @@
-import { createStackNavigator } from '@react-navigation/stack'
 import {
+  createStackNavigator,
   TransitionSpecs,
   CardStyleInterpolators,
 } from '@react-navigation/stack'
-import TabStudentNavigator from './student/TabStudentNavigator'
 
 import {
   changePasswordOptions,
@@ -11,9 +10,7 @@ import {
   recoveryOptions,
   setupOptions,
 } from 'config/index.config'
-import { useEffect, useLayoutEffect, useState } from 'react'
-import { storageUtil } from 'utils/index.utils'
-import Loading from 'components/loading/Loading'
+import { useLayoutEffect, useState } from 'react'
 import {
   ActivationCode,
   ChangePassword,
@@ -22,11 +19,7 @@ import {
   RecoveryPassword,
   Register,
   Setup,
-  SplashScreen,
-  ThirdSession,
-  Welcome1,
-  Welcome2,
-  Welcome3,
+  OnBoarding,
   TeacherActivities,
   Courses,
   Home,
@@ -34,23 +27,19 @@ import {
   TopicsByClass,
   ActivitiesByClass,
   Profile,
+  DetailClassTeacher,
+  HomeStudent,
+  ClassStudent,
+  ActivitiesStudent,
 } from 'views/index.views'
-import { useNavigation } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Octicons } from '@expo/vector-icons'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import QuizzCode from '../views/teacher/games/QuizzCode'
 import EditProfile from '../views/shared/edit/EditProfile'
 import DetailActivity from '../views/teacher/activities/DetailActivity'
-import CourseTabs from './teacher/CourseTabs'
-import ClassTabs from './teacher/ClassTabs'
-import { Button, TouchableOpacity } from 'react-native'
-import { useDispatch } from 'react-redux'
-import { saveCourseId } from '../redux/slices/id.slice'
 import DetailClass from '../views/student/class/DetailClass'
-import { HomeStudent, ClassStudent, ActivitiesStudent } from 'views/index.views'
 import Feedback from '../components/feedback/Feedback'
-import { DetailClassTeacher } from '../views/index.views'
 
 const Stack = createStackNavigator()
 const Tabs = createBottomTabNavigator()
@@ -529,44 +518,14 @@ const ProfileNavigator = () => {
 }
 
 function RootNavigator() {
-  const [role, setRole] = useState('')
-  const navigation = useNavigation()
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    storageUtil
-      .getSecureData('session_info')
-      .then((res) => {
-        const infoUser = JSON.parse(res)
-        const { user } = infoUser
-        if (user) {
-          setRole(user.role)
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading) {
-    return <Loading />
-  }
-
   return (
     <Stack.Navigator
-      initialRouteName={'Splash'}
+      initialRouteName={'OnBoarding'}
       screenOptions={navigatorOptions(TransitionSpecs, CardStyleInterpolators)}
     >
       {/* RUTAS COMPARTIDAS */}
-      <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Welcome" component={Welcome1} />
-      <Stack.Screen name="Welcome2" component={Welcome2} />
-      <Stack.Screen name="Welcome3" component={Welcome3} />
-      <Stack.Screen name="ThirdSession" component={ThirdSession} />
+      <Stack.Screen name="OnBoarding" component={OnBoarding} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen
         name="Setup"

@@ -1,38 +1,60 @@
 {
   "expo": {
-    "name": "codeverse-client",
-    "slug": "codeverse-client",
+    "name": "Codify UTC",
+    "slug": "codify",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo_codify.png",
     "userInterfaceStyle": "light",
-
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/logo_codify.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#741D1D"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.codeverseclient"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.anonymous.codeverseclient"
+      "package": "com.anonymous.codeverseclient",
+      "permissions": [
+        "INTERNET",
+        "MODIFY_AUDIO_SETTINGS",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "VIBRATE",
+        "SYSTEM_ALERT_WINDOW"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-secure-store"],
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Esta aplicación necesita acceso a tus fotos para seleccionar imágenes.",
+          "cameraPermission": "Esta aplicación necesita acceso a tu cámara para tomar fotos.",
+          "//": "Deshabiltar permiso del micrófono",
+          "microphonePermission": false
+        }
+      ]
+    ],
     "extra": {
       "eas": {
-        "projectId": "5c4bfa85-6f23-426d-8d2a-69c44dd5585b"
+        "projectId": "55e4b6b8-b273-4d2b-8785-9f9b765b9b4b"
       }
     },
     "runtimeVersion": "1.0.0",
     "updates": {
-      "url": "https://u.expo.dev/5c4bfa85-6f23-426d-8d2a-69c44dd5585b"
+      "url": "https://u.expo.dev/55e4b6b8-b273-4d2b-8785-9f9b765b9b4b"
     },
-
-    "scheme": "codeverse-client"
+    "scheme": "codeverse-client",
+    "owner": "rodris_dev"
   }
 }

@@ -402,7 +402,7 @@ const Classes = ({ route }) => {
         ) : (
           <View className="flex-1 bg-[#F5F9FF] justify-center items-center px-5">
             <TouchableOpacity
-              className="w-full bg-white border border-dashed border-gray-200 rounded-xl px-5 py-10 shadow-lg "
+              className="w-full px-5 py-10  "
               onPress={toggleClassModal}
             >
               <LottieView

@@ -1,4 +1,4 @@
-import { Ionicons, Octicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import {
   Modal,
@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux'
 import Toast from 'react-native-toast-message'
 import toastConfig from '../../config/toast/toast.config'
 import { classesAPI } from 'api/index.api'
+import SelectSubjectModal from './SelectSubjectModal'
 
 const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
   const [loading, setLoading] = useState(false)
@@ -23,6 +24,9 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
     topic: '',
     CourseId: '',
   })
+  const [showSubjectModal, setShowSubjectModal] = useState(false)
+  const toggleShowSubjectModal = () => setShowSubjectModal((prev) => !prev)
+  const [nameCourse, setNameCourse] = useState(null)
   const [items, setItems] = useState([])
   const handleChange = (name, value) => {
     setDataClass((prev) => ({
@@ -90,6 +94,13 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
       transparent={true}
       onRequestClose={toggleModal}
     >
+      <SelectSubjectModal
+        visible={showSubjectModal}
+        onClose={toggleShowSubjectModal}
+        handleChange={handleChange}
+        items={items}
+        setNameCourse={setNameCourse}
+      />
       <ScrollView className="pb-20">
         <View className="flex  bg-[#F5F9FF]  px-5 py-5 h-screen">
           {/* Header */}
@@ -131,33 +142,30 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
                 >
                   Curso
                 </Text>
-                <View className="h-[58px] rounded-lg bg-white border border-gray-300 shadow-sm flex justify-center items-center">
-                  <Select
-                    key={dataClass.CourseId}
-                    onValueChange={(value) => handleChange('CourseId', value)}
-                    items={items}
-                    placeholder={{
-                      label: 'Selecciona el curso',
-                      value: null,
-                      color: '#9EA0A4',
-                    }}
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <MaterialCommunityIcons
+                      name="room-service"
+                      size={20}
+                      color={'#545454'}
+                    />
+                  </View>
+                  <Text
                     style={{
-                      inputIOS: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#202244',
-                      },
-                      inputAndroid: {
-                        fontSize: 14,
-                        fontFamily: 'Mulish_700Bold',
-                        color: '#000',
-                      },
-                      placeholder: {
-                        fontSize: 12,
-                        fontFamily: 'Mulish_700Bold',
-                      },
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
                     }}
-                  />
+                  >
+                    {nameCourse || 'Curso'}
+                  </Text>
+
+                  <TouchableOpacity
+                    className="absolute right-5"
+                    onPress={toggleShowSubjectModal}
+                  >
+                    <Octicons name="chevron-down" size={18} color={'#202244'} />
+                  </TouchableOpacity>
                 </View>
               </View>
 

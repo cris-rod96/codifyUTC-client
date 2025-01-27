@@ -35,7 +35,7 @@ const useSetup = () => {
     })
   }
 
-  const onSubmit = (imageUri) => {
+  const onSubmit = (imageUri, setLoading) => {
     if (Object.values(user).includes('')) {
       return {
         ok: false,
@@ -53,6 +53,8 @@ const useSetup = () => {
         message: 'La foto de perfil es obligatoria',
       }
     }
+
+    setLoading(true)
 
     const formData = new FormData()
     Object.keys(user).forEach((key) => {
@@ -89,6 +91,9 @@ const useSetup = () => {
           title: 'Error',
           message,
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 
