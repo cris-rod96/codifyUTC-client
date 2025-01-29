@@ -7,3 +7,5 @@ export { default as courseStudentsAPI } from './course-student/course-studen.api
 export { default as studentsAPI } from './students/students.api'
 export { default as topicsAPI } from './topic/topic.api'
 export { default as usersAPI } from './user/user.api'
+export { default as quizzResponseAPI } from './quizz-response/quizzResponse.api'
+export { default as responsesAPI } from './responses/responses.api'

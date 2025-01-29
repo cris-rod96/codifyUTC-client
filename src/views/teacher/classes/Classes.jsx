@@ -286,7 +286,10 @@ const Classes = ({ route }) => {
                     {item.Topics.length > 0 ? (
                       <View className="flex flex-col">
                         {item.Topics.map((topic, index) => (
-                          <View className="p-5 flex flex-row items-center justify-between border-b border-gray-200">
+                          <View
+                            className="p-5 flex flex-row items-center justify-between border-b border-gray-200"
+                            key={index}
+                          >
                             <View className="flex flex-row gap-1">
                               <View className="w-10 h-10 flex justify-center items-center rounded-full bg-[#F5F9FF] border border-[#E8F1FF]">
                                 <Text

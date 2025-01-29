@@ -31,13 +31,12 @@ import CoursesModal from '../../../components/modal/CoursesModal'
 import ClassesModal from '../../../components/modal/ClassesModal'
 
 const QuizzCode = ({ route }) => {
-  const [dueDate, setDate] = useState(new Date())
+  const [dueDate, setDueDate] = useState(new Date())
   const { user } = useSelector((state) => state.user)
 
   const navigation = useNavigation()
   const [showCalendar, setShowCalendar] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const [courses, setCourses] = useState([])
@@ -67,7 +66,7 @@ const QuizzCode = ({ route }) => {
   const handleDate = (e, selectedDate) => {
     const currentDate = selectedDate || dueDate
     toggleCalendar()
-    setDate(currentDate)
+    setDueDate(currentDate)
   }
 
   const [classId, setClassId] = useState(null)
@@ -182,12 +181,40 @@ const QuizzCode = ({ route }) => {
       return
     }
 
-    const hasValidAnswers = answers.some((answer) => answer.option.trim())
-
-    if (!hasValidAnswers) {
-      showToast('error', 'Error', 'Por favor, ingresa al menos una respuesta.')
+    if (answers.length < 4) {
+      showToast('error', 'Error', 'Por favor, ingresa las 4 opciones.')
       return
     }
+
+    const correctAnswer = answers.filter((answer) => answer.isCorrect)
+
+    if (correctAnswer.length !== 1) {
+      showToast(
+        'error',
+        'Error',
+        'Debe haber 1 respuesta marcada como correcta'
+      )
+      return
+    }
+
+    if (!question.feedback.trim()) {
+      showToast(
+        'error',
+        'Error',
+        'Debes añadir una justificación a la respuesta'
+      )
+      return
+    }
+
+    if (question.feedback.trim().split(' ').length < 15) {
+      showToast(
+        'error',
+        'Error',
+        'La justificación debe tener más de 15 palabras'
+      )
+      return
+    }
+
     const idRandom = uuid.v4()
     const newQuestion = { ...question, id: idRandom }
     const newQuizzActivity = {
@@ -199,7 +226,6 @@ const QuizzCode = ({ route }) => {
     setActivites((prev) => [...prev, newQuizzActivity])
     setQuestion(initialQuestionState)
     setAnswer(initialAnswerState)
-    setDate(new Date())
     setAnswers([])
     // setImageUri(null)
     setSelectedValue({ placeholder: '', bgColor: '', optionIndex: null })
@@ -259,13 +285,18 @@ const QuizzCode = ({ route }) => {
     activitiesAPI
       .create(formData)
       .then((res) => {
-        const { code, message } = res.data
-        if (code === 201) {
-          setSuccess(true)
-        }
+        showToast(
+          'success',
+          'Actividad creada',
+          'La actividad se creó con éxito'
+        )
       })
       .catch((err) => {
-        console.log(err.message)
+        showToast(
+          'error',
+          'Error',
+          'Error al crear la actividad. Intente de nuevo.'
+        )
       })
       .finally(() => {
         setLoading(false)
@@ -285,6 +316,9 @@ const QuizzCode = ({ route }) => {
   const clearAll = () => {
     setQuestions([])
     setActivites([])
+    setAnswer(initialAnswerState)
+    setQuestion(initialQuestionState)
+    setAnswers([])
   }
   const renderQuestion = (item, index) => {
     return (
@@ -595,7 +629,7 @@ const QuizzCode = ({ route }) => {
                 is24Hour={true}
                 display="calendar"
                 onChange={handleDate}
-                minimumDate={dueDate}
+                minimumDate={new Date()}
               />
             )}
           </View>
@@ -647,6 +681,7 @@ const QuizzCode = ({ route }) => {
               className="bg-white border border-gray-200 rounded-lg h-[100px] px-3"
               onChangeText={(value) => handleQuestion('feedback', value)}
               textAlignVertical="top"
+              value={question.feedback}
               style={{
                 fontFamily: 'Mulish_600SemiBold',
                 fontSize: 14,
@@ -707,19 +742,36 @@ const QuizzCode = ({ route }) => {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    className="h-14 bg-[#741D1D] rounded-lg justify-center items-center flex flex-1 flex-row  gap-2"
+                    className="h-14 rounded-lg justify-center items-center flex flex-1 flex-row  gap-2"
+                    style={{
+                      backgroundColor: loading ? '#888' : '#741D1D',
+                    }}
                     onPress={saveActivity}
                   >
-                    <Ionicons name="save" size={18} color="#fff" />
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 16,
-                        color: '#fff',
-                      }}
-                    >
-                      Guardar
-                    </Text>
+                    {loading ? (
+                      <Text
+                        style={{
+                          fontFamily: 'Jost_600SemiBold',
+                          fontSize: 16,
+                          color: '#fff',
+                        }}
+                      >
+                        Guardando
+                      </Text>
+                    ) : (
+                      <>
+                        <Ionicons name="save" size={18} color="#fff" />
+                        <Text
+                          style={{
+                            fontFamily: 'Jost_600SemiBold',
+                            fontSize: 16,
+                            color: '#fff',
+                          }}
+                        >
+                          Guardar
+                        </Text>
+                      </>
+                    )}
                   </TouchableOpacity>
                 </View>
               </>

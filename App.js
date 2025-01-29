@@ -41,10 +41,12 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
-        <RootNavigator />
-      </NavigationContainer>
+      <LoadingProvider>
+        <NavigationContainer>
+          <StatusBar backgroundColor={'#741D1D'} barStyle={'light-content'} />
+          <RootNavigator />
+        </NavigationContainer>
+      </LoadingProvider>
     </Provider>
   )
 }

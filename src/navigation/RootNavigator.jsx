@@ -31,6 +31,7 @@ import {
   HomeStudent,
   ClassStudent,
   ActivitiesStudent,
+  Students,
 } from 'views/index.views'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Octicons } from '@expo/vector-icons'
@@ -43,7 +44,6 @@ import Feedback from '../components/feedback/Feedback'
 
 const Stack = createStackNavigator()
 const Tabs = createBottomTabNavigator()
-const TopTabs = createMaterialTopTabNavigator()
 
 const TeacherTabs = () => {
   return (
@@ -100,7 +100,7 @@ const TeacherTabs = () => {
         name="TabActivity"
         component={ActivitiesNavigator}
         options={{
-          tabBarLabel: 'Actividades',
+          tabBarLabel: 'Juegos',
           headerTitle: 'Actividades',
           headerStyle: {
             backgroundColor: '#F5F9FF',
@@ -116,6 +116,30 @@ const TeacherTabs = () => {
 
           tabBarIcon: ({ size, color }) => (
             <Octicons name="rocket" size={21} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="TeacherStudents"
+        component={Students}
+        options={{
+          headerShown: true,
+          headerTitle: 'Alumnos',
+          tabBarLabel: 'Alumnos',
+          headerStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+            color: '#202244',
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          tabBarIcon: ({ size, color }) => (
+            <Octicons name="people" size={21} color={color} />
           ),
         }}
       />
@@ -289,49 +313,6 @@ const StudentsTabs = () => {
   )
 }
 
-const ClassTopTabs = ({ route, navigation }) => {
-  const [classId, setClassId] = useState(null)
-  const { class_name, id } = route.params
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: class_name,
-    })
-    setClassId(id)
-  }, [route])
-  return (
-    <TopTabs.Navigator
-      screenOptions={{
-        tabBarStyle: {
-          backgroundColor: '#F5F9FF',
-        },
-        sceneStyle: {
-          backgroundColor: '#F5F9FF',
-        },
-        swipeEnabled: false,
-        lazy: true,
-      }}
-    >
-      <TopTabs.Screen
-        name="TopicsClass"
-        options={{
-          tabBarLabel: 'Temas',
-        }}
-      >
-        {() => <TopicsByClass class_name={class_name} id={classId} />}
-      </TopTabs.Screen>
-
-      <TopTabs.Screen
-        name="ActivitiesClass"
-        options={{
-          tabBarLabel: 'Actividades',
-        }}
-      >
-        {() => <ActivitiesByClass class_id={classId} />}
-      </TopTabs.Screen>
-    </TopTabs.Navigator>
-  )
-}
-
 const CourseNavigator = () => {
   return (
     <Stack.Navigator
@@ -431,7 +412,7 @@ const ActivitiesNavigator = () => {
         component={DetailActivity}
         options={{
           headerShown: true,
-          headerTitle: 'Detalle',
+          headerTitle: 'Detalle de Actividad',
         }}
       />
       <Stack.Screen

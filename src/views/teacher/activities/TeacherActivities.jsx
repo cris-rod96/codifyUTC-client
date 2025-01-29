@@ -5,7 +5,7 @@ import {
   Ionicons,
   Octicons,
 } from '@expo/vector-icons'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Text,
   ScrollView,
@@ -14,11 +14,13 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  FlatList,
+  RefreshControl,
 } from 'react-native'
 import LottieView from 'lottie-react-native'
 import emptyData from 'assets/no-data.json'
 import { useDispatch, useSelector } from 'react-redux'
-import activitiesAPI from 'api/activities/activities.api'
+import { activitiesAPI } from 'api/index.api'
 import quizzLogo from 'assets/quizz.png'
 import lightningLogo from 'assets/lightning.png'
 import brainLogo from 'assets/brain.png'
@@ -28,19 +30,35 @@ import { useNavigation } from '@react-navigation/native'
 import { saveActivities } from 'redux/slices/teacher.slice'
 import { dateUtils } from '../../../utils/index.utils'
 import gameDefault from 'assets/game-default.png'
-import SelectActivityModal from '../../../components/modal/SelectActivityModal'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '../../../config/index.config'
+import {
+  SelectActivityModal,
+  DeleteQuestionModal,
+} from 'components/modal/index.modals'
 
 const TeacherActivities = () => {
   const navigation = useNavigation()
   const { activities } = useSelector((state) => state.teacher)
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.user)
+  const [refreshing, setRefreshing] = useState(false)
+  const [activityId, setActivityId] = useState(null)
   const [showSelectActivityModal, setShowSelectActivityModal] = useState(false)
+  const [showQuestionDelete, setShowQuestionDelete] = useState(false)
+  const toggleShowQuestionDelete = () => setShowQuestionDelete((prev) => !prev)
   const toggleShowSelecActivityModal = () =>
     setShowSelectActivityModal((prev) => !prev)
 
+  const showToast = (type, title, message) => {
+    Toast.show({
+      type,
+      text1: title,
+      text2: message,
+      position: 'bottom',
+    })
+  }
   const handleContinue = (type) => {
-    console.log(type)
     if (type === 'Quizz Code') {
       navigation.navigate('TabActivity', {
         screen: 'QuizzCode',
@@ -78,31 +96,42 @@ const TeacherActivities = () => {
         .catch((err) => {
           console.log(err)
         })
+        .finally(() => {
+          setRefreshing(false)
+        })
     }
   }
 
-  const deleteActivity = (id) => {
-    Alert.alert('Eliminar actividad', '¿Deseas eliminar esta actividad?', [
-      {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => {
-          activitiesAPI
-            .deleteActivity(id)
-            .then((res) => {
-              fetchData()
-            })
-            .catch((err) => {
-              console.log(err)
-            })
-        },
-      },
-    ])
+  const onContinue = (confirm) => {
+    toggleShowQuestionDelete()
+    setTimeout(() => {
+      if (confirm) {
+        showToast(
+          'success',
+          'Actvidad eliminada',
+          'Se ha eliminado la actividad con éxito'
+        )
+      } else {
+        showToast(
+          'error',
+          'Error al eliminar',
+          'No se elimino la actividad. Intente de nuevo'
+        )
+      }
+      onRefresh()
+    }, 1500)
   }
+
+  const deleteActivity = (id) => {
+    navigation.navigate('DetailActivity', {
+      id: id,
+    })
+  }
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    fetchData()
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -115,9 +144,20 @@ const TeacherActivities = () => {
         onClose={toggleShowSelecActivityModal}
         onContinue={handleContinue}
       />
+
+      <DeleteQuestionModal
+        title={'¿Realmente desea eliminar esta actividad?'}
+        isVisible={showQuestionDelete}
+        onClose={toggleShowQuestionDelete}
+        onContinue={onContinue}
+        model={'activities'}
+        id={activityId}
+      />
+
       {/* Mostrar barra de búsqueda solo si hay actividades */}
       {activities.length > 0 && (
         <View className="flex flex-col gap-5">
+          {/* FloattingButton */}
           {/* Buscador */}
           <View className="flex flex-row items-center justify-between h-[55px] bg-white rounded-xl overflow-hidden border border-gray-200 pr-2">
             {/* Icono de busqueda */}
@@ -146,14 +186,33 @@ const TeacherActivities = () => {
         </View>
       )}
 
+      {activities.length > 0 && (
+        <TouchableOpacity
+          className="bg-[#741D1D] w-12 h-12 rounded-full flex justify-center items-center absolute bottom-4 right-2 z-50 border border-gray-300"
+          onPress={toggleShowSelecActivityModal}
+        >
+          <Octicons name="plus" size={21} color={'white'} />
+        </TouchableOpacity>
+      )}
+
       {/* Área desplazable para cursos */}
       {activities.length > 0 ? (
-        <ScrollView
-          className="flex-1 mt-5"
+        <FlatList
+          data={activities}
           showsVerticalScrollIndicator={false}
-        >
-          {activities.map((item) => (
-            <View className="flex flex-col bg-white rounded-lg">
+          contentContainerStyle={{
+            paddingBottom: 10,
+            paddingTop: 20,
+          }}
+          keyExtractor={(item, index) => index.toString()}
+          refreshControl={
+            <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+          }
+          renderItem={({ item, index }) => (
+            <View
+              className="flex flex-col bg-white rounded-lg mb-10"
+              key={item.id}
+            >
               {/* Poster and Logo */}
               <View className="w-full h-[160px] relative rounded-t-lg">
                 <Image
@@ -270,7 +329,6 @@ const TeacherActivities = () => {
                 className="flex flex-row items-center justify-center gap-2 h-[40px] bg-[#440b0b] mt-5 rounded-b-lg"
                 onPress={() => deleteActivity(item.id)}
               >
-                <Octicons name="trash" size={16} color={'white'} />
                 <Text
                   style={{
                     fontFamily: 'Jost_600SemiBold',
@@ -278,12 +336,12 @@ const TeacherActivities = () => {
                     color: 'white',
                   }}
                 >
-                  Eliminar
+                  Detalle de actividad
                 </Text>
               </TouchableOpacity>
             </View>
-          ))}
-        </ScrollView>
+          )}
+        />
       ) : (
         <View className="flex-1 bg-[#F5F9FF] justify-center items-center px-5">
           <LottieView
@@ -338,6 +396,7 @@ const TeacherActivities = () => {
           </TouchableOpacity>
         </View>
       )}
+      <Toast config={toastConfig} position="bottom" />
     </View>
   )
 }

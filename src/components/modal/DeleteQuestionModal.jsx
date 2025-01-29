@@ -1,10 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import LottieView from 'lottie-react-native'
 import warning from 'assets/warning.json'
 import { Octicons } from '@expo/vector-icons'
-import topicsAPI from '../../api/topic/topic.api'
-import classesAPI from '../../api/classes/classes.api'
+import { activitiesAPI, classesAPI, topicsAPI } from 'api/index.api'
 const DeleteQuestionModal = ({
   title,
   isVisible,
@@ -34,6 +33,17 @@ const DeleteQuestionModal = ({
           })
           .catch((err) => {
             console.log(err.message)
+          })
+        break
+
+      case 'activities':
+        activitiesAPI
+          .deleteActivity(id)
+          .then((res) => {
+            onContinue(true)
+          })
+          .catch((err) => {
+            onContinue(false)
           })
         break
     }

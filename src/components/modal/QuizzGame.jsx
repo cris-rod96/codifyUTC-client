@@ -6,6 +6,8 @@ import { activitiesAPI } from 'api/index.api'
 import { Octicons } from '@expo/vector-icons'
 import { Audio } from 'expo-av'
 import Results from '../results/Results'
+import { storageUtil } from 'utils/index.utils'
+import { quizzResponseAPI } from 'api/index.api'
 
 const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
   // Sonidos del juego
@@ -250,8 +252,19 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
     )
   }
 
+  const saveStudentActivity = async () => {
+    const res = await storageUtil.getSecureData('session_info')
+    const { user } = await JSON.parse(res)
+    const data = {
+      ActivityId: activity_id,
+      StudentId: user.id,
+      quizzResponses: userAnswers,
+    }
+    const resp = await quizzResponseAPI.register(data)
+    console.log(resp)
+  }
+
   const nextQuestion = () => {
-    console.log(userAnswers)
     if (currentIndex + 1 < quizz.Questions.length) {
       setIsSelected(false)
       setShowMessage(false)
@@ -260,7 +273,8 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
       setIndexCorrect(null)
       setCurrentIndex((prev) => prev + 1)
     } else {
-      setShowModalResults(true)
+      saveStudentActivity()
+      // setShowModalResults(true)
     }
   }
 
