@@ -72,7 +72,7 @@ const Register = () => {
         role,
       })
       setTimeout(() => {
-        navigation.navigate('Setup', {
+        navigation.replace('Setup', {
           email: data.email,
           password: data.password,
           nick_name: data.nick_name,

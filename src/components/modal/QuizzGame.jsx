@@ -8,8 +8,16 @@ import { Audio } from 'expo-av'
 import Results from '../results/Results'
 import { storageUtil } from 'utils/index.utils'
 import { quizzResponseAPI } from 'api/index.api'
+import { useDispatch } from 'react-redux'
+import { saveAcitiviTyId, saveUserAnswers } from '../../redux/slices/gameSlice'
 
-const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
+const QuizzGame = ({
+  showQuizzGame,
+  toggleQuizzGame,
+  activity_id,
+  showResults,
+}) => {
+  const dispatch = useDispatch()
   // Sonidos del juego
   const [soundCorrect, setSoundCorrrect] = useState(null)
   const [soundIncorrect, setSoundIncorrrect] = useState(null)
@@ -260,8 +268,16 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
       StudentId: user.id,
       quizzResponses: userAnswers,
     }
-    const resp = await quizzResponseAPI.register(data)
-    console.log(resp)
+    quizzResponseAPI
+      .register(data)
+      .then((res) => {
+        dispatch(saveUserAnswers(userAnswers))
+        dispatch(saveAcitiviTyId(activity_id))
+        closeQuizzGame()
+      })
+      .catch((err) => {
+        console.log('Error')
+      })
   }
 
   const nextQuestion = () => {
@@ -274,7 +290,6 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
       setCurrentIndex((prev) => prev + 1)
     } else {
       saveStudentActivity()
-      // setShowModalResults(true)
     }
   }
 
@@ -287,10 +302,13 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
     setIndexCorrect(null)
     setCurrentIndex(0)
     setUserAnswers([])
-    // setMounted(false)
+    setMounted(false)
     setTotalScore(0)
+    setCountDown(10)
+    setStartCountDown(false)
+    setShowStartMessage(false)
     intervalRef.current = null
-    toggleQuizzGame()
+    showResults()
   }
 
   const stopCountDown = () => {
@@ -416,118 +434,112 @@ const QuizzGame = ({ showQuizzGame, toggleQuizzGame, activity_id }) => {
           resizeMode="cover"
         />
         {question && mounted ? (
-          !showModalResult ? (
-            <View className="p-5">
-              <View className="flex flex-row items-center justify-between">
+          <View className="p-5">
+            <View className="flex flex-row items-center justify-between">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 21,
+                  color: 'white',
+                }}
+              >
+                Quizz Code
+              </Text>
+              <View className="w-8 h-8 rounded-full bg-white justify-center items-center">
                 <Text
                   style={{
-                    fontFamily: 'Jost_600SemiBold',
-                    fontSize: 21,
+                    fontFamily: 'Mulish_800ExtraBold',
+                    fontSize: 14,
+                    color: '#741D1D',
+                  }}
+                >
+                  {counter}
+                </Text>
+              </View>
+            </View>
+
+            <View className="flex flex-col mt-10">
+              <View className="mb-10 flex flex-row justify-between items-center">
+                <Text
+                  style={{
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 18,
                     color: 'white',
                   }}
                 >
-                  Quizz Code
+                  {currentIndex + 1}/{quizz.Questions.length}
                 </Text>
-                <View className="w-8 h-8 rounded-full bg-white justify-center items-center">
+                {isSelected && (
                   <Text
                     style={{
-                      fontFamily: 'Mulish_800ExtraBold',
-                      fontSize: 14,
-                      color: '#741D1D',
+                      fontFamily: 'Jost_700Bold',
+                      fontSize: 18,
+                      color: isCorrectResponsed ? 'green' : 'red',
                     }}
                   >
-                    {counter}
+                    {isCorrectResponsed ? `+${currentScore}` : 0}
                   </Text>
-                </View>
+                )}
+                <Text
+                  style={{
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 18,
+                    color: 'white',
+                  }}
+                >
+                  {totalScore} pts
+                </Text>
+              </View>
+              <View className="w-full h-[180px] bg-white rounded-lg border border-gray-200 flex justify-center items-center px-3">
+                <Text
+                  style={{
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 17,
+                    color: '#202244',
+                    textAlign: 'center',
+                  }}
+                >
+                  {question.question}
+                </Text>
+              </View>
+              <View className="flex flex-row flex-wrap justify-between mt-5">
+                {question.Options.map((item, index) => boxOptions(item, index))}
               </View>
 
-              <View className="flex flex-col mt-10">
-                <View className="mb-10 flex flex-row justify-between items-center">
+              {/* Mensaje */}
+              {showMessage && (
+                <View className="mt-12 flex flex-col">
                   <Text
                     style={{
-                      fontFamily: 'Jost_700Bold',
-                      fontSize: 18,
+                      fontFamily: 'Mulish_600SemiBold',
+                      fontSize: 16,
                       color: 'white',
-                    }}
-                  >
-                    {currentIndex + 1}/{quizz.Questions.length}
-                  </Text>
-                  {isSelected && (
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_700Bold',
-                        fontSize: 18,
-                        color: isCorrectResponsed ? 'green' : 'red',
-                      }}
-                    >
-                      {isCorrectResponsed ? `+${currentScore}` : 0}
-                    </Text>
-                  )}
-                  <Text
-                    style={{
-                      fontFamily: 'Jost_700Bold',
-                      fontSize: 18,
-                      color: 'white',
-                    }}
-                  >
-                    {totalScore} pts
-                  </Text>
-                </View>
-                <View className="w-full h-[180px] bg-white rounded-lg border border-gray-200 flex justify-center items-center px-3">
-                  <Text
-                    style={{
-                      fontFamily: 'Jost_700Bold',
-                      fontSize: 17,
-                      color: '#202244',
+                      marginBottom: 20,
                       textAlign: 'center',
                     }}
+                    className="text-wrap"
                   >
-                    {question.question}
+                    {message}
                   </Text>
-                </View>
-                <View className="flex flex-row flex-wrap justify-between mt-5">
-                  {question.Options.map((item, index) =>
-                    boxOptions(item, index)
-                  )}
-                </View>
 
-                {/* Mensaje */}
-                {showMessage && (
-                  <View className="mt-12 flex flex-col">
+                  <TouchableOpacity
+                    className="w-full bg-white/80 py-3 flex justify-center items-center"
+                    onPress={nextQuestion}
+                  >
                     <Text
                       style={{
-                        fontFamily: 'Mulish_600SemiBold',
-                        fontSize: 16,
-                        color: 'white',
-                        marginBottom: 20,
-                        textAlign: 'center',
+                        fontFamily: 'Jost_600SemiBold',
+                        fontSize: 15,
+                        color: '#202244',
                       }}
-                      className="text-wrap"
                     >
-                      {message}
+                      Continuar
                     </Text>
-
-                    <TouchableOpacity
-                      className="w-full bg-white/80 py-3 flex justify-center items-center"
-                      onPress={nextQuestion}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: 'Jost_600SemiBold',
-                          fontSize: 15,
-                          color: '#202244',
-                        }}
-                      >
-                        Continuar
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-          ) : (
-            <Results userAnswers={userAnswers} toggleGame={closeQuizzGame} />
-          )
+          </View>
         ) : (
           <View className="flex-1 justify-center items-center flex flex-col gap-5 px-4 relative">
             <View className="w-[250px] h-[250px] rounded-full bg-white flex justify-center items-center border-2 border-gray-200">

@@ -1,10 +1,22 @@
 import { Ionicons } from '@expo/vector-icons'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import profile from 'assets/profile.png'
 import { useSelector } from 'react-redux'
 const StudentsSlide = () => {
-  const { students } = useSelector((state) => state.teacher)
+  const { user } = useSelector((state) => state.user)
+  const { students, courses } = useSelector((state) => state.teacher)
+  const [allStudents, setAllStudents] = useState([])
+
+  const getNameCourse = (id) => {
+    const course = courses.find((cr) => cr.id === id)
+    return course.subject
+  }
+
+  useEffect(() => {
+    const students = courses.flatMap((course) => course.Students)
+    setAllStudents(students)
+  }, [])
 
   return (
     <View className="flex flex-col gap-3 w-full">
@@ -37,9 +49,9 @@ const StudentsSlide = () => {
       </View>
 
       {/* Contenido condicional */}
-      {students.length > 0 ? (
+      {allStudents.length > 0 ? (
         <FlatList
-          data={students}
+          data={allStudents}
           horizontal
           showsHorizontalScrollIndicator={false}
           // pagingEnabled
@@ -52,9 +64,13 @@ const StudentsSlide = () => {
               key={item.id}
             >
               {/* Foto */}
-              <View className="w-[70px] h-[70px] rounded-full bg-red-500 relative">
+              <View className="w-[100px] h-[100px] rounded-full bg-red-500 relative overflow-hidden border border-gray-200">
                 <Image
-                  source={profile}
+                  source={
+                    item.profile_picture
+                      ? { uri: item.profile_picture }
+                      : profile
+                  }
                   className="absolute w-full h-full object-contain"
                 />
               </View>
@@ -68,7 +84,16 @@ const StudentsSlide = () => {
                     color: '#202244',
                   }}
                 >
-                  {item.name}
+                  {item.full_name}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Mulish_400Regular',
+                    fontSize: 12,
+                    color: '#888',
+                  }}
+                >
+                  {getNameCourse(item.CourseStudent.CourseId)}
                 </Text>
               </View>
             </View>

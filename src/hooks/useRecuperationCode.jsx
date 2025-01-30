@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usersAPI } from 'api/index.api'
 
-const useRecuperationCode = () => {
+const useRecuperationCode = (setLoading) => {
   const [data, setData] = useState({
     method: '',
     value: '',
@@ -23,6 +23,7 @@ const useRecuperationCode = () => {
         message: 'El código debe tener 4 dígitos',
       }
     }
+    setLoading(true)
 
     return usersAPI
       .verifyCode({
@@ -34,8 +35,6 @@ const useRecuperationCode = () => {
         const { message } = res.data
         return {
           ok: true,
-          toast: 'success',
-          title: 'Código de recuperación',
           message,
         }
       })
@@ -44,10 +43,11 @@ const useRecuperationCode = () => {
 
         return {
           ok: false,
-          toast: 'error',
-          title: 'Código de recuperación',
           message,
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 

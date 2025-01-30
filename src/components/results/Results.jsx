@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Image, Modal, Text, TouchableOpacity, View } from 'react-native'
 import Congrats from '../congrats/Congrats'
 import LottieView from 'lottie-react-native'
 import tryAgain from 'assets/0-400.json'
@@ -9,8 +9,9 @@ import goal from 'assets/800-999.json'
 import winner from 'assets/1000.json'
 import { Octicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
+import bg from 'assets/bg-tech.jpg'
 
-const Results = ({ userAnswers, toggleGame }) => {
+const Results = ({ visible, userAnswers, onClose, onReturn, activityId }) => {
   const navigation = useNavigation()
   const [showResults, setShowResults] = useState(false)
   const [score, setScore] = useState(0)
@@ -19,16 +20,13 @@ const Results = ({ userAnswers, toggleGame }) => {
   const [animation, setAnimation] = useState(null)
   const [message, setMessage] = useState('')
 
-  const goToActivities = () => {
-    toggleGame()
-    navigation.navigate('ActivitiesStudent')
-  }
-
   const viewFeedBack = () => {
+    onClose()
     navigation.navigate('ActivitiesStudent', {
       screen: 'Feedback',
       params: {
         userAnswers: userAnswers,
+        activityId: activityId,
       },
     })
   }
@@ -96,100 +94,116 @@ const Results = ({ userAnswers, toggleGame }) => {
     }, 3500)
   }, [userAnswers])
 
-  return showResults ? (
-    <View className="flex-1 flex justify-center items-center flex-col px-6">
-      <View className="flex flex-col items-center mb-10 gap-1 w-full">
-        <Text
-          style={{
-            fontFamily: 'Jost_700Bold',
-            fontSize: 30,
-            color: 'white',
-          }}
-        >
-          PUNTOS
-        </Text>
+  return (
+    <Modal
+      visible={visible}
+      animationType="fade"
+      onRequestClose={() => {}}
+      transparent={true}
+    >
+      <View className="flex-1 bg-[#F5F9FF] relative">
+        <Image
+          source={bg}
+          className="w-full h-full absolute object-contain"
+          resizeMode="cover"
+        />
+        {showResults ? (
+          <View className="flex-1 flex justify-center items-center flex-col px-6">
+            <View className="flex flex-col items-center mb-10 gap-1 w-full">
+              <Text
+                style={{
+                  fontFamily: 'Jost_700Bold',
+                  fontSize: 30,
+                  color: 'white',
+                }}
+              >
+                PUNTOS
+              </Text>
 
-        <View className="w-full h-[120px] border border-white/20 mt-5 flex justify-center items-center rounded-xl bg-white/20 px-2">
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 27,
-              color: 'white',
-            }}
-          >
-            {score} de {scoreTotal}
-          </Text>
-        </View>
+              <View className="w-full h-[120px] border border-white/20 mt-5 flex justify-center items-center rounded-xl bg-white/20 px-2">
+                <Text
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 27,
+                    color: 'white',
+                  }}
+                >
+                  {score} de {scoreTotal}
+                </Text>
+              </View>
+            </View>
+            {animation && (
+              <LottieView
+                autoPlay
+                loop
+                source={animation}
+                style={{
+                  width: 200,
+                  height: 200,
+                }}
+              />
+            )}
+
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 17,
+                color: 'white',
+                textAlign: 'center',
+                marginTop: 20,
+              }}
+            >
+              {message}
+            </Text>
+
+            <TouchableOpacity
+              className="mt-7 w-full py-3 bg-[#741D1D] rounded-lg relative flex flex-row items-center justify-center"
+              onPress={() => viewFeedBack()}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: 'white',
+                  textAlign: 'center',
+                }}
+              >
+                Ver respuestas
+              </Text>
+              <Octicons
+                name="chevron-right"
+                size={18}
+                color={'white'}
+                className="absolute right-6"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="mt-3 w-full py-3 bg-[#741D1D] rounded-lg relative flex flex-row items-center justify-center"
+              onPress={() => onReturn()}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: 'white',
+                  textAlign: 'center',
+                }}
+              >
+                Regresar
+              </Text>
+              <Octicons
+                name="chevron-left"
+                size={18}
+                color={'white'}
+                className="absolute left-6"
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Congrats />
+        )}
       </View>
-      {animation && (
-        <LottieView
-          autoPlay
-          loop
-          source={animation}
-          style={{
-            width: 200,
-            height: 200,
-          }}
-        />
-      )}
-
-      <Text
-        style={{
-          fontFamily: 'Jost_600SemiBold',
-          fontSize: 17,
-          color: 'white',
-          textAlign: 'center',
-          marginTop: 20,
-        }}
-      >
-        {message}
-      </Text>
-
-      <TouchableOpacity
-        className="mt-7 w-full py-3 bg-[#741D1D] rounded-lg relative flex flex-row items-center justify-center"
-        onPress={() => viewFeedBack()}
-      >
-        <Text
-          style={{
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 16,
-            color: 'white',
-            textAlign: 'center',
-          }}
-        >
-          Ver respuestas
-        </Text>
-        <Octicons
-          name="chevron-right"
-          size={18}
-          color={'white'}
-          className="absolute right-6"
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        className="mt-3 w-full py-3 bg-[#741D1D] rounded-lg relative flex flex-row items-center justify-center"
-        onPress={goToActivities}
-      >
-        <Text
-          style={{
-            fontFamily: 'Jost_600SemiBold',
-            fontSize: 16,
-            color: 'white',
-            textAlign: 'center',
-          }}
-        >
-          Regresar
-        </Text>
-        <Octicons
-          name="chevron-left"
-          size={18}
-          color={'white'}
-          className="absolute left-6"
-        />
-      </TouchableOpacity>
-    </View>
-  ) : (
-    <Congrats />
+    </Modal>
   )
 }
 

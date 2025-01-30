@@ -45,6 +45,15 @@ const DetailClassTeacher = ({ route, navigation }) => {
         },
       })
     }
+
+    if (type === 'Lightning Code') {
+      navigation.navigate('TabActivity', {
+        screen: 'LightningCode',
+        params: {
+          class_id: currentClass.id,
+        },
+      })
+    }
   }
 
   const getLogo = (typeActivity) => {

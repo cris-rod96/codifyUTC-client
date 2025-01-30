@@ -11,6 +11,15 @@ const activitiesAPI = {
     })
   },
 
+  createLightningActivity: (data) => {
+    console.log(data)
+    return instance.post(`${model}/lightning`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
   getById: (id) => {
     return instance.get(`${model}/${id}`)
   },

@@ -21,16 +21,19 @@ import {
 import Toast from 'react-native-toast-message'
 import { EmailSentModal, GenderModal } from 'components/modal/index.modals'
 import toastConfig from '../../../config/toast/toast.config'
+import { useNavigation } from '@react-navigation/native'
 
 const Setup = ({ route }) => {
-  const { addRegisterData, handleChange, user, onSubmit, contactData } =
-    useSetup()
+  const navigation = useNavigation()
+  const [contactData, setContacData] = useState({
+    email: '',
+    full_name: '',
+  })
+  const { addRegisterData, handleChange, user, onSubmit } = useSetup()
 
   const [keyboardVisibe, setKeyboardVisible] = useState(false)
   const [loading, setLoading] = useState(false)
   const [imageUri, setImageUri] = useState(null)
-  const [showModal, setShowModal] = useState(false)
-  const toggleShowModal = () => setShowModal((prev) => !prev)
 
   const [showGenderModal, setShowGenderModal] = useState(false)
   const toggleShowGenderModal = () => setShowGenderModal((prev) => !prev)
@@ -50,12 +53,33 @@ const Setup = ({ route }) => {
     })
   }
 
+  const onChange = (key, value) => {
+    setContacData((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
+
+    handleChange(key, value)
+  }
+
   const register = async () => {
     const { ok, message, title, toast } = await onSubmit(imageUri, setLoading)
     showToast(toast, title, message)
 
     if (ok) {
-      toggleShowModal()
+      showToast(
+        'success',
+        'Usuario registrado',
+        'Enviamos un código de activación al correo registrado'
+      )
+      setImageUri(null)
+
+      setTimeout(() => {
+        navigation.navigate('ActivationCode', {
+          email: contactData.email,
+          full_name: contactData.full_name,
+        })
+      }, 2500)
     }
   }
 
@@ -83,18 +107,13 @@ const Setup = ({ route }) => {
   useEffect(() => {
     if (route.params) {
       const { email, nick_name, password, role } = route.params
+      onChange('email', email)
       addRegisterData(email, nick_name, password, role)
     }
   }, [route.params])
 
   return (
     <View className="flex-1 bg-[#F5F9FF]">
-      <EmailSentModal
-        isVisible={showModal}
-        toggleModal={toggleShowModal}
-        user={contactData}
-      />
-
       <GenderModal
         visible={showGenderModal}
         onClose={toggleShowGenderModal}
@@ -132,7 +151,7 @@ const Setup = ({ route }) => {
                   defaultValue={user.full_name}
                   autoCapitalize="none"
                   autoComplete="off"
-                  onChangeText={(text) => handleChange('full_name', text)}
+                  onChangeText={(text) => onChange('full_name', text)}
                   placeholder="Nombre y Apellido"
                   className="flex-1 bg-white  px-1 "
                   style={{

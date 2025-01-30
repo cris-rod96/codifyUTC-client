@@ -40,7 +40,6 @@ const Home = () => {
         .then((res) => {
           const { courses } = res.data
           dispatch(saveCourses(courses))
-          // dispatch(saveAllStudents(courses))
           dispatch(saveAllClassesInCourses(courses))
         })
         .catch((err) => {
@@ -53,7 +52,13 @@ const Home = () => {
   }, [])
 
   return (
-    <ScrollView className="flex-1">
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{
+        paddingBottom: 80,
+      }}
+      showsVerticalScrollIndicator={false}
+    >
       <View className="flex-1 flex-col h-screen gap-10 p-5 bg-[#F5F9FF] ">
         {/* Encabezado */}
         <View className="flex flex-row justify-between items-center">

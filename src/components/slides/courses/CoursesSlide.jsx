@@ -74,7 +74,7 @@ const CoursesSlide = () => {
           })}
           renderItem={({ item }) => (
             <View
-              className="flex flex-col w-[250px] h-[200px] bg-white mr-4 rounded-xl border border-gray-200"
+              className="flex flex-col w-[250px] h-auto  bg-white mr-4 rounded-xl border border-gray-200 relative"
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -84,27 +84,19 @@ const CoursesSlide = () => {
               }}
               key={item.id}
             >
-              <View className="w-full h-[125px] bg-red-400 rounded-t-xl relative">
+              <View className="w-full h-[125px] bg-red-400 rounded-t-xl relative overflow-hidden">
                 <Image
                   className="absolute w-full h-full object-contain"
+                  resizeMode="cover"
                   source={item.poster ? { uri: item.poster } : courseImage}
                 />
               </View>
-              <View className="py-3 px-3 flex-1">
+              <View className="py-3 px-3  relative">
                 <Text
                   style={{
-                    fontFamily: 'Jost_600SemiBold',
-                    fontSize: 16,
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 14,
                     color: '#202244',
-                  }}
-                >
-                  {item.text}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Mulish_600SemiBold',
-                    fontSize: 12,
-                    color: '#545454',
                   }}
                 >
                   {item.semester} Sistemas

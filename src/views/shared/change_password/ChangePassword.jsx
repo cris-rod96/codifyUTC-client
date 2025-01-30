@@ -47,7 +47,7 @@ const ChangePassword = ({ route, navigation }) => {
 
     if (ok) {
       setTimeout(() => {
-        navigation.navigate('Login')
+        navigation.replace('Login')
       }, 2500)
     }
   }

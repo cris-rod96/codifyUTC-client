@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usersAPI } from 'api/index.api'
 
-const useActivationCode = () => {
+const useActivationCode = (setLoading) => {
   const [data, setData] = useState({
     full_name: '',
     email: '',
@@ -24,6 +24,8 @@ const useActivationCode = () => {
       }
     }
 
+    setLoading(true)
+
     return usersAPI
       .activateAccount({
         email: data.email,
@@ -33,20 +35,18 @@ const useActivationCode = () => {
         const { message } = res.data
         return {
           ok: true,
-          toast: 'success',
-          title: 'Código de activación',
           message,
         }
       })
       .catch((err) => {
         const { message } = err.response.data
-
         return {
           ok: false,
-          toast: 'error',
-          title: 'Código de activación',
           message,
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
 

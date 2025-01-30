@@ -40,8 +40,10 @@ import {
 const TeacherActivities = () => {
   const navigation = useNavigation()
   const { activities } = useSelector((state) => state.teacher)
+  const [allActivities, setAllActivities] = useState([])
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.user)
+  const [userId, setUserId] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
   const [activityId, setActivityId] = useState(null)
   const [showSelectActivityModal, setShowSelectActivityModal] = useState(false)
@@ -91,6 +93,7 @@ const TeacherActivities = () => {
         .getByTeacher(user.id)
         .then((res) => {
           const { activities } = res.data
+          console.log('Aqui estamos:', activities)
           dispatch(saveActivities(activities))
         })
         .catch((err) => {
@@ -131,11 +134,13 @@ const TeacherActivities = () => {
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     fetchData()
-  }, [])
+  }, [userId])
 
   useEffect(() => {
-    fetchData()
-  }, [user])
+    if (user) {
+      fetchData()
+    }
+  }, [])
 
   return (
     <View className="flex-1 flex flex-col h-full w-full bg-[#F5F9FF] px-5 py-5">

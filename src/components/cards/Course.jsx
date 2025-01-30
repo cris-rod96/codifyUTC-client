@@ -18,7 +18,7 @@ const Course = ({ course, deleteCourse }) => {
   const navigation = useNavigation()
   const shareOnWhatsApp = () => {
     const msg = msgUtil.messageWhatsapp(course, currentUser.full_name)
-    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`
+    const url = `whatsapp://send?text=${encodeURIComponent(msg)}`
 
     Linking.canOpenURL(url)
       .then((supported) => {

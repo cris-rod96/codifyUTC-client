@@ -1,29 +1,23 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import { useState, useEffect, useRef } from 'react'
-import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Keyboard,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
 import { toastConfig } from 'config/index.config'
 import { useRecuperationCode } from 'hooks/index.hooks'
+import { codeAPI } from '../../../api/index.api'
 
 const RecoveryCode = ({ route }) => {
-  const { data, addInfoData, onSubmit } = useRecuperationCode()
+  const [loading, setLoading] = useState(false)
+  const { data, addInfoData, onSubmit } = useRecuperationCode(setLoading)
   const navigation = useNavigation()
-
-  // Estado para los segundos del temporizador
-  const [seconds, setSeconds] = useState(59)
-
-  // Efecto para iniciar el temporizador
-  useEffect(() => {
-    if (seconds === 0) return // Si el temporizador ya llegó a 0, no hacer nada más
-
-    const timer = setInterval(() => {
-      setSeconds((prevSeconds) => prevSeconds - 1)
-    }, 1000)
-
-    // Limpiar el intervalo cuando el temporizador llegue a 0 o el componente se desmonte
-    return () => clearInterval(timer)
-  }, [seconds])
 
   // Referencias para los inputs de código
   const input1Ref = useRef(null)
@@ -48,19 +42,36 @@ const RecoveryCode = ({ route }) => {
     }
   }
 
+  const resendCode = () => {
+    codeAPI
+      .resendCode(data.method, data.value, 'Recovery')
+      .then((res) => {
+        showToast(
+          'success',
+          'Código reenviado',
+          `Código reenviado vía ${method}`
+        )
+      })
+      .catch((err) => {
+        showToast('error', 'Error al reenviar', 'No se pudo reenvíar el código')
+      })
+  }
+
   const sendCode = async () => {
-    const { ok, toast, title, message } = await onSubmit({
+    const { ok, message } = await onSubmit({
       code: code.join(''),
     })
-    showToast(toast, title, message)
 
     if (ok) {
+      showToast('success', 'Código correcto', message)
       setTimeout(() => {
-        navigation.navigate('ChangePassword', {
+        navigation.replace('ChangePassword', {
           method: data.method,
           value: data.value,
         })
       }, 2500)
+    } else {
+      showToast('error', 'Código incorrecto', message)
     }
   }
 
@@ -179,61 +190,63 @@ const RecoveryCode = ({ route }) => {
           />
         </View>
 
-        <View className="flex flex-row my-4 items-center justify-center">
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#545454',
-            }}
-          >
-            Reenviando código en{' '}
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Mulish_800ExtraBold',
-              fontSize: 17,
-              color: '#741D1D',
-            }}
-          >
-            {seconds < 10 ? `0${seconds}` : seconds}{' '}
-            {/* Mostrar el tiempo con 2 dígitos */}
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 12,
-              color: '#545454',
-            }}
-          >
-            s
-          </Text>
-        </View>
-
         <TouchableOpacity
-          className="flex flex-row gap-2 items-center justify-center my-5 bg-[#741D1D] py-4 rounded-full w-full"
+          className="flex flex-row gap-2 items-center justify-center my-5  py-4 rounded-full w-full"
           onPress={() => {
             Keyboard.dismiss()
             sendCode()
           }}
+          style={{
+            backgroundColor: loading ? '#888' : '#741D1D',
+          }}
+          disabled={loading}
         >
+          {loading ? (
+            <>
+              <ActivityIndicator size={'small'} color={'white'} />
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: '#FFFFFF',
+                }}
+              >
+                Validando
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: '#FFFFFF',
+                }}
+              >
+                Validar
+              </Text>
+
+              <Octicons
+                name="chevron-right"
+                size={21}
+                color={'white'}
+                className="absolute right-8"
+              />
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
+      <View className="w-full absolute bottom-10 flex justify-center items-center">
+        <TouchableOpacity onPress={resendCode}>
           <Text
             style={{
-              fontFamily: 'Jost_600SemiBold',
-              fontSize: 15,
-              color: '#FFFFFF',
+              fontFamily: 'Jost_700Bold',
+              fontSize: 16,
+              color: '#741D1D',
             }}
           >
-            Continuar
+            Solicitar un nuevo código
           </Text>
-
-          <View className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-white absolute right-5">
-            <Ionicons
-              name="chevron-forward-sharp"
-              size={20}
-              color={'#741D1D'}
-            />
-          </View>
         </TouchableOpacity>
       </View>
       <Toast position="bottom" config={toastConfig} />

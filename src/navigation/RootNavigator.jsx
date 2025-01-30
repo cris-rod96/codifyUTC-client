@@ -32,11 +32,12 @@ import {
   ClassStudent,
   ActivitiesStudent,
   Students,
+  QuizzGame,
 } from 'views/index.views'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Octicons } from '@expo/vector-icons'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import QuizzCode from '../views/teacher/games/QuizzCode'
+import { QuizzCode, LightningCode } from 'views/index.views'
 import EditProfile from '../views/shared/edit/EditProfile'
 import DetailActivity from '../views/teacher/activities/DetailActivity'
 import DetailClass from '../views/student/class/DetailClass'
@@ -424,6 +425,15 @@ const ActivitiesNavigator = () => {
         })}
       />
 
+      <Stack.Screen
+        name="LightningCode"
+        component={LightningCode}
+        options={{
+          headerTitle: 'Lightning Code',
+          headerLeft: () => null,
+        }}
+      />
+
       {/* Luego colocar el resto */}
     </Stack.Navigator>
   )
@@ -454,6 +464,7 @@ const ActivitiesStudentNavigator = () => {
           },
         }}
       />
+
       <Stack.Screen
         name="Feedback"
         component={Feedback}
@@ -538,7 +549,9 @@ function RootNavigator() {
       <Stack.Screen
         name="ActivationCode"
         component={ActivationCode}
-        options={setupOptions}
+        options={{
+          headerShown: false,
+        }}
       />
 
       {/* Rutas del docente */}

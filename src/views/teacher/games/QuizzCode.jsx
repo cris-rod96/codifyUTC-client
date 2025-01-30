@@ -21,12 +21,10 @@ import { toastConfig } from 'config/index.config'
 import DatePicker from '@react-native-community/datetimepicker'
 import { dateUtils } from 'utils/index.utils'
 import activitiesAPI from '../../../api/activities/activities.api'
-import CongratsActivity from '../../../components/modal/CongratsActivity'
 import quizzLogo from 'assets/quizz.png'
 import { useNavigation } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 import { coursesAPI } from '../../../api/index.api'
-import Select from 'react-native-picker-select'
 import CoursesModal from '../../../components/modal/CoursesModal'
 import ClassesModal from '../../../components/modal/ClassesModal'
 
@@ -304,12 +302,7 @@ const QuizzCode = ({ route }) => {
   }
 
   const deleteQuestion = (id) => {
-    // setQuestions((prev) => prev.filter((_, index) => index !== item))
-    // setActivites((prev) => {
-
-    // })
     setQuestions((prev) => prev.filter((question) => question.id !== id))
-    // Eliminar la actividad correspondiente de la lista de actividades (activites)
     setActivites((prev) => prev.filter((activity) => activity.quizz.id !== id))
   }
 
@@ -404,14 +397,6 @@ const QuizzCode = ({ route }) => {
 
   return (
     <View className="flex-1 bg-[#F5F9FF]">
-      {/* <CongratsActivity
-        isVisible={showSuccess}
-        onClose={toggleSuccess}
-        loading={loading}
-        success={success}
-        classId={classId}
-      /> */}
-
       <CoursesModal
         visible={showSelectSubjectModal}
         items={itemCourses}
@@ -609,7 +594,7 @@ const QuizzCode = ({ route }) => {
             >
               Disponible hasta
             </Text>
-            <View className="flex flex-row items-center justify-between">
+            <View classNasaveQuestionLightningme="flex flex-row items-center justify-between">
               <View className="flex flex-1 h-14 items-center justify-center bg-white border border-gray-200 rounded-lg">
                 <Text>{dueDate.toLocaleDateString()}</Text>
               </View>

@@ -1,13 +1,31 @@
-
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useRef, useState } from 'react'
-import { FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import program from 'assets/programacion.jpg'
 
 const ClassesSlide = () => {
   const { classes } = useSelector((state) => state.teacher)
   const flatListRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  const formatDate = (date) => {
+    if (typeof date === 'string') {
+      date = new Date(date)
+    } else if (!(date instanceof Date)) {
+      throw new Error('Fecha inválida')
+    }
+
+    return date
+      .toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .split('/')
+      .reverse()
+      .join('-') // Convertir a formato YYYY-MM-DD
+  }
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -69,7 +87,7 @@ const ClassesSlide = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
-              className="flex flex-col w-[250px] h-[150px] bg-white mr-4 rounded-xl border border-gray-200"
+              className="flex flex-col w-[250px]  bg-white mr-4 rounded-xl border border-gray-200"
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -80,37 +98,46 @@ const ClassesSlide = () => {
               key={item.id}
             >
               {/* Imagen del curso */}
-              <View className="w-full h-[75px] bg-red-400 rounded-t-xl"></View>
+              <View className="w-full h-[125px] rounded-t-xl relative overflow-hidden">
+                <Image
+                  source={program}
+                  className="absolute w-full h-full object-contain"
+                  resizeMode="cover"
+                />
+              </View>
 
               {/* Detalles del curso */}
-              <View className="py-3 px-3 flex-1">
+              <View className="py-3 px-3">
                 <Text
                   style={{
-                    fontFamily: 'Jost_600SemiBold',
-                    fontSize: 16,
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 14,
                     color: '#202244',
                   }}
                 >
-                  {item.text}
+                  {item.topic}
                 </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Mulish_600SemiBold',
-                    fontSize: 12,
-                    color: '#545454',
-                  }}
-                >
-                  {item.activitiesCount} actividades
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Mulish_400Regular',
-                    fontSize: 12,
-                    color: '#888888',
-                  }}
-                >
-                  Fecha de creación: {item.creationDate}
-                </Text>
+                <View className="flex flex-row items-center gap-2">
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_600SemiBold',
+                      fontSize: 12,
+                      color: '#202244',
+                    }}
+                  >
+                    Fecha de creación:
+                  </Text>
+
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_600SemiBold',
+                      fontSize: 12,
+                      color: '#888888',
+                    }}
+                  >
+                    {formatDate(item.created_at)}
+                  </Text>
+                </View>
               </View>
             </View>
           )}

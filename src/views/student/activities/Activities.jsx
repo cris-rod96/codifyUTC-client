@@ -28,9 +28,11 @@ import brainLogo from 'assets/brain.png'
 import puzzleLogo from 'assets/puzzle.png'
 import poster from 'assets/game-default.png'
 import { dateUtils } from 'utils/index.utils'
+import Results from '../../../components/results/Results'
 
 const Activities = () => {
   const { user } = useSelector((state) => state.user)
+  const { quizzResponses } = useSelector((state) => state.game)
   const [userCourse, setUserCourse] = useState(null)
   const [classes, setClasses] = useState([])
   const [activities, setActivities] = useState([])
@@ -39,6 +41,13 @@ const Activities = () => {
   const [showQuizzGame, setShowQuizzGame] = useState(false)
   const [showLightningGame, setShowLightningGame] = useState(false)
   const [activityId, setActivityId] = useState(null)
+
+  const [showResultsModal, setShowResultsModal] = useState(false)
+  const toggleShowResultsModal = () => setShowResultsModal((prev) => !prev)
+
+  const onReturn = () => {
+    toggleShowResultsModal()
+  }
 
   const toggleQuizzGame = () => setShowQuizzGame((prev) => !prev)
   const toggleLightningGame = () => setShowLightningGame((prev) => !prev)
@@ -61,6 +70,14 @@ const Activities = () => {
     if (type === 'Quizz Code') {
       toggleQuizzGame()
     }
+  }
+  const showResults = () => {
+    toggleQuizzGame()
+    setTimeout(() => {
+      setShowResultsModal(true)
+    }, 2000)
+    console.log(JSON.stringify(quizzResponses))
+    console.log(activityId)
   }
 
   const viewQuizzResponses = (id) => {
@@ -362,6 +379,14 @@ const Activities = () => {
             showQuizzGame={showQuizzGame}
             toggleQuizzGame={toggleQuizzGame}
             activity_id={activityId}
+            showResults={showResults}
+          />
+          <Results
+            visible={showResultsModal}
+            onClose={toggleShowResultsModal}
+            userAnswers={quizzResponses}
+            onReturn={onReturn}
+            activityId={activityId}
           />
         </ScrollView>
       ) : (

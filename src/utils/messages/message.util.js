@@ -10,8 +10,8 @@ Te invitamos a ser parte de nuestro nuevo curso: *"${course.subject}"* ofrecido 
 - **Código de acceso:** ${course.access_code}  
 
 ✨ Este curso está diseñado para brindarte:  
-✅ Clases en línea con materiales exclusivos.  
-✅ Acceso a recursos interactivos que potenciarán tu aprendizaje.  
+✅ Clases en línea bajo la lógica de tu docente de turno.  
+✅ Acceso a recursos externos para potenciar tu aprendizaje.  
 ✅ Un entorno innovador para resolver desafíos y actividades prácticas.
 
 ¡Es muy sencillo! Únete ahora utilizando el código de acceso al registrarte en nuestra plataforma.

@@ -47,4 +47,5 @@ export {
   Overdue,
   Pending,
   QuizzCodeFeedback,
+  QuizzGame,
 } from './student/index.student'

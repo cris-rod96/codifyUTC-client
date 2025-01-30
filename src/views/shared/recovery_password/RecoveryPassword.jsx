@@ -42,7 +42,7 @@ const RecoveryPassword = () => {
 
     if (ok) {
       setTimeout(() => {
-        navigation.navigate('RecoveryCode', {
+        navigation.replace('RecoveryCode', {
           method,
           value,
         })
