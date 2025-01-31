@@ -19,6 +19,13 @@ const activitiesAPI = {
       },
     })
   },
+  createBrainActivity: (data) => {
+    return instance.post(`${model}/brain`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
 
   getById: (id) => {
     return instance.get(`${model}/${id}`)
@@ -29,6 +36,10 @@ const activitiesAPI = {
 
   getByTeacher: (user_id) => {
     return instance.get(`${model}/teacher/${user_id}`)
+  },
+
+  updateActivity: (activity_id, data) => {
+    return instance.put(`${model}/${activity_id}`, data)
   },
 
   deleteActivity: (activity_id) => {

@@ -16,7 +16,7 @@ const StudentsSlide = () => {
   useEffect(() => {
     const students = courses.flatMap((course) => course.Students)
     setAllStudents(students)
-  }, [])
+  }, [user])
 
   return (
     <View className="flex flex-col gap-3 w-full">

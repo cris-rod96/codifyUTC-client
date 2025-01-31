@@ -3,11 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import courseImage from 'assets/web-dev.jpg'
+import { useNavigation } from '@react-navigation/native'
 
 const CoursesSlide = () => {
+  const navigation = useNavigation()
   const { courses } = useSelector((state) => state.teacher)
   const flatListRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  const viewAllCourses = () => {
+    navigation.navigate('TabCourse')
+  }
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -41,7 +47,10 @@ const CoursesSlide = () => {
         </Text>
 
         {courses.length > 0 && (
-          <TouchableOpacity className="w-fit flex flex-row items-center">
+          <TouchableOpacity
+            className="w-fit flex flex-row items-center"
+            onPress={viewAllCourses}
+          >
             <Text
               style={{
                 fontFamily: 'Mulish_800ExtraBold',

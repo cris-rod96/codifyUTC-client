@@ -24,7 +24,7 @@ const Profile = () => {
   return !user ? (
     <Loading message={'Espere por favor'} />
   ) : (
-    <View className="flex flex-col items-center justify-center h-full w-full bg-[#F5F9FF]">
+    <View className="flex-1 flex flex-col items-center py-20 h-full w-full bg-[#F5F9FF]">
       <View
         className="w-5/6 h-[500px] relative bg-white rounded-xl border border-gray-200 shadow"
         style={{ overflow: 'visible' }}
@@ -86,25 +86,7 @@ const Profile = () => {
               <Ionicons name="chevron-forward" size={22} color={'#202244'} />
             </TouchableOpacity>
 
-            {user.role === 'Docente' && (
-              <TouchableOpacity className="flex flex-row justify-between items-center w-full">
-                <View className="flex flex-row gap-2 items-center">
-                  <Ionicons name="trash-outline" size={22} color={'#202244'} />
-                  <Text
-                    style={{
-                      color: '#202244',
-                      fontFamily: 'Mulish_700Bold',
-                      fontSize: 15,
-                    }}
-                  >
-                    Papelera
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={22} color={'#202244'} />
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity className="flex flex-row justify-between items-center w-full">
+            {/* <TouchableOpacity className="flex flex-row justify-between items-center w-full">
               <View className="flex flex-row gap-2 items-center">
                 <Ionicons name="headset-outline" size={22} color={'#202244'} />
                 <Text
@@ -118,9 +100,12 @@ const Profile = () => {
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={22} color={'#202244'} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
-            <TouchableOpacity className="flex flex-row justify-between items-center w-full">
+            <TouchableOpacity
+              className="flex flex-row justify-between items-center w-full"
+              onPress={() => navigation.navigate('NewPassword')}
+            >
               <View className="flex flex-row gap-2 items-center">
                 <Ionicons
                   name="lock-closed-outline"

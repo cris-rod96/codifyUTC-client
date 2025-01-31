@@ -35,6 +35,7 @@ import { toastConfig } from '../../../config/index.config'
 import {
   SelectActivityModal,
   DeleteQuestionModal,
+  EditActivityModal,
 } from 'components/modal/index.modals'
 
 const TeacherActivities = () => {
@@ -52,6 +53,10 @@ const TeacherActivities = () => {
   const toggleShowSelecActivityModal = () =>
     setShowSelectActivityModal((prev) => !prev)
 
+  const [showEditActivityModal, setShowEditActivityModal] = useState(false)
+  const toggleShowEditActivityModal = () =>
+    setShowEditActivityModal((prev) => !prev)
+
   const showToast = (type, title, message) => {
     Toast.show({
       type,
@@ -61,9 +66,22 @@ const TeacherActivities = () => {
     })
   }
   const handleContinue = (type) => {
+    console.log(type)
     if (type === 'Quizz Code') {
       navigation.navigate('TabActivity', {
         screen: 'QuizzCode',
+      })
+    }
+
+    if (type === 'Lightning Code') {
+      navigation.navigate('TabActivity', {
+        screen: 'LightningCode',
+      })
+    }
+
+    if (type === 'Brain Boost') {
+      navigation.navigate('TabActivity', {
+        screen: 'BrainBoost',
       })
     }
   }
@@ -81,19 +99,12 @@ const TeacherActivities = () => {
     }
   }
 
-  const viewActivityDetails = (activity_id) => {
-    navigation.navigate('DetailActivity', {
-      activity_id,
-    })
-  }
-
   const fetchData = () => {
     if (user) {
       activitiesAPI
         .getByTeacher(user.id)
         .then((res) => {
           const { activities } = res.data
-          console.log('Aqui estamos:', activities)
           dispatch(saveActivities(activities))
         })
         .catch((err) => {
@@ -103,6 +114,11 @@ const TeacherActivities = () => {
           setRefreshing(false)
         })
     }
+  }
+
+  const editActivity = (id) => {
+    setActivityId(id)
+    toggleShowEditActivityModal()
   }
 
   const onContinue = (confirm) => {
@@ -118,14 +134,17 @@ const TeacherActivities = () => {
         showToast(
           'error',
           'Error al eliminar',
-          'No se elimino la actividad. Intente de nuevo'
+          'No se eliminó la actividad. Intente de nuevo'
         )
       }
       onRefresh()
     }, 1500)
   }
+  const refreshActivities = () => {
+    onRefresh()
+  }
 
-  const deleteActivity = (id) => {
+  const detailActivity = (id) => {
     navigation.navigate('DetailActivity', {
       id: id,
     })
@@ -332,7 +351,7 @@ const TeacherActivities = () => {
 
               <TouchableOpacity
                 className="flex flex-row items-center justify-center gap-2 h-[40px] bg-[#440b0b] mt-5 rounded-b-lg"
-                onPress={() => deleteActivity(item.id)}
+                onPress={() => detailActivity(item.id)}
               >
                 <Text
                   style={{
@@ -401,6 +420,12 @@ const TeacherActivities = () => {
           </TouchableOpacity>
         </View>
       )}
+      <EditActivityModal
+        visible={showEditActivityModal}
+        onClose={toggleShowEditActivityModal}
+        activity_id={activityId}
+        onContinue={refreshActivities}
+      />
       <Toast config={toastConfig} position="bottom" />
     </View>
   )

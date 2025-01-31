@@ -28,6 +28,18 @@ const UserApi = {
   changePassword: ({ method, value, password }) => {
     return instance.put('/users/change-password', { method, value, password })
   },
+
+  updateInfo: (user_id, data) => {
+    return instance.patch(`/users/${user_id}`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  newPassword: (user_id, password) => {
+    return instance.patch(`/users/new-password/${user_id}`, { password })
+  },
 }
 
 export default UserApi

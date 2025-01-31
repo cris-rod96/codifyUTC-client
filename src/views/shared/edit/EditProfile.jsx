@@ -1,4 +1,7 @@
+import { Ionicons } from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   Text,
@@ -6,122 +9,275 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import profile from '../../../../assets/profile.png'
-import { Ionicons } from '@expo/vector-icons'
+import { useDispatch, useSelector } from 'react-redux'
+import { pickerImagesUtil, storageUtil } from 'utils/index.utils'
+import { usersAPI } from 'api/index.api'
+
+import profile from 'assets/profile.png'
+import { saveUser } from '../../../redux/slices/user.slice'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '../../../config/index.config'
+
 const EditProfile = () => {
+  const { user } = useSelector((state) => state.user)
+  const [imageUri, setImageUri] = useState(null)
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
+
+  const showToast = (type, title, message) => {
+    Toast.show({
+      type,
+      text1: title,
+      text2: message,
+    })
+  }
+
+  const pickImage = async () => {
+    const uri = await pickerImagesUtil.pickImageFromGalllery()
+    if (uri) {
+      setImageUri(uri)
+    }
+  }
+
+  const handleChange = (name, value) => {
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = () => {
+    const formData = new FormData()
+    const { profile_picture, ...info } = data
+
+    Object.keys(info).forEach((key) => {
+      formData.append(key, info[key])
+    })
+
+    formData.append('profile_picture', {
+      uri: profile_picture,
+      name: `profile_picture_${user.nick_name.replace(/\s/g, '')}.jpg`,
+      type: 'image/jpeg',
+    })
+
+    setLoading(true)
+    usersAPI
+      .updateInfo(user.id, formData)
+      .then((res) => {
+        showToast(
+          'success',
+          'Información actualiza',
+          'Se actualizó la información del usuario'
+        )
+        const { data: userData } = res.data
+        dispatch(saveUser(userData))
+      })
+      .catch((err) => {
+        showToast(
+          'error',
+          'Error al actualizar',
+          'No se actualizó la información del usuario'
+        )
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    if (imageUri) {
+      setData((prev) => ({
+        ...prev,
+        profile_picture: imageUri,
+      }))
+    }
+  }, [imageUri])
+
+  useEffect(() => {
+    if (user) {
+      setData({
+        full_name: user.full_name,
+        phone: user.phone,
+        profile_picture: user.profile_picture,
+      })
+    }
+  }, [])
   return (
-    <ScrollView>
-      <View className="flex flex-col gap-10 items-center justify- h-full w-full py-10 px-5">
-        {/* Image profile */}
-        <View className="relative w-36 h-36 rounded-full border border-gray-200">
+    <ScrollView
+      className="flex-1 w-full bg-[#F5F9FF]"
+      contentContainerStyle={{
+        paddingBottom: 20,
+      }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-1 bg-[#F5F9FF] flex flex-col py-5 px-5 items-center ">
+        {/* Imagen */}
+        <TouchableOpacity
+          className="w-32 h-32 rounded-full bg-red-400  border-2 border-[#741D1D] relative mb-4"
+          onPress={pickImage}
+        >
           <Image
-            source={profile}
-            className="w-full h-full object-cover absolute"
+            source={
+              data?.profile_picture ? { uri: data.profile_picture } : profile
+            }
+            className="w-full h-full object-contain absolute rounded-full"
+            resizeMode="cover"
           />
-          <TouchableOpacity className="absolute bottom-2 -right-1 rounded-xl bg-[#741D1D] p-2">
-            <Ionicons name="image" size={22} color="white" />
-          </TouchableOpacity>
-        </View>
+
+          <View className="absolute bottom-2 right-2 rounded-full bg-[#741D1D] w-10 h-10 flex items-center justify-center">
+            <Ionicons name="camera" size={24} color={'white'} />
+          </View>
+        </TouchableOpacity>
 
         {/* Formulario */}
-        <View className="w-full flex flex-col gap-4">
-          {/* Nombres completos */}
+        <View className="flex flex-col w-full gap-3 mb-5">
           <TextInput
-            placeholder="Cristhian Rodriguez"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
+            className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
             style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
+              fontFamily: 'Mulish_600SemiBold',
+              fontSize: 15,
+              color: '#888',
             }}
+            defaultValue={data?.full_name}
+            onChangeText={(value) => handleChange('full_name', value)}
           />
+          <View className="flex flex-col gap-2">
+            <TextInput
+              className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
+              style={{
+                fontFamily: 'Mulish_600SemiBold',
+                fontSize: 15,
+                color: '#888',
+              }}
+              defaultValue={user.email}
+              editable={false}
+            />
+            <Text
+              style={{
+                fontFamily: 'Mulish_700Bold',
+                fontSize: 12,
+                color: '#741D1D',
+              }}
+              className="px-3"
+            >
+              * Este campo no puede actualizarse
+            </Text>
+          </View>
+          <TextInput
+            className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
+            style={{
+              fontFamily: 'Mulish_600SemiBold',
+              fontSize: 15,
+              color: '#888',
+            }}
+            defaultValue={data?.phone}
+            onChangeText={(value) => handleChange('phone', value)}
+          />
+          <View className="flex flex-col gap-2">
+            <TextInput
+              className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
+              style={{
+                fontFamily: 'Mulish_600SemiBold',
+                fontSize: 15,
+                color: '#888',
+              }}
+              defaultValue={user.dni}
+              editable={false}
+            />
+            <Text
+              style={{
+                fontFamily: 'Mulish_700Bold',
+                fontSize: 12,
+                color: '#741D1D',
+              }}
+              className="px-3"
+            >
+              * Este campo no puede actualizarse
+            </Text>
+          </View>
+          <View className="flex flex-col gap-2">
+            <TextInput
+              className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
+              style={{
+                fontFamily: 'Mulish_600SemiBold',
+                fontSize: 15,
+                color: '#888',
+              }}
+              defaultValue={user.gender}
+              editable={false}
+            />
+            <Text
+              style={{
+                fontFamily: 'Mulish_700Bold',
+                fontSize: 12,
+                color: '#741D1D',
+              }}
+              className="px-3"
+            >
+              * Este campo no puede actualizarse
+            </Text>
+          </View>
 
-          {/* Nickname */}
-          <TextInput
-            placeholder="rodris"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
-          {/* Email */}
-          <TextInput
-            placeholder="crisrodam1996@gmail.com"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
+          <View className="flex flex-col gap-2">
+            <TextInput
+              className="w-full bg-white border border-gray-200 rounded-lg h-[50px] px-5"
+              style={{
+                fontFamily: 'Mulish_600SemiBold',
+                fontSize: 15,
+                color: '#888',
+              }}
+              defaultValue={user.role}
+              editable={false}
+            />
+            <Text
+              style={{
+                fontFamily: 'Mulish_700Bold',
+                fontSize: 12,
+                color: '#741D1D',
+              }}
+              className="px-3"
+            >
+              * Este campo no puede actualizarse
+            </Text>
+          </View>
+        </View>
 
-          {/* DNI */}
-          <TextInput
-            placeholder="0940501596"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
-
-          {/* Phone */}
-          <TextInput
-            placeholder="0981135286"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
-
-          {/* Género */}
-          <TextInput
-            placeholder="Masculino"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
-
-          {/* Role */}
-          <TextInput
-            placeholder="Estudiante"
-            className="bg-white rounded-lg px-4 py-5 border border-gray-200"
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 14,
-              color: '#505050',
-            }}
-          />
-
-          {/* Submit */}
-          <TouchableOpacity className="w-full flex flex-row items-center justify-center gap-2 bg-[#741D1D] px-4 py-5 rounded-3xl relative">
+        <TouchableOpacity
+          className="w-full py-4 rounded-full  flex flex-row gap-2 items-center justify-center"
+          style={{
+            backgroundColor: loading ? '#888' : '#741D1D',
+          }}
+          disabled={loading}
+          onPress={handleSubmit}
+        >
+          {loading ? (
+            <>
+              <ActivityIndicator size={'small'} color={'white'} />
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: 'white',
+                }}
+              >
+                Actualizando
+              </Text>
+            </>
+          ) : (
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
-                fontSize: 18,
+                fontSize: 16,
                 color: 'white',
               }}
             >
               Actualizar
             </Text>
-            <View className="absolute right-5 flex items-center justify-center bg-white w-7 h-7 rounded-full">
-              <Ionicons
-                name="chevron-forward-sharp"
-                size={20}
-                color={'#741D1D'}
-              />
-            </View>
-          </TouchableOpacity>
-        </View>
+          )}
+        </TouchableOpacity>
       </View>
+      <Toast config={toastConfig} position="bottom" />
     </ScrollView>
   )
 }

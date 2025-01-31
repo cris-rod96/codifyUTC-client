@@ -3,11 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import program from 'assets/programacion.jpg'
+import { useNavigation } from '@react-navigation/native'
 
 const ClassesSlide = () => {
+  const navigation = useNavigation()
   const { classes } = useSelector((state) => state.teacher)
   const flatListRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  const viewClasses = () => {
+    navigation.navigate('TabClass')
+  }
 
   const formatDate = (date) => {
     if (typeof date === 'string') {
@@ -59,7 +65,10 @@ const ClassesSlide = () => {
         </Text>
 
         {classes.length > 0 && (
-          <TouchableOpacity className="w-fit flex flex-row items-center">
+          <TouchableOpacity
+            className="w-fit flex flex-row items-center"
+            onPress={viewClasses}
+          >
             <Text
               style={{
                 fontFamily: 'Mulish_800ExtraBold',

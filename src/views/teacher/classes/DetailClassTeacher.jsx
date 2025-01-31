@@ -18,7 +18,14 @@ import quizz from 'assets/quizz.png'
 
 import { Entypo, FontAwesome, Octicons } from '@expo/vector-icons'
 import gameDefault from 'assets/game-default.png'
-import { TopicModal, SelectActivityModal } from 'components/modal/index.modals'
+import {
+  TopicModal,
+  SelectActivityModal,
+  EditTopicModal,
+  EditActivityModal,
+  DeleteQuestionModal,
+} from 'components/modal/index.modals'
+import { dateUtils } from '../../../utils/index.utils'
 
 const DetailClassTeacher = ({ route, navigation }) => {
   const [currentClass, setCurrentClass] = useState({
@@ -28,6 +35,8 @@ const DetailClassTeacher = ({ route, navigation }) => {
   const [topics, setTopics] = useState([])
   const [activities, setActivities] = useState([])
 
+  const [refresh, setRefresh] = useState(false)
+
   const [showTopicModal, setShowTopicModal] = useState(false)
   const toggleShowTopicModal = () => setShowTopicModal((prev) => !prev)
 
@@ -35,8 +44,40 @@ const DetailClassTeacher = ({ route, navigation }) => {
   const toggleShowSelecActivityModal = () =>
     setShowSelectActivityModal((prev) => !prev)
 
+  const [showEditTopicModal, setShowEditTopicModal] = useState(false)
+  const toggleShowEditTopicModal = () => setShowEditTopicModal((prev) => !prev)
+
+  const [showEditActivityModal, setShowEditActivityModal] = useState(false)
+  const toggleShowEditActivityModal = () =>
+    setShowEditActivityModal((prev) => !prev)
+  const [topicId, setTopicId] = useState(null)
+  const [activityId, setActivityId] = useState(null)
+
+  const [showQuestionDelete, setShowQuestionDelete] = useState(false)
+  const toggleShowQuestionDelete = () => setShowQuestionDelete((prev) => !prev)
+
+  const editContent = (topic_id) => {
+    setTopicId(topic_id)
+    toggleShowEditTopicModal()
+  }
+
+  const onContinue = () => {
+    setRefresh((prev) => !prev)
+  }
+
+  const afterDelete = (confirm) => {
+    if (confirm) {
+      setShowQuestionDelete(false)
+      setRefresh((prev) => !prev)
+    }
+  }
+
+  const handleDelete = (id) => {
+    setActivityId(id)
+    toggleShowQuestionDelete()
+  }
+
   const handleContinue = (type) => {
-    console.log(type)
     if (type === 'Quizz Code') {
       navigation.navigate('TabActivity', {
         screen: 'QuizzCode',
@@ -69,42 +110,22 @@ const DetailClassTeacher = ({ route, navigation }) => {
     }
   }
 
-  const addActivity = () => {
-    console.log('AddActivity')
-  }
-
-  const deleteTopic = (id) => {
-    Alert.alert('Borrar contenido', '¿Estás seguro de eliminar el contenido?', [
-      {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-      },
-    ])
-  }
-
-  const deleteActivity = (id) => {
-    Alert.alert('Borrar contenido', '¿Estás seguro de eliminar el contenido?', [
-      {
-        text: 'Cancelar',
-        style: 'cancel',
-      },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-      },
-    ])
-  }
   const editActivity = (id) => {
-    console.log('Editar activity: ', id)
+    setActivityId(id)
+    toggleShowEditActivityModal()
+  }
+
+  const verifyExpired = (due_date) => {
+    const currentDate = dateUtils.formatDate(new Date())
+    return currentDate > due_date
   }
 
   const renderContent = (item, index) => {
     return (
-      <View className="flex flex-col bg-white border border-gray-200  overflow-hidden pb-10 relative">
+      <View
+        className="flex flex-col bg-white border border-gray-200  overflow-hidden pb-10 relative"
+        key={item.id}
+      >
         {/* Cabecera */}
         <View className="h-[45px] px-5 flex flex-row items-center relative">
           <Text
@@ -117,7 +138,10 @@ const DetailClassTeacher = ({ route, navigation }) => {
             {item.title}
           </Text>
 
-          <TouchableOpacity className="absolute right-4 flex flex-row items-center gap-2">
+          <TouchableOpacity
+            className="absolute right-4 flex flex-row items-center gap-2"
+            onPress={() => editContent(item.id)}
+          >
             <Text
               style={{
                 fontFamily: 'Mulish_600SemiBold',
@@ -165,24 +189,6 @@ const DetailClassTeacher = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* <View className="flex flex-row items-center h-[40px] justify-between mt-4">
-          <TouchableOpacity
-            className="flex-1 h-full flex flex-row gap-2 items-center justify-center bg-[#440b0b]"
-            onPress={() => deleteTopic(item.id)}
-          >
-            <Octicons name="trash" size={18} color={'white'} />
-            <Text
-              style={{
-                fontFamily: 'Jost_600SemiBold',
-                fontSize: 16,
-                color: 'white',
-              }}
-            >
-              Eliminar
-            </Text>
-          </TouchableOpacity>
-        </View> */}
-
         <Text
           className="absolute bottom-3 right-3"
           style={{
@@ -198,8 +204,9 @@ const DetailClassTeacher = ({ route, navigation }) => {
   }
 
   const renderActivty = (item) => {
+    const activityExpired = verifyExpired(item.due_date)
     return (
-      <View className="flex flex-col bg-white rounded-lg">
+      <View className="flex flex-col bg-white rounded-lg" key={item.id}>
         {/* Poster and Logo */}
         <View className="w-full h-[160px] relative rounded-t-lg">
           <Image
@@ -306,11 +313,37 @@ const DetailClassTeacher = ({ route, navigation }) => {
               </View>
             </View>
           </View>
+
+          {activityExpired && (
+            <View className="px-3 mt-5 flex flex-col gap-2">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 14,
+                  color: '#741D1D',
+                  textAlign: 'center',
+                }}
+              >
+                Esta actividad ya expiró. Te recomendamos cerrarla o eliminarla
+                para evitar confusiones.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 12,
+                  color: '#202244',
+                  textAlign: 'center',
+                }}
+              >
+                Fecha de expiración: {item.due_date}
+              </Text>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity
-          className="flex flex-row items-center justify-center gap-2 h-[40px] bg-[#440b0b] mt-5 rounded-b-lg"
-          onPress={() => deleteActivity(item.id)}
+          className="flex flex-row items-center justify-center gap-2 h-[40px] bg-[#440b0b] mt-2 rounded-b-lg"
+          onPress={() => handleDelete(item.id)}
         >
           <Octicons name="trash" size={16} color={'white'} />
           <Text
@@ -354,7 +387,7 @@ const DetailClassTeacher = ({ route, navigation }) => {
           console.log('Finalizando búsqueda de actividades')
         })
     }
-  }, [currentClass])
+  }, [currentClass, refresh])
 
   useEffect(() => {
     if (route.params) {
@@ -535,6 +568,27 @@ const DetailClassTeacher = ({ route, navigation }) => {
         isVisible={showSelectActivityModal}
         onClose={toggleShowSelecActivityModal}
         onContinue={handleContinue}
+      />
+
+      <EditTopicModal
+        visible={showEditTopicModal}
+        onClose={toggleShowEditTopicModal}
+        topic_id={topicId}
+        onContinue={onContinue}
+      />
+      <EditActivityModal
+        visible={showEditActivityModal}
+        onClose={toggleShowEditActivityModal}
+        activity_id={activityId}
+        onContinue={onContinue}
+      />
+      <DeleteQuestionModal
+        title={'¿Realmente desea eliminar esta actividad?'}
+        isVisible={showQuestionDelete}
+        onClose={toggleShowQuestionDelete}
+        onContinue={afterDelete}
+        model={'activities'}
+        id={activityId}
       />
     </View>
   )

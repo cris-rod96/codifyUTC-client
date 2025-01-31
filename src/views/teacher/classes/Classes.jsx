@@ -14,7 +14,7 @@ import { useLoading } from 'context/LoadingContext'
 import LottieView from 'lottie-react-native'
 import emptyData from 'assets/no-data.json'
 import { FontAwesome6, Octicons } from '@expo/vector-icons'
-import { storageUtil } from '../../../utils/index.utils'
+import { lectureUtils, storageUtil } from '../../../utils/index.utils'
 import { useNavigation } from '@react-navigation/native'
 import DeleteQuestionModal from '../../../components/modal/DeleteQuestionModal'
 import Toast from 'react-native-toast-message'
@@ -279,7 +279,7 @@ const Classes = ({ route }) => {
                             color: '#F5F9FF',
                           }}
                         >
-                          3 Mins
+                          {lectureUtils.getTotalEstimatedReadingTime(item)} Mins
                         </Text>
                       )}
                     </View>
@@ -319,7 +319,10 @@ const Classes = ({ route }) => {
                                     color: '#545454',
                                   }}
                                 >
-                                  3 Mins
+                                  {lectureUtils.estimateReadingTime(
+                                    topic.content
+                                  )}{' '}
+                                  Mins
                                 </Text>
                               </View>
                             </View>

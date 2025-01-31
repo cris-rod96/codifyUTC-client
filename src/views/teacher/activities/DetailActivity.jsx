@@ -4,7 +4,12 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { dateUtils } from '../../../utils/index.utils'
 import { responsesAPI, quizzResponseAPI } from 'api/index.api'
+import { DeleteQuestionModal } from 'components/modal/index.modals'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '../../../config/index.config'
 const DetailActivity = ({ route, navigation }) => {
+  const [showQuestionDelete, setShowQuestionDelete] = useState(false)
+  const toggleShowQuestionDelete = () => setShowQuestionDelete((prev) => !prev)
   const [activityId, setActivityId] = useState(null)
   const [participants, setParticipants] = useState(0)
   const [responses, setResponses] = useState([])
@@ -12,6 +17,14 @@ const DetailActivity = ({ route, navigation }) => {
   const [averageTime, setAverageTime] = useState(0)
   const [averageScore, setAverageScore] = useState(0)
   const [arrFeed, setArrFeed] = useState([])
+
+  const showToast = (type, title, message) => {
+    Toast.show({
+      type,
+      text1: title,
+      text2: message,
+    })
+  }
 
   const getFeedbackMessage = (percentajeHits) => {
     if (percentajeHits >= 90 && percentajeHits <= 100) {
@@ -54,6 +67,25 @@ const DetailActivity = ({ route, navigation }) => {
     }
   }
 
+  const onContinue = (confirm) => {
+    if (confirm) {
+      toggleShowQuestionDelete()
+      showToast(
+        'success',
+        'Actividad eliminada',
+        'Se ha eliminado esta actividad'
+      )
+      setTimeout(() => {
+        navigation.goBack()
+      }, 2500)
+    } else {
+      showToast(
+        'error',
+        'Error al eliminar',
+        'No se pudo eliminar esta actividad'
+      )
+    }
+  }
   const calculatePercentage = (hits, errors) => {
     const total = hits + errors
     const percentajeHits = Math.ceil((hits / total) * 100)
@@ -93,14 +125,13 @@ const DetailActivity = ({ route, navigation }) => {
   }, [quizzResponse])
 
   useEffect(() => {
-    const avgScoreTotal =
-      responses.reduce((sum, r) => sum + r.score_total, 0) / responses.length
-    const avgTimeTaken =
-      responses.reduce((sum, r) => sum + r.time_taken, 0) / responses.length
-    setAverageTime(avgTimeTaken)
-    setAverageScore(avgScoreTotal)
-
     if (responses.length > 0) {
+      const avgScoreTotal =
+        responses.reduce((sum, r) => sum + r.score_total, 0) / responses.length
+      const avgTimeTaken =
+        responses.reduce((sum, r) => sum + r.time_taken, 0) / responses.length
+      setAverageTime(avgTimeTaken)
+      setAverageScore(avgScoreTotal)
       const ids = responses.map((r) => r.id)
       Promise.all(ids.map((id) => quizzResponseAPI.getByResponse(id))).then(
         (res) => {
@@ -134,7 +165,10 @@ const DetailActivity = ({ route, navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         {/* Boton eliminar */}
-        <TouchableOpacity className="flex flex-row items-center gap-2 py-3 justify-center bg-[#741D1D] rounded-lg">
+        <TouchableOpacity
+          className="flex flex-row items-center gap-2 py-3 justify-center bg-[#741D1D] rounded-lg"
+          onPress={toggleShowQuestionDelete}
+        >
           <Octicons name="trash" size={21} color={'white'} />
           <Text
             style={{
@@ -334,8 +368,34 @@ const DetailActivity = ({ route, navigation }) => {
                 </View>
               )
             })}
+
+          {arrFeed.length === 0 && (
+            <View className="w-full bg-white border border-dashed border-gray-200 rounded-lg px-3 py-5">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 14,
+
+                  color: '#888',
+                  textAlign: 'center',
+                }}
+              >
+                La actividad aún no ha recibido participantes
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
+
+      <DeleteQuestionModal
+        title={'¿Realmente desea eliminar esta actividad?'}
+        isVisible={showQuestionDelete}
+        onClose={toggleShowQuestionDelete}
+        onContinue={onContinue}
+        model={'activities'}
+        id={activityId}
+      />
+      <Toast config={toastConfig} position="bottom" />
     </View>
   )
 }

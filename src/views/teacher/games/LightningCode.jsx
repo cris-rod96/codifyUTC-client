@@ -1,4 +1,4 @@
-import { Ionicons, Octicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import {
   Image,
   ScrollView,
@@ -14,14 +14,18 @@ import { useEffect, useRef, useState } from 'react'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from '../../../config/index.config'
 import { dateUtils } from 'utils/index.utils'
-import { activitiesAPI } from 'api/index.api'
+import { activitiesAPI, coursesAPI } from 'api/index.api'
 import {
   TimeModal,
   ScoreModal,
   AnswerModal,
+  CoursesModal,
+  ClassesModal,
 } from 'components/modal/index.modals'
 import uuid from 'uuid'
+import { useSelector } from 'react-redux'
 const LightningCode = ({ route }) => {
+  const { user } = useSelector((state) => state.user)
   // Variables Generales
   const boxOptions = [
     {
@@ -47,6 +51,24 @@ const LightningCode = ({ route }) => {
   const [showTimeModal, setShowTimeModal] = useState(false)
   const [showScoreModal, setShowScoreModal] = useState(false)
   const [showAnswerModal, setShowAnswerModal] = useState(false)
+  const [showSelectSubjectModal, setShowSelectSubjectModal] = useState(false)
+  const [showSelectClassModal, setShowSelectClassModal] = useState(false)
+
+  const [courses, setCourses] = useState([])
+  const [itemCourses, setItemCourses] = useState(null)
+  const [nameCourse, setNameCourse] = useState(null)
+
+  const [courseSelectedId, setCourseSelectedId] = useState(null)
+  const [classes, setClasses] = useState([])
+  const [itemClasses, setItemClasses] = useState(null)
+  const [nameClass, setNameClass] = useState(null)
+  const [selectClass, setSelectClass] = useState(true)
+
+  const toggleShowSubjectModal = () =>
+    setShowSelectSubjectModal((prev) => !prev)
+  const toggleShowSelectClassModal = () =>
+    setShowSelectClassModal((prev) => !prev)
+
   const [showCalendar, setShowCalendar] = useState(false)
   const [loading, setLoading] = useState(false)
   const [classId, setClassId] = useState(null)
@@ -115,6 +137,35 @@ const LightningCode = ({ route }) => {
     hideInputCursor()
     setSelectedValue({ placeholder, bgColor, optionIndex: index })
     setShowAnswerModal(true)
+  }
+
+  const handleCourseSelected = (value, name) => {
+    setCourseSelectedId(value)
+    setNameCourse(name)
+  }
+
+  const handleClassSelected = (value, name) => {
+    setClassId(value)
+    setNameClass(name)
+  }
+
+  const createCourses = () => {
+    const mapCourses = courses.map((course) => ({
+      label: course.subject,
+      value: course.id,
+    }))
+    setItemCourses(mapCourses)
+    toggleShowSubjectModal()
+  }
+
+  const createClasses = () => {
+    const mapClasses = classes.map((item) => ({
+      label: item.topic,
+      value: item.id,
+    }))
+
+    setItemClasses(mapClasses)
+    toggleShowSelectClassModal()
   }
 
   // Método para añadir data a la question
@@ -198,9 +249,6 @@ const LightningCode = ({ route }) => {
       (total, activity) => (total += activity.lightning.score),
       0
     )
-
-    console.log(activities)
-
     const activities_count = activities.length
     const formData = new FormData()
 
@@ -274,6 +322,8 @@ const LightningCode = ({ route }) => {
     setAnswers([])
   }
 
+  // Solucionar el delete question
+
   const renderQuestion = (item) => {
     return (
       <View
@@ -303,14 +353,47 @@ const LightningCode = ({ route }) => {
     if (route.params) {
       const { class_id } = route.params
       setClassId(class_id)
-      // setSelectClass(false)
+      setSelectClass(false)
     } else {
-      // setSelectClass(true)
+      setSelectClass(true)
     }
   }, [route.params])
 
+  useEffect(() => {
+    if (courseSelectedId) {
+      const filterCourse = courses.find(
+        (course) => course.id === courseSelectedId
+      )
+      const { Classes } = filterCourse
+      setClasses(Classes)
+    }
+  }, [courseSelectedId])
+
+  useEffect(() => {
+    if (user) {
+      const { id } = user
+      coursesAPI.getAll(id).then((res) => {
+        const { courses } = res.data
+        setCourses(courses)
+      })
+    }
+  }, [])
+
   return (
     <View className="flex-1 bg-[#F5F9FF]">
+      <CoursesModal
+        visible={showSelectSubjectModal}
+        items={itemCourses}
+        onClose={toggleShowSubjectModal}
+        handleCourseSelected={handleCourseSelected}
+      />
+
+      <ClassesModal
+        visible={showSelectClassModal}
+        items={itemClasses}
+        onClose={toggleShowSelectClassModal}
+        handleClassSelected={handleClassSelected}
+      />
       {/* HEADER */}
       <View className="w-full h-[50px] flex flex-row justify-between items-center border-b border-gray-200 px-5">
         <View className="flex flex-row items-center gap-3">
@@ -345,7 +428,60 @@ const LightningCode = ({ route }) => {
             onClose={toggleScoreModal}
             handleQuestion={handleQuestion}
           />
+          {selectClass && (
+            <>
+              <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative mb-5">
+                <View className="w-14 flex flex-row items-center justify-center h-full ">
+                  <MaterialCommunityIcons
+                    name="room-service"
+                    size={20}
+                    color={'#545454'}
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#505050',
+                  }}
+                >
+                  {nameCourse || 'Selecciona el Curso'}
+                </Text>
 
+                <TouchableOpacity
+                  className="absolute right-5"
+                  onPress={createCourses}
+                >
+                  <Octicons name="chevron-down" size={18} color={'#202244'} />
+                </TouchableOpacity>
+              </View>
+              <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative mb-5">
+                <View className="w-14 flex flex-row items-center justify-center h-full ">
+                  <MaterialCommunityIcons
+                    name="room-service"
+                    size={20}
+                    color={'#545454'}
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 14,
+                    color: '#505050',
+                  }}
+                >
+                  {nameClass || 'Selecciona la clase'}
+                </Text>
+
+                <TouchableOpacity
+                  className="absolute right-5"
+                  onPress={createClasses}
+                >
+                  <Octicons name="chevron-down" size={18} color={'#202244'} />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
           {/* Pregunta Box */}
           <View className="flex flex-col mb-4">
             <Text
@@ -635,7 +771,7 @@ const LightningCode = ({ route }) => {
                     textAlign: 'center',
                   }}
                 >
-                  Añade pregunta a este quizz para empezar
+                  Añade pregunta a este cuestionario
                 </Text>
               </View>
             )}

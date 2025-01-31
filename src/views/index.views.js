@@ -35,6 +35,7 @@ export {
   Welcome2,
   Welcome3,
   OnBoarding,
+  NewPassword,
 } from './shared/index.shared'
 
 // Vistas del Estudiante

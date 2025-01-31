@@ -32,12 +32,14 @@ import {
   ClassStudent,
   ActivitiesStudent,
   Students,
-  QuizzGame,
+  BrainBoost,
+  QuizzCode,
+  LightningCode,
+  NewPassword,
 } from 'views/index.views'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Octicons } from '@expo/vector-icons'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import { QuizzCode, LightningCode } from 'views/index.views'
 import EditProfile from '../views/shared/edit/EditProfile'
 import DetailActivity from '../views/teacher/activities/DetailActivity'
 import DetailClass from '../views/student/class/DetailClass'
@@ -149,7 +151,7 @@ const TeacherTabs = () => {
         name="Perfil"
         component={ProfileNavigator}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerTitle: 'Perfil',
           tabBarLabel: 'Perfil',
           headerStyle: {
@@ -433,6 +435,14 @@ const ActivitiesNavigator = () => {
           headerLeft: () => null,
         }}
       />
+      <Stack.Screen
+        name="BrainBoost"
+        component={BrainBoost}
+        options={{
+          headerTitle: 'Brain Boost',
+          headerLeft: () => null,
+        }}
+      />
 
       {/* Luego colocar el resto */}
     </Stack.Navigator>
@@ -495,7 +505,9 @@ const ProfileNavigator = () => {
         name="Profile"
         component={Profile}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitle: 'Perfil del usuario',
+          headerLeft: () => {},
         }}
       />
       <Stack.Screen
@@ -503,6 +515,13 @@ const ProfileNavigator = () => {
         component={EditProfile}
         options={{
           headerTitle: 'Editar perfil',
+        }}
+      />
+      <Stack.Screen
+        name="NewPassword"
+        component={NewPassword}
+        options={{
+          headerTitle: 'Nueva contraseña',
         }}
       />
     </Stack.Navigator>

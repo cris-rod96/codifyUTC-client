@@ -11,3 +11,4 @@ export { default as RecoveryPassword } from './recovery_password/RecoveryPasswor
 export { default as EditProfile } from './edit/EditProfile'
 export { default as Profile } from './profile/Profile'
 export { default as OnBoarding } from './onBoarding/OnBoarding'
+export { default as NewPassword } from './new_password/NewPassword'
