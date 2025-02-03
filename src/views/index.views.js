@@ -16,6 +16,7 @@ export {
   StudentsByCourse,
   TopicsByClass,
   DetailClassTeacher,
+  DetailCourse,
 } from './teacher/index.teacher'
 
 // Vistas compartidas
@@ -49,4 +50,5 @@ export {
   Pending,
   QuizzCodeFeedback,
   QuizzGame,
+  RankingStudent,
 } from './student/index.student'

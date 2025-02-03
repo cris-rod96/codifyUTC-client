@@ -74,10 +74,16 @@ const toastConfig = {
       }}
       contentContainerStyle={{ paddingHorizontal: 15 }}
       text1Style={{
+        fontFamily: 'Jost_700Bold',
+        fontSize: 15,
+        fontWeight: '400',
+        color: '#202244', // Cambié el color para que el texto sea visible
+      }}
+      text2Style={{
         fontFamily: 'Mulish_600SemiBold',
         fontSize: 12,
         fontWeight: '300',
-        color: '#202244', // Cambié el color para que el texto sea visible
+        color: '#202244',
       }}
       // Agregar icono al lado izquierdo del toast
       leadingIcon={() => (

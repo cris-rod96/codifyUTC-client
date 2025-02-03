@@ -216,6 +216,22 @@ const LightningCode = ({ route }) => {
       return
     }
 
+    if (answers.length < 4) {
+      showToast('error', 'Error', 'Por favor, ingresa las 4 opciones.')
+      return
+    }
+
+    const correctAnswer = answers.filter((answer) => answer.isCorrect)
+
+    if (correctAnswer.length !== 1) {
+      showToast(
+        'error',
+        'Error',
+        'Debe haber 1 respuesta marcada como correcta'
+      )
+      return
+    }
+
     if (
       !question.feedback.trim() ||
       question.feedback.trim().split(' ').length < 10
@@ -286,21 +302,12 @@ const LightningCode = ({ route }) => {
     activitiesAPI
       .createLightningActivity(formData)
       .then((res) => {
-        const { code } = res.data
-        if (code === 201) {
-          clearAll()
-          showToast(
-            'success',
-            'Actividad creada',
-            'Se creó la actividad con éxito'
-          )
-        } else {
-          showToast(
-            'error',
-            'Error al crear',
-            'No se pudo crear la actividad. Intenta de nuevo'
-          )
-        }
+        showToast(
+          'success',
+          'Actividad creada',
+          'Se creó la actividad con éxito'
+        )
+        clearAll()
       })
       .catch((err) => {
         showToast(
@@ -323,6 +330,12 @@ const LightningCode = ({ route }) => {
   }
 
   // Solucionar el delete question
+  const deleteQuestion = (id) => {
+    setQuestions((prev) => prev.filter((question) => question.id !== id))
+    setActivites((prev) =>
+      prev.filter((activity) => activity.lightning.id !== id)
+    )
+  }
 
   const renderQuestion = (item) => {
     return (
@@ -336,12 +349,14 @@ const LightningCode = ({ route }) => {
             fontSize: 14,
             color: '#202244',
           }}
+          className="flex-1"
         >
           {item.question}
         </Text>
         {/* Opciones */}
         <TouchableOpacity
-        // onPress={() => deleteQuestion(item.id || null)}
+          className="w-12 flex justify-center items-center"
+          onPress={() => deleteQuestion(item.id || null)}
         >
           <Octicons name="trash" size={20} color="red" />
         </TouchableOpacity>
@@ -495,12 +510,14 @@ const LightningCode = ({ route }) => {
               Pregunta
             </Text>
             <TextInput
-              className="w-full h-14 bg-white border border-gray-300 rounded-lg text-center mb-6"
+              multiline={true}
+              className="w-full h-[100px] bg-white border border-gray-300 rounded-lg text-center mb-6 px-3"
               style={{
                 fontFamily: 'Mulish_600SemiBold',
                 fontSize: 14,
                 color: '#9D9D9D',
               }}
+              placeholder="Añadir pregunta"
               defaultValue={question.question}
               onChangeText={(value) => handleQuestion('question', value)}
             />
@@ -621,7 +638,7 @@ const LightningCode = ({ route }) => {
               {boxOptions.map((opt, index) => (
                 <TouchableOpacity
                   key={index}
-                  className="w-[48%] h-24 rounded-lg justify-center items-center mb-4"
+                  className="w-[48%] h-24 rounded-lg justify-center items-center mb-4 px-2"
                   style={{
                     backgroundColor: opt.bgColor,
                   }}
@@ -630,8 +647,9 @@ const LightningCode = ({ route }) => {
                   <Text
                     style={{
                       fontFamily: 'Mulish_700Bold',
-                      fontSize: 14,
+                      fontSize: 13,
                       color: '#FFF',
+                      textAlign: 'center',
                     }}
                   >
                     {answers[index]?.option || opt.label}

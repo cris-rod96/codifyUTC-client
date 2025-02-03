@@ -19,9 +19,9 @@ const AccessCodeModal = ({
   user_id,
   course_id,
   successRegister,
+  handleContinue,
 }) => {
   const [accessCode, setAccessCode] = useState('')
-  const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const showToast = (type, title, message) => {
@@ -29,8 +29,15 @@ const AccessCodeModal = ({
       type: type,
       text1: title,
       text2: message,
-      position: 'top',
     })
+  }
+
+  const resetData = () => {
+    setAccessCode('')
+    setLoading(false)
+    setTimeout(() => {
+      handleContinue()
+    }, 2500)
   }
 
   const handleClose = () => {
@@ -53,6 +60,8 @@ const AccessCodeModal = ({
       return
     }
 
+    setLoading(true)
+
     courseStudentsAPI
       .register({
         CourseId: course_id,
@@ -61,13 +70,17 @@ const AccessCodeModal = ({
       })
       .then((res) => {
         const { message } = res.data
-        successRegister()
+        showToast('success', 'Código verificado', message)
+        resetData()
       })
       .catch((err) => {
         if (err.response.data) {
           const { message } = err.response.data
           showToast('error', 'Código incorrecto', message)
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
   useEffect(() => {
@@ -112,36 +125,35 @@ const AccessCodeModal = ({
             onChangeText={(value) => handleChange(value)}
             placeholder="Introduce el código"
             placeholderTextColor="#9E9E9E"
-            className={`w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-black ${
-              !message && 'mb-4'
-            }`}
+            className={`w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-black mb-3`}
             style={{
               fontFamily: 'Mulish_700Bold',
               fontSize: 14,
             }}
           />
 
-          {message && (
-            <Text
-              className="my-2 text-center"
-              style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 11,
-                color: '#741D1D',
-              }}
-            >
-              {message}
-            </Text>
-          )}
-
           {/* Botón de acceso */}
           <TouchableOpacity
-            className="w-full bg-[#741D1D] flex-row items-center justify-center py-3 rounded-full"
+            className="w-full  flex-row items-center justify-center py-3 rounded-full gap-2"
+            style={{
+              backgroundColor: loading ? '#888' : '#741D1D',
+            }}
             onPress={handleSubmit}
-            // disabled={loading}
+            disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="white" />
+              <>
+                <ActivityIndicator size="small" color="white" />
+                <Text
+                  style={{
+                    fontFamily: 'Jost_600SemiBold',
+                    fontSize: 16,
+                    color: 'white',
+                  }}
+                >
+                  Verificando
+                </Text>
+              </>
             ) : (
               <>
                 <Text
@@ -150,7 +162,6 @@ const AccessCodeModal = ({
                     fontSize: 16,
                     color: 'white',
                   }}
-                  className="mr-2"
                 >
                   Acceder
                 </Text>
@@ -164,8 +175,8 @@ const AccessCodeModal = ({
             )}
           </TouchableOpacity>
         </View>
+        <Toast config={toastConfig} position="bottom" />
       </View>
-      <Toast config={toastConfig} position="top" />
     </Modal>
   )
 }

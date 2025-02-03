@@ -202,18 +202,31 @@ const BrainBoost = ({ route }) => {
     activitiesAPI
       .createBrainActivity(formData)
       .then((res) => {
-        console.log(res.data)
+        showToast(
+          'success',
+          'Actividad creada',
+          'Se ha creado la actividad correctamente'
+        )
+        clearAll()
       })
       .catch((err) => {
-        console.log(err)
+        showToast(
+          'error',
+          'Error',
+          'Error al crear la actividad. Intente de nuevo.'
+        )
       })
       .finally(() => {
         setLoading(false)
       })
   }
+  const deleteQuestion = (id) => {
+    setQuestions((prev) => prev.filter((question) => question.id !== id))
+    setActivites((prev) => prev.filter((activity) => activity.brain.id !== id))
+  }
 
   const clearAll = () => {
-    setQuestion([])
+    setQuestions([])
     setActivites([])
     setQuestion(initialQuestionState)
     setDueDate(new Date())
@@ -231,12 +244,14 @@ const BrainBoost = ({ route }) => {
             fontSize: 14,
             color: '#202244',
           }}
+          className="flex-1"
         >
           {item.problem}
         </Text>
         {/* Opciones */}
         <TouchableOpacity
-        // onPress={() => deleteQuestion(item.id || null)}
+          className="w-12 flex justify-center items-center"
+          onPress={() => deleteQuestion(item.id || null)}
         >
           <Octicons name="trash" size={20} color="red" />
         </TouchableOpacity>
@@ -393,8 +408,7 @@ const BrainBoost = ({ route }) => {
             </Text>
             <TextInput
               multiline={true}
-              textAlignVertical="top"
-              className="w-full h-[80px] bg-white border border-gray-300 rounded-lg px-5"
+              className="w-full h-[100px] bg-white border border-gray-300 rounded-lg px-3 text-center"
               style={{
                 fontFamily: 'Mulish_600SemiBold',
                 fontSize: 14,
@@ -516,12 +530,11 @@ const BrainBoost = ({ route }) => {
             </Text>
             <TextInput
               multiline={true}
-              textAlignVertical="top"
-              className="w-full h-[100px] bg-white border border-gray-300 rounded-lg px-5"
+              className="w-full h-[100px] bg-white border border-gray-300 rounded-lg px-5 text-center"
               style={{
                 fontFamily: 'Mulish_600SemiBold',
-                fontSize: 16,
-                color: '#9D9D9D',
+                fontSize: 14,
+                color: '#202244',
               }}
               defaultValue={question.expected_output}
               onChangeText={(value) => handleQuestion('expected_output', value)}

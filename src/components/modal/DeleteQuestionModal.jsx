@@ -3,7 +3,7 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import LottieView from 'lottie-react-native'
 import warning from 'assets/warning.json'
 import { Octicons } from '@expo/vector-icons'
-import { activitiesAPI, classesAPI, topicsAPI } from 'api/index.api'
+import { activitiesAPI, classesAPI, topicsAPI, coursesAPI } from 'api/index.api'
 const DeleteQuestionModal = ({
   title,
   isVisible,
@@ -39,6 +39,17 @@ const DeleteQuestionModal = ({
       case 'activities':
         activitiesAPI
           .deleteActivity(id)
+          .then((res) => {
+            onContinue(true)
+          })
+          .catch((err) => {
+            onContinue(false)
+          })
+        break
+
+      case 'courses':
+        coursesAPI
+          .deleteCourse(id)
           .then((res) => {
             onContinue(true)
           })

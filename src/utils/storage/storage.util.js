@@ -10,10 +10,8 @@ const getSecureData = async (key) => {
 }
 
 const removeSecureData = async (key) => {
-  const value = await SecureStorage.deleteItemAsync(key)
-  return value
+  await SecureStorage.deleteItemAsync(key)
 }
-
 export default {
   saveSecureData,
   getSecureData,

@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState = {
   classes: [],
   courseStudentId: null,
+  userCourse: null,
 }
 
 const studentSlice = createSlice({
@@ -16,10 +17,22 @@ const studentSlice = createSlice({
     setCourseStudentId: (state, action) => {
       state.courseStudentId = action.payload
     },
+
+    saveUserCourse: (state, action) => {
+      state.userCourse = action.payload
+    },
+
+    deleteUserCourse: (state) => {
+      state.userCourse = null
+    },
   },
 })
 
-export const { saveAllClassesByCourse, setCourseStudentId } =
-  studentSlice.actions
+export const {
+  saveAllClassesByCourse,
+  setCourseStudentId,
+  saveUserCourse,
+  deleteUserCourse,
+} = studentSlice.actions
 
 export default studentSlice.reducer

@@ -23,6 +23,10 @@ const ScoreModal = ({ visible, onClose, handleQuestion }) => {
     setSelectedValue(value)
     handleQuestion('score', value)
   }
+  const handleClose = () => {
+    setSelectedValue(null)
+    onClose()
+  }
 
   const renderRadioButton = ({ item }) => {
     const isSelected = item.value === valueSelected
@@ -96,7 +100,7 @@ const ScoreModal = ({ visible, onClose, handleQuestion }) => {
 
             <TouchableOpacity
               className="mt-2 px-4 py-3 bg-[#741D1D] rounded-lg"
-              onPress={onClose}
+              onPress={handleClose}
             >
               <Text
                 style={{

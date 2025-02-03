@@ -11,19 +11,26 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import Select from 'react-native-picker-select'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Toast from 'react-native-toast-message'
 import toastConfig from '../../config/toast/toast.config'
 import { classesAPI } from 'api/index.api'
 import SelectSubjectModal from './SelectSubjectModal'
+import {
+  saveCourses,
+  saveAllClassesInCourses,
+  saveAllStudents,
+} from 'redux/slices/teacher.slice'
 
 const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
   const [loading, setLoading] = useState(false)
+  const [auxCourses, setAuxCourses] = useState([])
   const { courses } = useSelector((state) => state.teacher)
   const [dataClass, setDataClass] = useState({
     topic: '',
     CourseId: '',
   })
+  const dispatch = useDispatch()
   const [showSubjectModal, setShowSubjectModal] = useState(false)
   const toggleShowSubjectModal = () => setShowSubjectModal((prev) => !prev)
   const [nameCourse, setNameCourse] = useState(null)
@@ -66,8 +73,19 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
       .create(dataClass)
       .then((res) => {
         resetData()
-        const { message } = res.data
+        const { message, new_class } = res.data
         showToast('success', 'Clase creada', message)
+        const updatedCourses = auxCourses.map((course) =>
+          course.id === dataClass.CourseId
+            ? {
+                ...course,
+                Classes: [...course.Classes, new_class],
+              }
+            : course
+        )
+        dispatch(saveCourses(updatedCourses))
+        dispatch(saveAllClassesInCourses(updatedCourses))
+        dispatch(saveAllStudents(updatedCourses))
         setTimeout(() => {
           registerClassSuccess(true)
           toggleModal()
@@ -85,6 +103,7 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
       value: course.id,
     }))
     setItems(mapItems)
+    setAuxCourses(courses)
   }, [courses])
 
   return (

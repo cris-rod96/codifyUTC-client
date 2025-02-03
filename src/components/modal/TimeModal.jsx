@@ -27,6 +27,11 @@ const TimeModal = ({ visible, onClose, handleQuestion }) => {
     handleQuestion('time_limit', value)
   }
 
+  const handleClose = () => {
+    setSelectedValue(null)
+    onClose()
+  }
+
   const renderRadioButton = ({ item }) => {
     const isSelected = item.value === valueSelected
 
@@ -82,7 +87,7 @@ const TimeModal = ({ visible, onClose, handleQuestion }) => {
             >
               Límite de tiempo
             </Text>
-            <Pressable onPress={onClose}>
+            <Pressable onPress={handleClose}>
               <Octicons name="x" size={24} color="#741D1D" />
             </Pressable>
           </View>

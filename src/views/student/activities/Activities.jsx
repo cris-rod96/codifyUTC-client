@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Image,
   ScrollView,
@@ -32,8 +32,10 @@ import Results from '../../../components/results/Results'
 
 const Activities = () => {
   const { user } = useSelector((state) => state.user)
+  const { userCourse } = useSelector((state) => state.student)
   const { quizzResponses } = useSelector((state) => state.game)
-  const [userCourse, setUserCourse] = useState(null)
+  const [refresh, setRefresh] = useState(false)
+  // const [userCourse, setUserCourse] = useState(null)
   const [classes, setClasses] = useState([])
   const [activities, setActivities] = useState([])
   const [responses, setResponses] = useState([])
@@ -47,6 +49,7 @@ const Activities = () => {
 
   const onReturn = () => {
     toggleShowResultsModal()
+    setRefresh((prev) => !prev)
   }
 
   const toggleQuizzGame = () => setShowQuizzGame((prev) => !prev)
@@ -76,8 +79,6 @@ const Activities = () => {
     setTimeout(() => {
       setShowResultsModal(true)
     }, 2000)
-    console.log(JSON.stringify(quizzResponses))
-    console.log(activityId)
   }
 
   const viewQuizzResponses = (id) => {
@@ -316,7 +317,7 @@ const Activities = () => {
   useEffect(() => {
     if (userCourse !== null) {
       classesAPI
-        .getByCourse(userCourse.id)
+        .getByCourse(userCourse.Course.id)
         .then((res) => {
           const { classes } = res.data
           setClasses(classes)
@@ -325,23 +326,9 @@ const Activities = () => {
           console.log(err)
         })
     }
-  }, [userCourse])
+  }, [userCourse, refresh])
 
-  useEffect(() => {
-    const { id } = user
-    coursesAPI
-      .getAllWithStudents()
-      .then((res) => {
-        const { courses } = res.data
-        const enrolledCourse = courses.find((course) =>
-          course.Students.some((student) => student.id === id)
-        )
-        setUserCourse(enrolledCourse === undefined ? null : enrolledCourse)
-      })
-      .catch((err) => console.log(err))
-  }, [])
-
-  return (
+  return userCourse !== null ? (
     <View className="flex flex-1 bg-[#F5F9FF]">
       {activities && activities.length > 0 ? (
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -424,6 +411,56 @@ const Activities = () => {
           </View>
         </View>
       )}
+    </View>
+  ) : (
+    <View className="px-5 flex-1 justify-center items-center flex-col bg-[#F5F9FF]">
+      <View className="w-full flex flex-col justify-center items-center">
+        <LottieView
+          source={emptyData}
+          autoPlay
+          loop
+          style={{
+            width: 250,
+            height: 250,
+          }}
+        />
+        <Text
+          style={{
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 18,
+            color: '#202244',
+          }}
+        >
+          Aún no estás inscrito en un curso
+        </Text>
+        <Text
+          style={{
+            fontFamily: 'Mulish_600SemiBold',
+            fontSize: 16,
+            color: '#888888',
+            textAlign: 'center',
+            marginTop: 5,
+          }}
+        >
+          Inscríbete en un curso para acceder a todas las actividades y empezar
+          a aprender. ¡No te quedes fuera!
+        </Text>
+
+        <TouchableOpacity
+          className="w-full py-4 flex flex-row items-center justify-center bg-[#741D1D] mt-5 rounded-full"
+          onPress={() => navigation.navigate('ClassStudent')}
+        >
+          <Text
+            style={{
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 16,
+              color: 'white',
+            }}
+          >
+            Ir a cursos
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }

@@ -5,11 +5,9 @@ import { courseStudentsAPI } from 'api/index.api'
 const BanStudentModal = ({
   visible,
   onClose,
-  student_id,
-  student_name,
+  student,
   course_name,
   course_id,
-  student_email,
   teacher_name,
   onContinue,
 }) => {
@@ -28,12 +26,12 @@ const BanStudentModal = ({
     courseStudentsAPI
       .bannedStudent({
         course_id,
-        student_id,
+        student_id: student?.id,
         course_name,
         reason,
         teacher_name,
-        student_name,
-        student_email,
+        student_name: student?.full_name,
+        student_email: student?.email,
       })
       .then((res) => {
         onContinue(true)
@@ -89,7 +87,7 @@ const BanStudentModal = ({
                 textAlign: 'center',
               }}
             >
-              {`¿Realmente deseas eliminar a ${student_name} de ${course_name}?`}
+              {`¿Realmente deseas eliminar a ${student?.full_name} de ${course_name}?`}
             </Text>
           </View>
 

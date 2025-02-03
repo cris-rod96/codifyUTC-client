@@ -18,6 +18,21 @@ const coursesAPI = {
     return instance.get(`${model}/with_students`)
   },
 
+  updateCourseWithImage: (courseId, formData) => {
+    return instance.put(`${model}/with-image/${courseId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+  updateCourseWithoutImage: (courseId, formData) => {
+    return instance.put(`${model}/withouth-image/${courseId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
   deleteCourse: (id) => {
     return instance.delete(`${model}/${id}`)
   },

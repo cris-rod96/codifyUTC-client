@@ -61,7 +61,7 @@ const ClassesSlide = () => {
             color: '#202244',
           }}
         >
-          Mis clases
+          Clases
         </Text>
 
         {classes.length > 0 && (

@@ -11,23 +11,28 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { coursesAPI } from 'api/index.api'
 import { FontAwesome6, Octicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import { BanStudentModal } from 'components/modal/index.modals'
+import {
+  saveCourses,
+  saveAllStudents,
+  saveAllClassesInCourses,
+} from 'redux/slices/teacher.slice'
+import { useNavigation } from '@react-navigation/native'
+
 const Students = () => {
+  const navigation = useNavigation()
+  const { students, courses } = useSelector((state) => state.teacher)
   const { user } = useSelector((state) => state.user)
-  const [courses, setCourses] = useState(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const [allStudents, setAllStudents] = useState(null)
-  const [studentId, setStudentId] = useState(null)
-  const [nameStudent, setNameStudent] = useState(null)
   const [nameTeacher, setNameTeacher] = useState(null)
   const [nameCourse, setNameCourse] = useState(null)
-  const [emailStudent, setEmailStudent] = useState(null)
+  const [currentStudent, setCurrentStudent] = useState(null)
   const [courseId, setCourseId] = useState(null)
+  const dispatch = useDispatch()
 
   // Ban Modal
   const [showBanModal, setShowModal] = useState(false)
@@ -46,6 +51,17 @@ const Students = () => {
     toggleShowBanModal()
     setTimeout(() => {
       if (confirm) {
+        const updateCourses = courses.map((course) => ({
+          ...course,
+          Students: course.Students.filter(
+            (student) => student.id !== currentStudent.id
+          ),
+        }))
+
+        dispatch(saveCourses(updateCourses))
+        dispatch(saveAllClassesInCourses(updateCourses))
+        dispatch(saveAllStudents(updateCourses))
+
         showToast(
           'success',
           'Estudiante eliminado',
@@ -58,14 +74,11 @@ const Students = () => {
           'No se eliminó al estudiante. Intente de nuevo'
         )
       }
-      onRefresh()
     }, 1500)
   }
 
   const onDelete = (item) => {
-    setStudentId(item.id)
-    setNameStudent(item.full_name)
-    setEmailStudent(item.email)
+    setCurrentStudent(item)
     setNameTeacher(user.full_name)
     setCourseId(item.CourseStudent.CourseId)
     const course = getSubjectCourse(item.CourseStudent.CourseId)
@@ -124,90 +137,98 @@ const Students = () => {
     )
   }
 
-  const fetchData = () => {
-    const { id } = user
-    setRefreshing(true)
-    coursesAPI
-      .getAll(id)
-      .then((res) => {
-        const { courses } = res.data
-        setCourses(courses)
-      })
-      .catch((err) => {})
-      .finally(() => setRefreshing(false))
-  }
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true)
-    fetchData()
-  })
-
-  useEffect(() => {
-    if (courses) {
-      const students = courses.map((course) => course.Students).flat()
-      setAllStudents(students)
-    }
-  }, [courses])
-
-  useEffect(() => {
-    fetchData()
-  }, [])
   return (
-    <View className="flex-1 px-5 py-3">
+    <View
+      className={`flex-1 flex flex-col px-5 py-3 bg-[#F5F9FF] ${
+        (!courses || courses.length === 0) && 'justify-center items-center'
+      }`}
+    >
       <Toast config={toastConfig} position="bottom" />
       <BanStudentModal
         visible={showBanModal}
         onClose={toggleShowBanModal}
-        student_id={studentId}
-        student_name={nameStudent}
+        student={currentStudent}
         course_name={nameCourse}
         course_id={courseId}
-        student_email={emailStudent}
         teacher_name={nameTeacher}
         onContinue={onContinue}
       />
-      {allStudents && allStudents.length > 0 ? (
-        <View className="flex flex-col">
-          <View className="flex flex-row items-center justify-between h-[55px] bg-white rounded-xl overflow-hidden border border-gray-200 pr-2">
-            {/* Icono de busqueda */}
-            <View className="w-12 flex justify-center items-center">
-              <Octicons name="search" size={18} />
+      {courses && courses.length > 0 ? (
+        students && students.length > 0 ? (
+          <View className="flex flex-col">
+            <View className="flex flex-row items-center justify-between h-[55px] bg-white rounded-xl overflow-hidden border border-gray-200 pr-2">
+              {/* Icono de busqueda */}
+              <View className="w-12 flex justify-center items-center">
+                <Octicons name="search" size={18} />
+              </View>
+              {/* Input de busqueda */}
+              <TextInput
+                style={{
+                  fontFamily: 'Mulush_700Bold',
+                  fontSize: 16,
+                  color: '#B4BDC4',
+                }}
+                className="flex-1 h-full pl-2"
+                // onChangeText={(value) => handleSearch(value)}
+                // defaultValue={search}
+              />
+              {/* Icono de filtros */}
+              <TouchableOpacity
+                className="w-10 h-10 justify-center items-center rounded-lg"
+                // onPress={toggleModal}
+              >
+                <FontAwesome6 name="sliders" size={17} />
+              </TouchableOpacity>
             </View>
-            {/* Input de busqueda */}
-            <TextInput
-              style={{
-                fontFamily: 'Mulush_700Bold',
-                fontSize: 16,
-                color: '#B4BDC4',
-              }}
-              className="flex-1 h-full pl-2"
-              // onChangeText={(value) => handleSearch(value)}
-              // defaultValue={search}
-            />
-            {/* Icono de filtros */}
-            <TouchableOpacity
-              className="w-10 h-10 justify-center items-center rounded-lg"
-              // onPress={toggleModal}
-            >
-              <FontAwesome6 name="sliders" size={17} />
-            </TouchableOpacity>
-          </View>
 
-          {/* Lista de estudiantes */}
-          <FlatList
-            data={allStudents}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingTop: 20,
-              paddingBottom: 10,
-            }}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => renderStudent(item)}
-            refreshControl={
-              <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
-            }
-          />
-        </View>
+            {/* Lista de estudiantes */}
+            <FlatList
+              data={students}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingTop: 20,
+                paddingBottom: 10,
+              }}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => renderStudent(item)}
+              // refreshControl={
+              //   <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+              // }
+            />
+          </View>
+        ) : (
+          <View className="flex-1 flex flex-col justify-center items-center w-full">
+            <LottieView
+              autoPlay
+              loop
+              source={emptyData}
+              style={{ width: 250, height: 250 }}
+            />
+
+            <Text
+              style={{
+                fontFamily: 'Jost_700Bold',
+                fontSize: 17,
+                color: '#202244',
+                textAlign: 'center',
+              }}
+            >
+              Sin alumnos registrados
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Mulish_400Regular',
+                fontSize: 15,
+                color: '#545454',
+                marginTop: 20,
+                textAlign: 'center',
+              }}
+            >
+              Si ya creaste un curso, comparte el código de acceso con tus
+              estudiantes para que puedan ser parte de tu espacio de trabajo
+            </Text>
+          </View>
+        )
       ) : (
         <View className="flex-1 flex flex-col justify-center items-center w-full">
           <LottieView
@@ -219,15 +240,41 @@ const Students = () => {
 
           <Text
             style={{
-              fontFamily: 'Jost_600SemiBold',
-              fontSize: 18,
+              fontFamily: 'Jost_700Bold',
+              fontSize: 17,
               color: '#202244',
               textAlign: 'center',
-              maxWidth: 300,
+              marginBottom: 10,
             }}
           >
-            Aún no hay alumnos registrados en tus cursos
+            Sin cursos registrados
           </Text>
+          <Text
+            style={{
+              fontFamily: 'Mulish_400Regular',
+              fontSize: 15,
+              color: '#545454',
+              textAlign: 'center',
+            }}
+          >
+            Crear un curso y comparte el código de acceso con tus estudiantes
+            para que puedan ingresar y no perderse de tus clases y actividades.
+          </Text>
+
+          <TouchableOpacity
+            className="w-full py-4 flex flex-row items-center justify-center gap-2 bg-[#741D1D] mt-4 rounded-full"
+            onPress={() => navigation.navigate('TabCourse')}
+          >
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 16,
+                color: 'white',
+              }}
+            >
+              Ir a cursos
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>

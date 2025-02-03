@@ -22,16 +22,18 @@ import ContentTopicModal from 'components/modal/ContentTopicModal'
 import { useNavigation } from '@react-navigation/native'
 import WelcomeCourseModal from 'components/modal/WelcomeCourseModal'
 import { lectureUtils } from 'utils/index.utils'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '../../../config/index.config'
+import { courseStudentsAPI } from 'api/index.api'
+import { saveUserCourse } from 'redux/slices/student.slice'
 
 const ClassStudent = () => {
   const [refreshingCourse, setRefreshingCourse] = useState(false)
-
   const navigation = useNavigation()
   const { user } = useSelector((state) => state.user)
   const [showAccessCodeModal, setShowAccessCodeModal] = useState(false)
   const [showLeaveCourseModal, setShowLeaveCourseModal] = useState(false)
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
-  const [accessCode, setAccessCode] = useState(null)
   const [courseId, setCourseId] = useState(null)
 
   const toggleWelcomeModal = () => setShowWelcomeModal((prev) => !prev)
@@ -63,9 +65,30 @@ const ClassStudent = () => {
     setClasses([])
   }
 
+  const handleContinue = () => {
+    toggleAccessCodeModal()
+    courseStudentsAPI.getByStudent(user.api).then((res) => {
+      const { course } = res.data
+      dispatch(saveUserCourse(course))
+    })
+    setTimeout(() => {
+      toggleWelcomeModal()
+    }, 1500)
+  }
+
   const [courses, setCourses] = useState([])
   const [userCourse, setUserCourse] = useState(null)
   const [classes, setClasses] = useState([])
+
+  const showMessage = () => {
+    if (!userCourse) {
+      Toast.show({
+        type: 'info',
+        text1: 'Acción no disponible',
+        text2: 'Por favor, ingresa el código para habilitar el contenido',
+      })
+    }
+  }
 
   const fetchClasses = () => {
     setRefreshingCourse(true)
@@ -123,16 +146,16 @@ const ClassStudent = () => {
       <View className="px-5 py-5" key={item.id}>
         <View className="bg-white w-full rounded-lg overflow-hidden border border-gray-200">
           {/* Portada */}
-          <View className="w-full h-[180px] relative ">
+          <TouchableOpacity
+            className="w-full h-[200px] relative"
+            onPress={() => showMessage()}
+          >
             <Image
               source={item.poster ? { uri: item.poster } : bgTech}
-              style={{
-                width: '100%',
-                height: '100%',
-              }}
-              resizeMode="contain"
+              className="w-full h-full"
+              resizeMode="cover"
             />
-          </View>
+          </TouchableOpacity>
 
           {/* Body del curso */}
           <View className="flex flex-row px-4 py-3 items-center justify-between">
@@ -188,7 +211,10 @@ const ClassStudent = () => {
 
   const renderTopic = (topic, index) => {
     return (
-      <View className="py-5 px-7 flex flex-row items-center justify-between border-b border-gray-200">
+      <View
+        className="py-5 px-7 flex flex-row items-center justify-between border-b border-gray-200"
+        key={index}
+      >
         <View className="w-10 h-10 rounded-full bg-[#741D1D] flex justify-center items-center">
           <Text
             style={{
@@ -226,9 +252,9 @@ const ClassStudent = () => {
     )
   }
 
-  const renderClass = ({ item }) => {
+  const renderClass = ({ item, index }) => {
     return (
-      <View className="bg-white border border-gray-200">
+      <View className="bg-white border border-gray-200" key={index}>
         {/* Cabecera */}
         <View className="flex flex-row items-start justify-between px-5 pt-5 ">
           <View className="flex flex-col ">
@@ -348,7 +374,10 @@ const ClassStudent = () => {
           user_id={user.id}
           course_id={courseId}
           successRegister={successRegister}
+          handleContinue={handleContinue}
         />
+
+        <Toast config={toastConfig} position="bottom" />
       </View>
     ) : (
       <View className="flex-1 flex justify-center items-center px-8 bg-[#F5F9FF]">

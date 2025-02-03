@@ -10,7 +10,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native'
-import Select from 'react-native-picker-select'
+
 import { codeUtil, pickerImagesUtil, storageUtil } from 'utils/index.utils'
 import Toast from 'react-native-toast-message'
 import toastConfig from 'config/toast/toast.config'
@@ -21,7 +21,7 @@ import {
   SelectCourseModal,
 } from 'components/modal/index.modals'
 
-const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
+const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
   const { user } = useSelector((state) => state.user)
   const [isMounted, setIsMounted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -46,7 +46,6 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
 
   const handleChange = (name, value) => {
     setCourse({ ...course, [name]: value })
-    console.log(course)
   }
 
   const pickImage = async () => {
@@ -98,7 +97,7 @@ const CourseModal = ({ isVisible, toggleModal, updateCourses }) => {
         setImageUri(null)
         setTimeout(() => {
           toggleModal()
-          updateCourses()
+          onContinue()
         }, 2500)
       })
       .catch((err) => {

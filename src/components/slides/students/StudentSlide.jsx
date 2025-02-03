@@ -29,7 +29,7 @@ const StudentsSlide = () => {
             color: '#202244',
           }}
         >
-          Mis Estudiantes
+          Alumnos
         </Text>
         {students.length > 0 && (
           <TouchableOpacity className="w-fit flex flex-row items-center">

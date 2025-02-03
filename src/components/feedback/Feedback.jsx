@@ -7,7 +7,7 @@ import profile from 'assets/profile.png'
 import { useSelector } from 'react-redux'
 import { RankingModal } from 'components/modal/index.modals'
 
-const Feedback = ({ route }) => {
+const Feedback = ({ route, navigation }) => {
   const { user } = useSelector((state) => state.user)
   const [activityId, setActivityId] = useState(null)
   const [responses, setResponses] = useState([])
@@ -77,7 +77,7 @@ const Feedback = ({ route }) => {
 
               <TouchableOpacity
                 className="flex flex-row items-center gap-2"
-                onPress={toggleShowRankingModal}
+                onPress={() => navigation.navigate('RankingStudent')}
               >
                 <Text
                   style={{

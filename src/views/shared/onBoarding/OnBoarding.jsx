@@ -16,11 +16,13 @@ import group from 'assets/group.png'
 import classes from 'assets/classes.png'
 import { useNavigation } from '@react-navigation/native'
 import { storageUtil } from 'utils/index.utils'
+import { useSharedValue } from 'react-native-reanimated'
 
 const OnBoarding = () => {
   const navigation = useNavigation()
   const [hasLaunched, setHasLaunched] = useState(null) // Inicializamos como null
   const { width } = useWindowDimensions()
+  const slideValue = useSharedValue(0)
   const [active, setActive] = useState(0)
 
   const data = [

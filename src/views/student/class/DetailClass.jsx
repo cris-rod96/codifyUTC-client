@@ -7,7 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { topicsAPI, activitiesAPI } from 'api/index.api'
+import {
+  topicsAPI,
+  activitiesAPI,
+  responsesAPI,
+  quizzResponseAPI,
+} from 'api/index.api'
 import { Entypo, FontAwesome, Octicons } from '@expo/vector-icons'
 import quizzLogo from 'assets/quizz.png'
 import lightningLogo from 'assets/lightning.png'
@@ -16,10 +21,13 @@ import puzzleLogo from 'assets/puzzle.png'
 import poster from 'assets/game-default.png'
 import { dateUtils } from 'utils/index.utils'
 import QuizzGame from '../../../components/modal/QuizzGame'
+import { useSelector } from 'react-redux'
 
 const DetailClass = ({ route, navigation }) => {
+  const { user } = useSelector((state) => state.user)
   const [showQuizzGame, setShowQuizzGame] = useState(false)
   const [activityId, setActivityId] = useState(null)
+  const [responses, setResponses] = useState([])
   const toggleShowQuizzGame = () => setShowQuizzGame((prev) => !prev)
 
   const startGame = (type, activity_id) => {
@@ -52,8 +60,30 @@ const DetailClass = ({ route, navigation }) => {
     })
   }
 
+  const viewQuizzResponses = (id) => {
+    const response = responses.find((resp) => resp.ActivityId === id)
+    quizzResponseAPI
+      .getByResponse(response.id)
+      .then((res) => {
+        const { quizzResponses } = res.data
+        navigation.navigate('ActivitiesStudent', {
+          screen: 'Feedback',
+          params: {
+            userAnswers: quizzResponses,
+            activityId: id,
+          },
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
   const renderTopic = (item, index) => (
-    <View className="bg-white border border-gray-200  relative p-5 flex flex-col gap-3 ">
+    <View
+      className="bg-white border border-gray-200  relative p-5 flex flex-col gap-3 "
+      key={index}
+    >
       {/* Title */}
       <Text
         style={{
@@ -121,9 +151,12 @@ const DetailClass = ({ route, navigation }) => {
     </View>
   )
 
-  const renderActivity = (activity) => {
+  const renderActivity = (activity, index) => {
     return (
-      <View className="bg-white border border-gray-200 rounded-lg">
+      <View
+        className="bg-white border border-gray-200 rounded-lg mb-4"
+        key={index}
+      >
         {/* Portada */}
         <View className="w-full h-[180px] bg-gray-800 rounded-t-lg relative">
           <Image
@@ -140,25 +173,39 @@ const DetailClass = ({ route, navigation }) => {
             source={getLogo(activity.type)}
             className="absolute w-[35px] h-[35px] top-3 right-5"
           />
-
-          <View
-            className="px-3 py-1 absolute w-[60px] bottom-3 rounded-full flex flex-row items-center justify-center right-3"
-            style={{
-              backgroundColor:
-                activity.status === 'Abierta' ? '#008B07' : '#B10303',
-            }}
-          >
-            <Text
+          {responses.find((res) => res.ActivityId === activity.id) ? (
+            <View className="px-3 py-1 absolute w-[80px] bottom-3 rounded-full flex flex-row items-center justify-center right-3 bg-[#008B07]">
+              <Text
+                style={{
+                  fontFamily: 'Mulish_600SemiBold',
+                  fontSize: 10,
+                  color: 'white',
+                  textAlign: 'center',
+                }}
+              >
+                Realizado
+              </Text>
+            </View>
+          ) : (
+            <View
+              className="px-3 py-1 absolute w-[60px] bottom-3 rounded-full flex flex-row items-center justify-center right-3"
               style={{
-                fontFamily: 'Mulish_600SemiBold',
-                fontSize: 10,
-                color: 'white',
-                textAlign: 'center',
+                backgroundColor:
+                  activity.status === 'Abierta' ? '#008B07' : '#B10303',
               }}
             >
-              {activity.status}
-            </Text>
-          </View>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_600SemiBold',
+                  fontSize: 10,
+                  color: 'white',
+                  textAlign: 'center',
+                }}
+              >
+                {activity.status}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Descripcion de la actividad */}
@@ -219,51 +266,87 @@ const DetailClass = ({ route, navigation }) => {
             </View>
           </View>
         </View>
-
-        <View className="flex flex-row items-center gap-2 mb-4 px-3">
-          <Text
-            style={{
-              fontFamily: 'Jost_600SemiBold',
-              fontSize: 15,
-              color: '#202244',
-            }}
+        {responses.find((res) => res.ActivityId === activity.id) ? (
+          <TouchableOpacity
+            className="py-3 w-full rounded-b-lg bg-green-800 flex flex-row items-center justify-center relative"
+            onPress={() => viewQuizzResponses(activity.id)}
           >
-            Disponible hasta:
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'Mulish_700Bold',
-              fontSize: 13,
-              color: '#202244',
-            }}
-          >
-            {dateUtils.formatDate(new Date(activity.due_date))}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          className="py-3 w-full rounded-b-lg bg-[#741D1D] flex flex-row items-center justify-center relative"
-          onPress={() => startGame(activity.type, activity.id)}
-        >
-          <Text
-            style={{
-              fontFamily: 'Jost_600SemiBold',
-              fontSize: 16,
-              color: 'white',
-            }}
-          >
-            Realizar
-          </Text>
-          <Octicons
-            name="chevron-right"
-            size={18}
-            color={'white'}
-            className="absolute right-5"
-          />
-        </TouchableOpacity>
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 16,
+                color: 'white',
+              }}
+            >
+              Ver detalle
+            </Text>
+            <Octicons
+              name="chevron-right"
+              size={18}
+              color={'white'}
+              className="absolute right-5"
+            />
+          </TouchableOpacity>
+        ) : (
+          <>
+            <View className="flex flex-row items-center gap-2 mb-4 px-3">
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 15,
+                  color: '#202244',
+                }}
+              >
+                Disponible hasta:
+              </Text>
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 13,
+                  color: '#202244',
+                }}
+              >
+                {activity.due_date}
+              </Text>
+            </View>
+            <TouchableOpacity
+              className="py-3 w-full rounded-b-lg bg-[#741D1D] flex flex-row items-center justify-center relative"
+              onPress={() => startGame(activity.type, activity.id)}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Jost_600SemiBold',
+                  fontSize: 16,
+                  color: 'white',
+                }}
+              >
+                Realizar
+              </Text>
+              <Octicons
+                name="chevron-right"
+                size={18}
+                color={'white'}
+                className="absolute right-5"
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     )
   }
+
+  useEffect(() => {
+    responsesAPI
+      .getByStudent(user.id)
+      .then((res) => {
+        const { responses } = res.data
+        setResponses(responses)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {})
+  }, [activities])
 
   useEffect(() => {
     if (classId !== null && classId !== undefined) {
@@ -342,7 +425,9 @@ const DetailClass = ({ route, navigation }) => {
             {activities && activities.length > 0 ? (
               <View className="px-5 py-10">
                 {/* Actividad */}
-                {activities.map((activity) => renderActivity(activity))}
+                {activities.map((activity, index) =>
+                  renderActivity(activity, index)
+                )}
               </View>
             ) : (
               <View className="mx-5 my-3 bg-white border border-dashed border-gray-200 rounded-lg px-5 py-7 flex flex-col justify-center items-center">

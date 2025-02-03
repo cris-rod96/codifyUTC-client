@@ -179,6 +179,15 @@ const QuizzCode = ({ route }) => {
       return
     }
 
+    if (question.time_limit === 0) {
+      showToast('error', 'Error', 'Por favor, ingresa un límite de tiempo.')
+      return
+    }
+    if (question.score === 0) {
+      showToast('error', 'Error', 'Por favor, ingresa un puntaje válido.')
+      return
+    }
+
     if (answers.length < 4) {
       showToast('error', 'Error', 'Por favor, ingresa las 4 opciones.')
       return
@@ -288,6 +297,7 @@ const QuizzCode = ({ route }) => {
           'Actividad creada',
           'La actividad se creó con éxito'
         )
+        clearAll()
       })
       .catch((err) => {
         showToast(
@@ -325,11 +335,15 @@ const QuizzCode = ({ route }) => {
             fontSize: 14,
             color: '#202244',
           }}
+          className="flex-1"
         >
           {item.question}
         </Text>
         {/* Opciones */}
-        <TouchableOpacity onPress={() => deleteQuestion(item.id || null)}>
+        <TouchableOpacity
+          className="w-12 flex justify-center items-center"
+          onPress={() => deleteQuestion(item.id || null)}
+        >
           <Octicons name="trash" size={20} color="red" />
         </TouchableOpacity>
       </View>
@@ -571,7 +585,8 @@ const QuizzCode = ({ route }) => {
           {/* Question Input */}
           <TextInput
             ref={inputRef}
-            className="h-14 bg-white border border-gray-300 rounded-lg text-center mb-6"
+            multiline={true}
+            className="h-[100px] bg-white border border-gray-300 rounded-lg text-center mb-6 px-3"
             defaultValue={question.question}
             placeholder="Añadir pregunta"
             onChangeText={(text) => handleQuestion('question', text)}
@@ -633,15 +648,16 @@ const QuizzCode = ({ route }) => {
             {boxOptions.map((option, index) => (
               <TouchableOpacity
                 key={index}
-                className="w-[48%] h-24 rounded-lg justify-center items-center mb-4"
+                className="w-[48%] h-24 rounded-lg justify-center items-center mb-4 px-2"
                 style={{ backgroundColor: option.bgColor }}
                 onLongPress={() => toggleAnswerModal(option.bgColor, index)}
               >
                 <Text
                   style={{
                     fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
+                    fontSize: 13,
                     color: '#fff',
+                    textAlign: 'center',
                   }}
                 >
                   {answers[index]?.option || option.label}
@@ -663,7 +679,7 @@ const QuizzCode = ({ route }) => {
 
             <TextInput
               multiline={true}
-              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3"
+              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3 text-center"
               onChangeText={(value) => handleQuestion('feedback', value)}
               textAlignVertical="top"
               value={question.feedback}

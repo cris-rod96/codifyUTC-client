@@ -17,7 +17,11 @@ import {
 import Toast from 'react-native-toast-message'
 import { toastConfig } from 'config/index.config'
 import { useLogin } from 'hooks/index.hooks'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native'
 import { useLoading } from 'context/LoadingContext'
 import { storageUtil } from '../../../utils/index.utils'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,7 +30,8 @@ import SendCodeModal from '../../../components/modal/SendCodeModal'
 import EmailSentModal from '../../../components/modal/EmailSentModal'
 import logo from 'assets/logo.png'
 
-const Login = () => {
+const Login = ({ route }) => {
+  const { user } = useSelector((state) => state.user)
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
   const navigation = useNavigation()
@@ -88,26 +93,18 @@ const Login = () => {
   }, [])
 
   useEffect(() => {
-    storageUtil
-      .getSecureData('session_info')
-      .then((res) => {
-        const info = res
-        if (info) {
-          const { user } = info
-          dispatch(saveUser(user))
-          if (user) {
-            const home =
-              user.role === 'Docente'
-                ? 'TabsTeacherNavigator'
-                : 'TabStudentNavigator'
-            navigation.navigate(home)
-          }
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [])
+    storageUtil.getSecureData('session_info').then((res) => {
+      if (res) {
+        const { user } = JSON.parse(res)
+        dispatch(saveUser(user))
+        const home =
+          user.role === 'Docente'
+            ? 'TabsTeacherNavigator'
+            : 'TabStudentNavigator'
+        navigation.navigate(home)
+      }
+    })
+  }, [route])
 
   return (
     <KeyboardAvoidingView

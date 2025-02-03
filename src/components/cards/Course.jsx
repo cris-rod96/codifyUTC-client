@@ -1,23 +1,21 @@
-import {
-  Alert,
-  Image,
-  Linking,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import { FontAwesome, Ionicons, Octicons } from '@expo/vector-icons'
+import { Image, Linking, Text, TouchableOpacity, View } from 'react-native'
+import logoDefault from 'assets/bg-tech.jpg'
+import { Ionicons, Octicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-import { msgUtil, storageUtil } from 'utils/index.utils'
-import { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { saveCourseId } from '../../redux/slices/id.slice'
-
-const Course = ({ course, deleteCourse }) => {
-  const [currentUser, setCurrentUser] = useState(null)
+import { msgUtil } from '../../utils/index.utils'
+import { useSelector } from 'react-redux'
+const Course = ({ course, onContinue }) => {
+  const { user } = useSelector((state) => state.user)
   const navigation = useNavigation()
-  const shareOnWhatsApp = () => {
-    const msg = msgUtil.messageWhatsapp(course, currentUser.full_name)
+
+  const goToScreen = (tabName, screenName) => {
+    navigation.navigate(tabName, {
+      screen: screenName,
+    })
+  }
+
+  const shareOnWP = () => {
+    const msg = msgUtil.messageWhatsapp(course, user.full_name)
     const url = `whatsapp://send?text=${encodeURIComponent(msg)}`
 
     Linking.canOpenURL(url)
@@ -25,12 +23,19 @@ const Course = ({ course, deleteCourse }) => {
         if (supported) {
           Linking.openURL(url)
         } else {
-          Alert.alert('Oops!', 'No se pudo abrir WhatsApp')
+          console.log('Error al compartir')
         }
       })
       .catch((err) => {
-        console.log(err)
+        console.log('No se puede compartir en estos momentos')
       })
+  }
+
+  const goToCourseDetail = (id, subject) => {
+    navigation.navigate('DetailCourse', {
+      courseId: id,
+      courseName: subject,
+    })
   }
 
   const getIconSection = (section) => {
@@ -43,64 +48,36 @@ const Course = ({ course, deleteCourse }) => {
         return <Ionicons name="moon" size={16} color="darkblue" />
     }
   }
-
-  const handleDeleteCourse = () => {
-    Alert.alert(
-      'Confirmación',
-      '¿Estás seguro de que deseas eliminar este curso?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => deleteCourse(course.id),
-        },
-      ]
-    )
-  }
-  const dispatch = useDispatch()
-
-  const viewClassesInCourse = (id) => {
-    dispatch(saveCourseId(id))
-    navigation.navigate('TabClass', {
-      screen: 'Classes',
-    })
-  }
-
-  useEffect(() => {
-    storageUtil.getSecureData('session_info').then((res) => {
-      const { user } = JSON.parse(res)
-      setCurrentUser(user)
-    })
-  }, [])
-
   return (
-    <View className="bg-white rounded-lg shadow-lg m-2 overflow-hidden">
-      {/* FOTO DEL CURSO */}
-      <Image
-        source={{ uri: course.poster }}
-        className="h-[180px] w-full rounded-t-lg mb-4 shadow-md"
-        resizeMode="cover"
-      />
+    <View className="w-full bg-white rounded-lg shadow-lg overflow-hidden relative">
+      {/* Foto del curso */}
+      <View className="w-full h-[180px] relative mb-3">
+        <Image
+          source={course.poster ? { uri: course.poster } : logoDefault}
+          className="w-full h-full absolute object-contain"
+          resizeMode="cover"
+        />
+      </View>
 
-      {/* Información principal */}
-      <View className="mb-4 px-3 ">
+      {/* Información General */}
+      <View className="flex flex-col px-3 mb-3">
         <View className="flex flex-row items-start justify-between mb-3">
-          <View>
+          <View className="flex flex-col">
             <Text
               style={{
-                fontFamily: 'Mulish_700Bold',
-                fontSize: 12,
-                color: '#545454',
+                fontFamily: 'Mulish_600SemiBold',
+                fontSize: 13,
+                color: '#888',
               }}
             >
               {course.semester} Semestre
             </Text>
+
             <Text
               style={{
-                fontFamily: 'Jost_600SemiBold',
+                fontFamily: 'Jost_700Bold',
                 fontSize: 16,
-                color: '#333',
+                color: '#202244',
               }}
             >
               {course.subject}
@@ -111,7 +88,8 @@ const Course = ({ course, deleteCourse }) => {
             <Text
               style={{
                 fontFamily: 'Mulish_500Medium',
-                color: '#555',
+                color: '#888',
+                fontSize: 13,
               }}
             >
               {course.section}
@@ -119,11 +97,18 @@ const Course = ({ course, deleteCourse }) => {
           </View>
         </View>
 
-        {/* Información visual */}
-        <View className="flex flex-row gap-2">
-          {/* Tarjeta Estudiantes */}
-          <View className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm">
-            <Octicons name="people" size={24} color="#333" />
+        {/* Tarjetas */}
+        <View className="flex flex-row gap-2 justify-between">
+          <TouchableOpacity
+            className="flex flex-col justify-center items-center border border-gray-200 w-[48%] p-2 bg-gray-50 rounded-md relative"
+            onPress={() => goToScreen('TeacherStudents', 'Students')}
+          >
+            <Octicons
+              name="people"
+              size={18}
+              color={'#333'}
+              className="absolute top-2 left-2"
+            />
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
@@ -138,15 +123,20 @@ const Course = ({ course, deleteCourse }) => {
                 fontSize: 12,
               }}
             >
-              Estudiantes
+              {course.Students.length === 1 ? 'Alumno' : 'Alumnos'}
             </Text>
-          </View>
-          {/* Tarjeta Clases */}
+          </TouchableOpacity>
+
           <TouchableOpacity
-            className="flex flex-col justify-center items-center border border-gray-200 p-2 w-[48%] bg-gray-50 rounded-md shadow-sm"
-            onPress={() => viewClassesInCourse(course.id)}
+            className="flex flex-col justify-center items-center border border-gray-200 w-[48%] p-2 bg-gray-50 rounded-md relative"
+            onPress={() => goToScreen('TabClass', 'Classes')}
           >
-            <Octicons name="stack" size={24} color="#333" />
+            <Octicons
+              name="stack"
+              size={18}
+              color={'#333'}
+              className="absolute top-2 left-2"
+            />
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
@@ -161,14 +151,19 @@ const Course = ({ course, deleteCourse }) => {
                 fontSize: 12,
               }}
             >
-              Clases
+              {course.Classes.length === 1 ? 'Clase' : 'Clases'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Código de acceso */}
-        <View className="flex flex-col justify-center items-center border border-gray-300 p-2 mt-3 bg-gray-100 rounded-md shadow-sm">
-          <Octicons name="key" size={22} color="#741D1D" />
+        {/* Cpodigo de acceso */}
+        <View className="flex flex-col items-center justify-center border border-gray-200 p-2 mt-3 bg-gray-50 rounded-md relative">
+          <Octicons
+            name="lock"
+            size={18}
+            color={'333'}
+            className="absolute top-3 left-3"
+          />
           <Text
             style={{
               fontFamily: 'Mulish_700Bold',
@@ -189,37 +184,35 @@ const Course = ({ course, deleteCourse }) => {
         </View>
       </View>
 
-      {/* Acciones */}
-      <View className="flex-row justify-between mt-2">
-        {/* Botón Compartir */}
+      <View className="flex flex-row justify-between">
         <TouchableOpacity
-          className="bg-green-600 py-3 flex-row items-center flex-auto shadow-md justify-center gap-2"
-          onPress={shareOnWhatsApp}
+          className="flex flex-row  items-center justify-center bg-green-700 py-3 gap-2 flex-1"
+          onPress={shareOnWP}
         >
-          <Octicons name="share-android" size={18} color="white" />
+          <Octicons name="share-android" size={18} color={'white'} />
           <Text
             style={{
-              fontFamily: 'Mulish_500Medium',
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 16,
               color: 'white',
             }}
           >
             Compartir
           </Text>
         </TouchableOpacity>
-
-        {/* Botón Eliminar */}
         <TouchableOpacity
-          className="bg-red-600 py-3 flex-row items-center flex-auto shadow-md justify-center gap-2"
-          onPress={handleDeleteCourse}
+          className="flex flex-row  items-center justify-center bg-purple-800 py-3 gap-2 flex-1"
+          onPress={() => goToCourseDetail(course.id, course.subject)}
         >
-          <Octicons name="trash" size={20} color="white" />
+          <Octicons name="pencil" size={18} color={'white'} />
           <Text
             style={{
-              fontFamily: 'Mulish_500Medium',
+              fontFamily: 'Jost_600SemiBold',
+              fontSize: 16,
               color: 'white',
             }}
           >
-            Eliminar
+            Editar
           </Text>
         </TouchableOpacity>
       </View>

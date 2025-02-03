@@ -42,13 +42,13 @@ const AnswerModal = ({
           </View>
 
           <TextInput
-            className={`w-full h-[100px] rounded-3xl text-center `}
+            className={`w-full h-[100px] rounded-3xl text-center px-3`}
             multiline
             placeholderTextColor={'white'}
             placeholder={placeholder}
             style={{
               fontFamily: 'Mulish_600SemiBold',
-              fontSize: 16,
+              fontSize: 14,
               color: 'white',
               backgroundColor: bgColor || '#000',
             }}

@@ -43,7 +43,7 @@ const CoursesSlide = () => {
             color: '#202244',
           }}
         >
-          Mis cursos
+          Cursos
         </Text>
 
         {courses.length > 0 && (
@@ -117,7 +117,9 @@ const CoursesSlide = () => {
                     color: '#888888',
                   }}
                 >
-                  {item.Students.length} estudiantes
+                  {item.Students.length === 1
+                    ? '1 estudiante'
+                    : `${item.Students.length} estudiantes`}
                 </Text>
               </View>
             </View>

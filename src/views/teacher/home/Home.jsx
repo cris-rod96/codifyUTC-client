@@ -1,108 +1,95 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, ScrollView, Image } from 'react-native'
+import { Image, ScrollView, Text, View } from 'react-native'
+import logoApp from 'assets/logo_codify.png'
 import profile from 'assets/profile.png'
-import {
-  StudentsSlide,
-  ClasseSlide,
-  CoursesSlide,
-} from 'components/slides/index.slides'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
-import { saveCourses } from 'redux/slices/teacher.slice'
+import { coursesAPI } from 'api/index.api'
 import {
+  saveCourses,
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
-import { coursesAPI } from 'api/index.api.js'
-import { useLoading } from 'context/LoadingContext'
-import { storageUtil } from '../../../utils/index.utils'
-const Home = () => {
+import {
+  CoursesSlide,
+  ClasseSlide,
+  StudentsSlide,
+} from 'components/slides/index.slides'
+
+const Home = ({ route }) => {
+  const [userId, setUserId] = useState(null)
   const { user } = useSelector((state) => state.user)
-  const { showLoading, hideLoading } = useLoading()
   const dispatch = useDispatch()
 
-  // const getUserInfo = () => {
-  //   storageUtil
-  //     .getSecureData('session_info')
-  //     .then((res) => {
-  //       const { user } = JSON.parse(res)
-  //       setUser(user)
-  //     })
-  //     .catch((err) => {
-  //       console.log(err.message)
-  //     })
-  // }
-
   useEffect(() => {
-    showLoading('Cargando datos de la cuenta. Espera un momento...')
-    if (user) {
-      coursesAPI
-        .getAll(user.id)
-        .then((res) => {
-          const { courses } = res.data
-          dispatch(saveCourses(courses))
-          dispatch(saveAllClassesInCourses(courses))
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-        .finally(() => {
-          hideLoading()
-        })
+    if (userId) {
+      coursesAPI.getAll(user.id).then((res) => {
+        const { courses } = res.data
+        dispatch(saveCourses(courses))
+        dispatch(saveAllClassesInCourses(courses))
+        dispatch(saveAllStudents(courses))
+      })
     }
-  }, [])
+  }, [userId])
+
+  useFocusEffect(() => {
+    setUserId(user.id)
+  })
 
   return (
-    <ScrollView
-      className="flex-1"
-      contentContainerStyle={{
-        paddingBottom: 80,
-      }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View className="flex-1 flex-col h-screen gap-10 p-5 bg-[#F5F9FF] ">
-        {/* Encabezado */}
-        <View className="flex flex-row justify-between items-center">
-          <View>
+    <View className="flex-1 bg-[#F5F9FF]">
+      {/* Header */}
+      <View className="flex flex-row items-center justify-between px-3 py-3  border-b border-gray-200 bg-[#741D1D]">
+        {/* Logo e info */}
+        <View className="flex flex-row items-center gap-1">
+          <Image source={logoApp} className="w-[50px] h-[50px]" />
+          <View className="flex flex-col px-2">
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',
                 fontSize: 18,
-                color: '#202244',
+                color: 'white',
               }}
             >
-              Hola, {user?.full_name}
+              {user.full_name}
             </Text>
-
             <Text
               style={{
                 fontFamily: 'Mulish_700Bold',
                 fontSize: 12,
-                color: '#545454',
+                color: '#F5F9FF',
               }}
             >
-              Bienvenido a Codify UTC
+              {user.role}
             </Text>
-          </View>
-
-          <View className="w-12 h-12 rounded-full bg-red-400 relative overflow-hidden">
-            <Image
-              source={
-                user?.profile_picture ? { uri: user.profile_picture } : profile
-              }
-              className="absolute w-full h-full object-cover"
-            />
           </View>
         </View>
 
-        {/* Sección de cursos */}
-        <CoursesSlide />
-
-        {/* Sección de clases */}
-        <ClasseSlide />
-        {/* Sección de Actividades */}
-        <StudentsSlide />
+        <View className="w-[45px] h-[45px] rounded-full bg-white relative overflow-hidden">
+          <Image
+            source={
+              user?.profile_picture ? { uri: user.profile_picture } : profile
+            }
+            className="w-full h-full object-contain"
+            resizeMode="cover"
+          />
+        </View>
       </View>
-    </ScrollView>
+
+      <ScrollView
+        className="flex-1 bg-[#F5F9FF]"
+        contentContainerStyle={{
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 flex flex-col gap-8 px-4 pt-10">
+          <CoursesSlide />
+          <ClasseSlide />
+          {/* <StudentsSlide /> */}
+        </View>
+      </ScrollView>
+    </View>
   )
 }
 

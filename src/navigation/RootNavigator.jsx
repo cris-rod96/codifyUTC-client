@@ -34,11 +34,14 @@ import {
   Students,
   BrainBoost,
   QuizzCode,
+  PuzzleMaster,
   LightningCode,
   NewPassword,
+  DetailCourse,
+  RankingStudent,
 } from 'views/index.views'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { Octicons } from '@expo/vector-icons'
+import { AntDesign, Octicons } from '@expo/vector-icons'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import EditProfile from '../views/shared/edit/EditProfile'
 import DetailActivity from '../views/teacher/activities/DetailActivity'
@@ -192,7 +195,7 @@ const ClassStudentNavigator = () => {
         name="ClassStudent"
         component={ClassStudent}
         options={{
-          headerTitle: 'Clases disponibles',
+          headerTitle: 'Clases',
           headerStyle: {
             backgroundColor: '#741D1D',
             borderBottomColor: '#000',
@@ -292,9 +295,31 @@ const StudentsTabs = () => {
         }}
       />
       <Tabs.Screen
+        name="RankingStudent"
+        component={RankingStudent}
+        options={{
+          tabBarLabel: 'Ranking',
+          tabBarIcon: ({ color, size }) => (
+            <AntDesign name="Trophy" size={21} color={color} />
+          ),
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          headerTitle: 'Ranking',
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+        }}
+      />
+      <Tabs.Screen
         name="ProfileStudent"
         component={ProfileNavigator}
         options={{
+          headerShown: false,
           tabBarLabel: 'Configuración',
           tabBarIcon: ({ color, size }) => (
             <Octicons name="gear" size={21} color={color} />
@@ -338,6 +363,8 @@ const CourseNavigator = () => {
           headerLeft: () => null,
         }}
       />
+
+      <Stack.Screen name="DetailCourse" component={DetailCourse} />
     </Stack.Navigator>
   )
 }
@@ -440,6 +467,14 @@ const ActivitiesNavigator = () => {
         component={BrainBoost}
         options={{
           headerTitle: 'Brain Boost',
+          headerLeft: () => null,
+        }}
+      />
+      <Stack.Screen
+        name="PuzzleMaster"
+        component={PuzzleMaster}
+        options={{
+          headerTitle: 'Puzzle Master',
           headerLeft: () => null,
         }}
       />

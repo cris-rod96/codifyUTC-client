@@ -7,6 +7,7 @@ import { SelectStatusActivityModal } from 'components/modal/index.modals'
 import { dateUtils } from '../../utils/index.utils'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from '../../config/index.config'
+import { DeleteQuestionModal } from 'components/modal/index.modals'
 
 const EditActivityModal = ({ visible, onClose, activity_id, onContinue }) => {
   const [activityId, setActivityId] = useState(null)
@@ -18,6 +19,8 @@ const EditActivityModal = ({ visible, onClose, activity_id, onContinue }) => {
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar)
   }
+  const [showQuestionDelete, setShowQuestionDelete] = useState(false)
+  const toggleShowQuestionDelete = () => setShowQuestionDelete((prev) => !prev)
 
   const showToast = (type, title, message) => {
     Toast.show({
@@ -43,6 +46,22 @@ const EditActivityModal = ({ visible, onClose, activity_id, onContinue }) => {
     toggleCalendar()
     const formatDate = dateUtils.formatDate(currentDate)
     handleChange('due_date', formatDate)
+  }
+  const handleContinue = (confirm) => {
+    if (confirm) {
+      showToast(
+        'success',
+        'Actvidadad eliminada',
+        'Se ha eliminado la actividad'
+      )
+      toggleShowQuestionDelete()
+      setTimeout(() => {
+        onClose()
+        onContinue()
+      }, 2500)
+    } else {
+      showToast('error', 'Error al eliminar', 'No se ha eliminado la actividad')
+    }
   }
 
   const saveEdit = () => {
@@ -107,15 +126,6 @@ const EditActivityModal = ({ visible, onClose, activity_id, onContinue }) => {
             >
               Editar actividad
             </Text>
-          </View>
-
-          <View className="flex flex-row items-center gap-2">
-            <TouchableOpacity
-              className="w-10 h-10 rounded-full bg-[#741D1D] flex flex-row items-center justify-center"
-              onPress={saveEdit}
-            >
-              <Ionicons name="save" color={'white'} size={18} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -192,16 +202,46 @@ const EditActivityModal = ({ visible, onClose, activity_id, onContinue }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          <TouchableOpacity
+            className="w-full py-4 rounded-full bg-[#741D1D] flex flex-row items-center justify-center"
+            onPress={saveEdit}
+          >
+            <Text
+              style={{
+                fontFamily: 'Jost_600SemiBold',
+                fontSize: 16,
+                color: 'white',
+              }}
+            >
+              Guardar
+            </Text>
+          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          className="absolute bottom-10 right-5 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300"
+          onPress={toggleShowQuestionDelete}
+        >
+          <Octicons name="trash" size={20} color={'white'} />
+        </TouchableOpacity>
         <SelectStatusActivityModal
           visible={showSelectStatusModal}
           onClose={toggleShowSelectStatusModal}
           handleStatus={handleChange}
           valueStatus={currentActivity?.status}
         />
-
         <Toast config={toastConfig} position="bottom" />
       </View>
+
+      <DeleteQuestionModal
+        title={'¿Realmente desea eliminar esta actividad?'}
+        isVisible={showQuestionDelete}
+        onClose={toggleShowQuestionDelete}
+        onContinue={handleContinue}
+        model={'activities'}
+        id={activity_id}
+      />
     </Modal>
   )
 }

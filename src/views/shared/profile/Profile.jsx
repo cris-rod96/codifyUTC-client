@@ -11,15 +11,13 @@ const Profile = () => {
   const { user } = useSelector((state) => state.user)
   const navigation = useNavigation()
 
-  const closeSession = () => {
-    storageUtil
-      .removeSecureData('session_info')
-      .then((res) => {
-        navigation.navigate('Login')
-      })
-      .catch((err) => {
-        console.log(err.message)
-      })
+  const closeSession = async () => {
+    try {
+      await storageUtil.removeSecureData('session_info')
+      navigation.navigate('Login')
+    } catch (err) {
+      console.log(err.message)
+    }
   }
   return !user ? (
     <Loading message={'Espere por favor'} />

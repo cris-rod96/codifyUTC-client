@@ -12,9 +12,16 @@ import {
 import Toast from 'react-native-toast-message'
 import toastConfig from 'config/toast/toast.config'
 import { topicsAPI } from 'api/index.api'
-import LoadingRegisterTopics from './LoadingRegisterTopcis'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  saveCourses,
+  saveAllClassesInCourses,
+  saveAllStudents,
+} from 'redux/slices/teacher.slice'
 
 const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
+  const { courses } = useSelector((state) => state.teacher)
+  const dispatch = useDispatch()
   const initialState = {
     title: '',
     content: '',
@@ -58,33 +65,30 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
       return
     }
 
-    setIsLoading(true)
-    setResults([])
-
-    try {
-      const res = await topicsAPI.create(arrContent)
-
-      // Procesar la respuesta
-      if (res.status === 201) {
-        const { message, results } = res.data
-
-        // Mostrar mensaje general de éxito
+    topicsAPI
+      .create(arrContent)
+      .then((res) => {
+        resetData()
+        const { topics, message } = res.data
+        const updatedCourses = courses.map((course) => ({
+          ...course,
+          Classes: course.Classes.map((classItem) =>
+            classItem.id === ClassId
+              ? {
+                  ...classItem,
+                  Topics: [...classItem.Topics, ...topics],
+                }
+              : classItem
+          ),
+        }))
+        dispatch(saveCourses(updatedCourses))
+        dispatch(saveAllClassesInCourses(updatedCourses))
+        dispatch(saveAllStudents(updatedCourses))
         showToast('success', 'Éxito', message)
-        setResults(results)
-        // toggleTopicModal()
-      } else {
-        showToast('error', 'Error', res.data.message || 'Algo salió mal.')
-      }
-    } catch (err) {
-      // Manejo de errores
-      console.error('Error en la solicitud:', err.message)
-      showToast(
-        'error',
-        'Error en la solicitud',
-        'No se pudo registrar los temas. Intente de nuevo.'
-      )
-    } finally {
-    }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
   const addTopic = () => {
@@ -98,6 +102,7 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
       arrContent.push({
         ...topic,
         ClassId,
+        created_at: new Date(),
       })
       setTopic(initialState)
 
@@ -311,7 +316,10 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
                 {arrContent.length > 0 ? (
                   <View className="w-full bg-white border border-[#E8F1FF] rounded-lg">
                     {arrContent.map((content, index) => (
-                      <View className="flex flex-row items-center justify-between py-3 border-b border-[#E8F1FF] px-5">
+                      <View
+                        className="flex flex-row items-center justify-between py-3 border-b border-[#E8F1FF] px-5"
+                        key={index}
+                      >
                         <View className="flex flex-row items-center gap-2">
                           <View className="w-8 h-8 rounded-full bg-[#F5F9FF] flex justify-center items-center">
                             <Text
@@ -360,12 +368,6 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
           <Toast config={toastConfig} position="bottom" />
         </View>
       )}
-
-      <LoadingRegisterTopics
-        isLoading={isLoading}
-        results={results}
-        toggleModalResults={toggleModalResults}
-      />
     </Modal>
   )
 }

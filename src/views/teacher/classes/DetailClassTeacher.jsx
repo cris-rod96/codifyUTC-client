@@ -26,8 +26,10 @@ import {
   DeleteQuestionModal,
 } from 'components/modal/index.modals'
 import { dateUtils } from '../../../utils/index.utils'
+import { useSelector } from 'react-redux'
 
 const DetailClassTeacher = ({ route, navigation }) => {
+  const { classes, courses } = useSelector((state) => state.teacher)
   const [currentClass, setCurrentClass] = useState({
     id: null,
     name: null,
@@ -127,36 +129,41 @@ const DetailClassTeacher = ({ route, navigation }) => {
         key={item.id}
       >
         {/* Cabecera */}
-        <View className="h-[45px] px-5 flex flex-row items-center relative">
+        <View
+          className="px-5 flex flex-col
+         items-center relative pt-3"
+        >
+          <View className="w-full flex flex-row items-center justify-end mb-2 ">
+            <TouchableOpacity
+              className="flex flex-row items-center gap-2"
+              onPress={() => editContent(item.id)}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Mulish_700Bold',
+                  fontSize: 14,
+                  color: '#202244',
+                }}
+              >
+                Editar
+              </Text>
+              <Octicons name="chevron-right" size={15} color={'#202244'} />
+            </TouchableOpacity>
+          </View>
           <Text
             style={{
               fontFamily: 'Jost_600SemiBold',
               fontSize: 15,
               color: '#202244',
+              textAlign: 'center',
             }}
           >
             {item.title}
           </Text>
-
-          <TouchableOpacity
-            className="absolute right-4 flex flex-row items-center gap-2"
-            onPress={() => editContent(item.id)}
-          >
-            <Text
-              style={{
-                fontFamily: 'Mulish_600SemiBold',
-                fontSize: 14,
-                color: '#202244',
-              }}
-            >
-              Editar
-            </Text>
-            <Octicons name="chevron-right" size={15} color={'#202244'} />
-          </TouchableOpacity>
         </View>
 
         {/* Body */}
-        <View className="px-5 py-7">
+        <View className="px-5 pt-3 py-7">
           <Text
             style={{
               fontFamily: 'Mulish_400Regular',
@@ -362,18 +369,7 @@ const DetailClassTeacher = ({ route, navigation }) => {
 
   useEffect(() => {
     if (currentClass.id) {
-      topicsAPI
-        .getByClass(currentClass.id)
-        .then((res) => {
-          const { topics } = res.data
-          setTopics(topics)
-        })
-        .catch((err) => {
-          console.log(err)
-        })
-        .finally(() => {
-          console.log('Finalizando búsqueda')
-        })
+      setTopics(currentClass.Topics)
       activitiesAPI
         .getByClass(currentClass.id)
         .then((res) => {
@@ -392,17 +388,14 @@ const DetailClassTeacher = ({ route, navigation }) => {
   useEffect(() => {
     if (route.params) {
       const { id, name } = route.params
-      setCurrentClass((prev) => ({
-        ...prev,
-        id: id,
-        name: name,
-      }))
+      const foundClass = classes.find((classItem) => classItem.id === id)
+      setCurrentClass(foundClass)
 
       navigation.setOptions({
         title: name,
       })
     }
-  }, [route.params, navigation])
+  }, [route.params, navigation, courses])
 
   return (
     <View className="flex-1 bg-[#F5F9FF]">

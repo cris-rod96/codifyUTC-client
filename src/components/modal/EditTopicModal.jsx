@@ -1,5 +1,5 @@
 import { Ionicons, Octicons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
+import { Children, useEffect, useState } from 'react'
 import {
   Modal,
   ScrollView,
@@ -13,8 +13,16 @@ import { topicsAPI } from 'api/index.api'
 import Toast from 'react-native-toast-message'
 import toastConfig from '../../config/toast/toast.config'
 import { DeleteQuestionModal } from 'components/modal/index.modals'
+import {
+  saveCourses,
+  saveAllClassesInCourses,
+  saveAllStudents,
+} from 'redux/slices/teacher.slice'
+import { useDispatch, useSelector } from 'react-redux'
 const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
+  const { courses } = useSelector((state) => state.teacher)
   const [topicId, setTopicId] = useState(null)
+  const dispatch = useDispatch()
   const [currentTopic, setCurrentTopic] = useState(null)
   const [externalResourc, setExternalResource] = useState(false)
   const [showQuestionDelete, setShowQuestionDelete] = useState(false)
@@ -37,17 +45,32 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
       ...prev,
       [name]: value,
     }))
-
-    console.log(currentTopic)
   }
 
   const afterDelete = (confirm) => {
     if (confirm) {
+      toggleShowQuestionDelete()
       showToast(
         'success',
         'Contenido eliminado',
         'Se ha eliminado el contenido con éxito'
       )
+      const updatedCourses = courses.map((course) => ({
+        ...course,
+        Classes: course.Classes.map((classItem) =>
+          classItem.id === currentTopic.ClassId
+            ? {
+                ...classItem,
+                Topics: classItem.Topics.filter(
+                  (topic) => topic.id !== topicId
+                ), // 🔥 Filtra el topic a eliminar
+              }
+            : classItem
+        ),
+      }))
+      dispatch(saveCourses(updatedCourses))
+      dispatch(saveAllClassesInCourses(updatedCourses))
+      dispatch(saveAllStudents(updatedCourses))
       setTimeout(() => {
         onContinue()
         onClose()
@@ -65,11 +88,31 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
     topicsAPI
       .update(topicId, currentTopic)
       .then((res) => {
+        console.log('Bueno')
+        const updatedCourses = courses.map((course) => ({
+          ...course,
+          Classes: course.Classes.map((classItem) =>
+            classItem.id === currentTopic.ClassId
+              ? {
+                  ...classItem,
+                  Topics: classItem.Topics.map((topic) =>
+                    topic.id === topicId
+                      ? { ...topic, ...currentTopic } // Aquí actualizas los datos del topic
+                      : topic
+                  ),
+                }
+              : classItem
+          ),
+        }))
+        dispatch(saveCourses(updatedCourses))
+        dispatch(saveAllClassesInCourses(updatedCourses))
+        dispatch(saveAllStudents(updatedCourses))
         const { message } = res.data
         showToast('success', 'Contenido actualizado', message)
         onContinue()
       })
       .catch((err) => {
+        console.log('Entr aqui')
         showToast(
           'error',
           'Error al actualizar',

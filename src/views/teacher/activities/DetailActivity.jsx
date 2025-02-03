@@ -158,7 +158,7 @@ const DetailActivity = ({ route, navigation }) => {
       setActivityId(id)
     }
   }, [route.params])
-  return (
+  return arrFeed && arrFeed.length > 0 ? (
     <View className="flex-1 bg-[#F5F9FF] px-5 py-3 flex flex-col">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -210,7 +210,7 @@ const DetailActivity = ({ route, navigation }) => {
                 color: '#888',
               }}
             >
-              Participantes
+              {participants === 1 ? 'Participante' : 'Participantes'}
             </Text>
           </View>
           <View className="w-full bg-white border border-gray-200 rounded-lg flex flex-col  justify-center items-center px-5 py-3 mt-3">
@@ -268,122 +268,121 @@ const DetailActivity = ({ route, navigation }) => {
           </Text>
 
           {/* Feedback */}
-          {arrFeed.length > 0 &&
-            arrFeed.map((feed, index) => {
-              const percentajeHits = calculatePercentage(feed.hits, feed.errors)
-              const { message, label } = getFeedbackMessage(percentajeHits)
-              return (
-                <View className="flex flex-col mb-10" key={index}>
-                  {/* Caja de la pregunta */}
-                  <View className="bg-black/80 w-full border border-black rounded-lg px-3 h-[150px] mb-3 flex justify-center items-center">
-                    <Text
+          {arrFeed.map((feed, index) => {
+            const percentajeHits = calculatePercentage(feed.hits, feed.errors)
+            const { message, label } = getFeedbackMessage(percentajeHits)
+            return (
+              <View className="flex flex-col mb-10" key={index}>
+                {/* Caja de la pregunta */}
+                <View className="bg-black/80 w-full border border-black rounded-lg px-3 h-[150px] mb-3 flex justify-center items-center">
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 21,
+                      color: 'white',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {feed.question}
+                  </Text>
+                </View>
+
+                {/* Estadissticas */}
+                <View className="w-full flex flex-col">
+                  <View className="w-full h-[200px] bg-white border-l-2 border-b-2 border-dashed border-gray-200 mt-5 flex flex-row justify-center gap-5 items-end overflow-hidden">
+                    <View
+                      className="w-[80px] bg-green-800 flex flex-col justify-center items-center"
                       style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 21,
-                        color: 'white',
-                        textAlign: 'center',
+                        height:
+                          percentajeHits === 0 ? '1%' : `${percentajeHits}%`,
                       }}
                     >
-                      {feed.question}
-                    </Text>
-                  </View>
-
-                  {/* Cajas de respuestas */}
-                  <View className="flex flex-row justify-between gap-2">
-                    <View className="flex-1 h-[100px]  bg-green-800 rounded-lg flex flex-col justify-center items-center">
                       <Text
                         style={{
                           fontFamily: 'Jost_600SemiBold',
-                          fontSize: 21,
+                          fontSize: 16,
                           color: 'white',
                         }}
                       >
-                        {feed.hits}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Mulish_800ExtraBold',
-                          fontSize: 18,
-                          color: '#F5F9FF',
-                        }}
-                      >
-                        Aciertos
+                        {percentajeHits}%
                       </Text>
                     </View>
-                    <View className="flex-1 h-[100px] bg-red-900 rounded-lg flex flex-col justify-center items-center">
+                    <View
+                      className="w-[80px] bg-red-800 flex flex-col justify-center items-center"
+                      style={{
+                        height:
+                          100 - percentajeHits === 0
+                            ? '1%'
+                            : `${100 - percentajeHits}%`,
+                      }}
+                    >
                       <Text
                         style={{
                           fontFamily: 'Jost_600SemiBold',
-                          fontSize: 21,
+                          fontSize: 16,
                           color: 'white',
                         }}
                       >
-                        {feed.errors}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Mulish_800ExtraBold',
-                          fontSize: 18,
-                          color: '#F5F9FF',
-                        }}
-                      >
-                        Errores
+                        {100 - percentajeHits}%
                       </Text>
                     </View>
                   </View>
-
-                  {/* Caja de Feedback */}
-                  <View className="flex flex-col mt-3 px-3 py-4 border border-gray-200 rounded-lg">
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 18,
-                        color: '#202244',
-                      }}
-                    >
-                      {label}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_600SemiBold',
-                        fontSize: 14,
-                        color: '#888',
-                        marginBottom: 10,
-                      }}
-                    >
-                      {percentajeHits}% de aciertos
-                    </Text>
-
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_600SemiBold',
-                        fontSize: 15,
-                        fontStyle: 'italic',
-                        textAlign: 'justify',
-                      }}
-                    >
-                      {message}
-                    </Text>
+                  <View className="py-5 flex flex-row items-center justify-center gap-10">
+                    <View className="flex flex-row items-center gap-1">
+                      <Octicons
+                        name="square-fill"
+                        size={12}
+                        color={'#166534'}
+                      />
+                      <Text>Aciertos</Text>
+                    </View>
+                    <View className="flex flex-row items-center gap-1">
+                      <Octicons
+                        name="square-fill"
+                        size={12}
+                        color={'#991b1b'}
+                      />
+                      <Text>Errores</Text>
+                    </View>
                   </View>
                 </View>
-              )
-            })}
 
-          {arrFeed.length === 0 && (
-            <View className="w-full bg-white border border-dashed border-gray-200 rounded-lg px-3 py-5">
-              <Text
-                style={{
-                  fontFamily: 'Jost_600SemiBold',
-                  fontSize: 14,
+                {/* Caja de Feedback */}
+                <View className="flex flex-col mt-3 px-3 py-4 border border-gray-200 rounded-lg">
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 18,
+                      color: '#202244',
+                    }}
+                  >
+                    {label}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_600SemiBold',
+                      fontSize: 14,
+                      color: '#888',
+                      marginBottom: 10,
+                    }}
+                  >
+                    {percentajeHits}% de aciertos
+                  </Text>
 
-                  color: '#888',
-                  textAlign: 'center',
-                }}
-              >
-                La actividad aún no ha recibido participantes
-              </Text>
-            </View>
-          )}
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 15,
+                      fontStyle: 'italic',
+                      textAlign: 'justify',
+                    }}
+                  >
+                    {message}
+                  </Text>
+                </View>
+              </View>
+            )
+          })}
         </View>
       </ScrollView>
 
@@ -396,6 +395,20 @@ const DetailActivity = ({ route, navigation }) => {
         id={activityId}
       />
       <Toast config={toastConfig} position="bottom" />
+    </View>
+  ) : (
+    <View className="w-full flex-1 bg-[#F5F9FF]  rounded-lg px-3 py-5 flex justify-center items-center">
+      <Text
+        style={{
+          fontFamily: 'Jost_600SemiBold',
+          fontSize: 14,
+
+          color: '#888',
+          textAlign: 'center',
+        }}
+      >
+        La actividad aún no ha recibido participantes
+      </Text>
     </View>
   )
 }

@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import { useLoading } from 'context/LoadingContext'
 import ByeModal from './ByeModal'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { courseStudentsAPI } from '../../api/index.api'
 import LottieView from 'lottie-react-native'
 import confused from 'assets/confused.json'
 import { Octicons } from '@expo/vector-icons'
+import { deleteUserCourse } from 'redux/slices/student.slice'
 
 const LeaveCourseModal = ({
   showLeaveCourseModal,
@@ -17,11 +18,13 @@ const LeaveCourseModal = ({
   const { user } = useSelector((state) => state.user)
   const [showByeModal, setShowByeModal] = useState(false)
   const toggleByeModal = () => setShowByeModal((prev) => !prev)
+  const dispatch = useDispatch()
 
   const leaveCourse = () => {
     courseStudentsAPI
       .leaveCourse({ course_id: courseId, user_id: user.id })
       .then((res) => {
+        dispatch(deleteUserCourse())
         toggleByeModal()
       })
       .catch((err) => {

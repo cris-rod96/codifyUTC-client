@@ -34,6 +34,10 @@ const courseStudentsAPI = {
       `${model}/?course_id=${course_id}&student_id=${user_id}`
     )
   },
+
+  getByStudent: (student_id) => {
+    return instance.get(`${model}/student/${student_id}`)
+  },
 }
 
 export default courseStudentsAPI
