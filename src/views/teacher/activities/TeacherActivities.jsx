@@ -157,9 +157,10 @@ const TeacherActivities = () => {
     onRefresh()
   }
 
-  const detailActivity = (id) => {
+  const detailActivity = (id, type) => {
     navigation.navigate('DetailActivity', {
       id: id,
+      type: type,
     })
   }
 
@@ -421,7 +422,7 @@ const TeacherActivities = () => {
 
                 <TouchableOpacity
                   className="flex flex-row items-center justify-center gap-2 h-[40px] bg-[#440b0b] mt-1 rounded-b-lg"
-                  onPress={() => detailActivity(item.id)}
+                  onPress={() => detailActivity(item.id, item.type)}
                 >
                   <Text
                     style={{

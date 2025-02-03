@@ -22,6 +22,7 @@ import poster from 'assets/game-default.png'
 import { dateUtils } from 'utils/index.utils'
 import QuizzGame from '../../../components/modal/QuizzGame'
 import { useSelector } from 'react-redux'
+import { lightningResponseAPI } from '../../../api/index.api'
 
 const DetailClass = ({ route, navigation }) => {
   const { user } = useSelector((state) => state.user)
@@ -77,6 +78,30 @@ const DetailClass = ({ route, navigation }) => {
       .catch((err) => {
         console.log(err)
       })
+  }
+  const viewLightningResponses = (id) => {
+    const response = responses.find((resp) => resp.ActivityId === id)
+    lightningResponseAPI
+      .getByResponse(response.id)
+      .then((res) => {
+        const { lightningResponses } = res.data
+        navigation.navigate('LCFeedback', {
+          userAnswers: lightningResponses,
+          activityId: id,
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+  const viewResponses = (type, id) => {
+    if (type === 'Quizz Code') {
+      viewQuizzResponses(id)
+    }
+
+    if (type === 'Lightning Code') {
+      viewLightningResponses(id)
+    }
   }
 
   const renderTopic = (item, index) => (
@@ -269,7 +294,7 @@ const DetailClass = ({ route, navigation }) => {
         {responses.find((res) => res.ActivityId === activity.id) ? (
           <TouchableOpacity
             className="py-3 w-full rounded-b-lg bg-green-800 flex flex-row items-center justify-center relative"
-            onPress={() => viewQuizzResponses(activity.id)}
+            onPress={() => viewResponses(activity.type, activity.id)}
           >
             <Text
               style={{

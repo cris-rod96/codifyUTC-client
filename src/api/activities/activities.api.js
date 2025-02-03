@@ -30,6 +30,11 @@ const activitiesAPI = {
   getById: (id) => {
     return instance.get(`${model}/${id}`)
   },
+
+  getLightningById: (id) => {
+    return instance.get(`${model}/lightning/${id}`)
+  },
+
   getByClass: (class_id) => {
     return instance.get(`${model}/class/${class_id}`)
   },

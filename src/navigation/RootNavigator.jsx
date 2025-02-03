@@ -47,6 +47,7 @@ import EditProfile from '../views/shared/edit/EditProfile'
 import DetailActivity from '../views/teacher/activities/DetailActivity'
 import DetailClass from '../views/student/class/DetailClass'
 import Feedback from '../components/feedback/Feedback'
+import LightningCodeFeedback from '../views/student/feedbacks/LightningCodeFeedback'
 
 const Stack = createStackNavigator()
 const Tabs = createBottomTabNavigator()
@@ -513,6 +514,15 @@ const ActivitiesStudentNavigator = () => {
       <Stack.Screen
         name="Feedback"
         component={Feedback}
+        options={{
+          headerShown: true,
+          headerTitle: 'Resultados',
+        }}
+      />
+
+      <Stack.Screen
+        name="LCFeedback"
+        component={LightningCodeFeedback}
         options={{
           headerShown: true,
           headerTitle: 'Resultados',

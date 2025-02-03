@@ -65,15 +65,28 @@ const OnBoarding = () => {
 
   // Cargar el estado de 'hasLaunched' al iniciar
   useEffect(() => {
-    storageUtil.getSecureData('hasLaunched').then((res) => {
-      setHasLaunched(res)
-    })
+    storageUtil
+      .getSecureData('hasLaunched')
+      .then((res) => {
+        // Si no existe el dato, consideramos que es la primera vez que se lanza
+        if (res !== null) {
+          setHasLaunched(res)
+        } else {
+          setHasLaunched(false) // O el valor que desees por defecto
+        }
+      })
+      .catch((err) => {
+        console.error('Error al leer el dato:', err)
+        setHasLaunched(false) // O el valor que desees por defecto
+      })
   }, [])
 
   // Efecto para navegar después de que se haya determinado si es la primera vez
   useEffect(() => {
-    if (hasLaunched) {
-      navigation.replace('Login') // Reemplaza la pantalla de OnBoarding por la de Login
+    if (hasLaunched !== null) {
+      if (hasLaunched) {
+        navigation.replace('Login') // Reemplaza la pantalla de OnBoarding por la de Login
+      }
     }
   }, [hasLaunched, navigation])
 

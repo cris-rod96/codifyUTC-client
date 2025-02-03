@@ -14,50 +14,56 @@ import html5 from 'assets/html-5.png'
 import js from 'assets/js.png'
 import python from 'assets/python.png'
 import java from 'assets/java.png'
-import { notificationUtils } from '../../utils/index.utils'
+import { notificationUtils, storageUtil } from '../../utils/index.utils'
 import Countdown from '../countdown/Countdown'
 import { Octicons } from '@expo/vector-icons'
 import Results from '../results/Results'
+import { useDispatch } from 'react-redux'
+import { activitiesAPI, lightningResponseAPI } from 'api/index.api'
+import { saveAcitiviTyId, saveUserAnswers } from '../../redux/slices/gameSlice'
 
-const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
+const LightningGame = ({
+  showLightningGame,
+  toggleLightningGame,
+  activity_id,
+  showResults,
+}) => {
+  const dispatch = useDispatch()
+  // Sonidos del juego
   const [soundCorrect, setSoundCorrect] = useState(null)
   const [soundIncorrect, setSoundIncorrect] = useState(null)
-  const boxColors = ['#A70808', '#130DB2', '#CBA715', '#1BA81B']
-  const [isCorrectResponsed, setIsCorrectResponsed] = useState(false)
-  const [showModalResults, setShowModalResults] = useState(false)
-  const [isSelected, setIsSelecteed] = useState(false)
-  const [indexCorrect, setIndexCorrect] = useState(null)
-  const [userAnswers, setUserAnswers] = useState([])
+  const [soundBeep, setSoundBeep] = useState(false)
+  const [soundStart, setSoundStart] = useState(false)
 
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [question, setQuestion] = useState(null)
-  const [messageShown, setMessageShown] = useState(false)
-  const [response, setResponse] = useState('')
-
-  // Contadores
-  const [counter, setCounter] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const intervalRef = useRef(null)
-
-  // Score
-  const [totalScore, setTotalScore] = useState(0)
-  const [currentScore, setCurrentScore] = useState(0)
-
-  // Monted
   const [mounted, setMounted] = useState(false)
 
-  const getLogo = (language) => {
-    switch (language) {
-      case 'HTML':
-        return html5
-      case 'JavaScript':
-        return js
-      case 'Java':
-        return java
-      case 'Python':
-        return python
-    }
-  }
+  const boxColors = ['#A70808', '#130DB2', '#CBA715', '#1BA81B']
+
+  const [isSelected, setIsSelected] = useState(false)
+  const [indexCorrect, setIndexCorrect] = useState(null)
+  const [isCorrectResponsed, setIsCorrectResponsed] = useState(false)
+
+  const [lightning, setLightning] = useState(null)
+  const [question, setQuestion] = useState(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  const [counter, setCounter] = useState(0)
+  const [totalScore, setTotalScore] = useState(0)
+  const [currentScore, setCurrentScore] = useState(0)
+  const [countDown, setCountDown] = useState(5)
+  const [startCountDown, setStartCountDown] = useState(false)
+
+  const [message, setMessage] = useState(false)
+  const [showMessage, setShowMessage] = useState(false)
+
+  const [startMessage, setStartMessage] = useState('')
+  const [showStartMessage, setShowStartMessage] = useState(false)
+
+  const intervalRef = useRef(null)
+  const intervalCountDown = useRef(null)
+
+  const [showModalResults, setShowModalResults] = useState(false)
+  const [userAnswers, setUserAnswers] = useState([])
 
   const loadSounds = async () => {
     const { sound: sound_correct } = await Audio.Sound.createAsync(
@@ -69,6 +75,16 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
       require('../../../assets/incorrect.mp3')
     )
     setSoundIncorrect(sound_incorrect)
+
+    const { sound: sound_beep } = await Audio.Sound.createAsync(
+      require('../../../assets/beep.mp3')
+    )
+    setSoundBeep(sound_beep)
+
+    const { sound: sound_start } = await Audio.Sound.createAsync(
+      require('../../../assets/start.mp3')
+    )
+    setSoundStart(sound_start)
   }
 
   const playSoundCorrect = async () => {
@@ -86,6 +102,21 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
       }, 100)
     }
   }
+  const playSoundBeep = async () => {
+    if (soundBeep) {
+      setTimeout(async () => {
+        await soundBeep.replayAsync()
+      }, 100)
+    }
+  }
+
+  const playSoundStart = async () => {
+    if (soundStart) {
+      setTimeout(async () => {
+        await soundStart.replayAsync()
+      }, 100)
+    }
+  }
 
   const releaseSounds = async () => {
     if (soundCorrect) {
@@ -95,236 +126,115 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
     if (soundIncorrect) {
       await soundIncorrect.unloadAsync()
     }
+
+    if (soundBeep) {
+      await soundBeep.unloadAsync()
+    }
+
+    if (soundStart) {
+      await soundStart.unloadAsync()
+    }
   }
 
-  const quizzLightning = {
-    total_timee: 600,
-    total_score: 1200,
-    activities: [
-      {
-        id: 1,
-        question: 'Encuentra el error en el siguiente código',
-        code: "function helloWorld() { console.logger('Hola mundo'); }",
-        time_limit: 30,
-        score: 100,
-        language: 'JavaScript',
-        options: [
-          { id: 1, option: 'console.log', isCorrect: true },
-          { id: 2, option: 'log.console', isCorrect: false },
-          { id: 3, option: 'console.script', isCorrect: false },
-          { id: 4, option: 'script.console', isCorrect: false },
-        ],
-      },
-      {
-        id: 2,
-        question: '¿Qué falta en este código HTML?',
-        code: `<html>
-  <head><title>Mi Página</title></head>
-  <body>
-  <h1>Hola Mundo</h1>
-  </body>
-  </html>`,
-        time_limit: 30,
-        score: 100,
-        language: 'HTML',
-        options: [
-          { id: 1, option: 'Falta el DOCTYPE', isCorrect: true },
-          { id: 2, option: 'Falta el cierre de <head>', isCorrect: false },
-          { id: 3, option: 'El título está mal definido', isCorrect: false },
-          { id: 4, option: 'El código es incorrecto', isCorrect: false },
-        ],
-      },
-      {
-        id: 3,
-        question: '¿Qué falta en este código de Python?',
-        code: `def saludo(nombre):
-  print(f"Hola {nombre}")
-  saludo()`,
-        time_limit: 30,
-        score: 100,
-        language: 'Python',
-        options: [
-          {
-            id: 1,
-            option: 'Un argumento al llamar a saludo()',
-            isCorrect: true,
-          },
-          { id: 2, option: 'Un return en la función', isCorrect: false },
-          { id: 3, option: 'Un parámetro llamado self', isCorrect: false },
-          { id: 4, option: 'Nada, el código está bien', isCorrect: false },
-        ],
-      },
-      {
-        id: 4,
-        question: '¿Qué etiqueta es incorrecta en este fragmento de HTML?',
-        code: `<div>
-  <header>Encabezado</header>
-  <article>Contenido</articulo>
-  </div>`,
-        time_limit: 20,
-        score: 100,
-        language: 'HTML',
-        options: [
-          { id: 1, option: '<article>', isCorrect: false },
-          { id: 2, option: '<header>', isCorrect: false },
-          { id: 3, option: '<articulo>', isCorrect: true },
-          { id: 4, option: '<div>', isCorrect: false },
-        ],
-      },
-      {
-        id: 5,
-        question: '¿Cuál es la salida de este código de Python?',
-        code: `x = [1, 2, 3]
-  y = x
-  y.append(4)
-  print(x)`,
-        time_limit: 20,
-        score: 100,
-        language: 'Python',
-        options: [
-          { id: 1, option: '[1, 2, 3, 4]', isCorrect: true },
-          { id: 2, option: '[1, 2, 3]', isCorrect: false },
-          { id: 3, option: 'Error', isCorrect: false },
-          { id: 4, option: '[4, 2, 3]', isCorrect: false },
-        ],
-      },
-      {
-        id: 6,
-        question: '¿Cuál es la salida de este código de JavaScript?',
-        code: `const x = '5';
-  const y = 5;
-  console.log(x == y);`,
-        time_limit: 20,
-        score: 100,
-        language: 'JavaScript',
-        options: [
-          { id: 1, option: 'true', isCorrect: true },
-          { id: 2, option: 'false', isCorrect: false },
-          { id: 3, option: 'Error', isCorrect: false },
-          { id: 4, option: 'undefined', isCorrect: false },
-        ],
-      },
-      {
-        id: 7,
-        question:
-          '¿Qué atributo falta para que el formulario se envíe correctamente?',
-        code: `<form>
-  <input type="text" name="nombre">
-  <input type="submit">
-  </form>`,
-        time_limit: 25,
-        score: 100,
-        language: 'HTML',
-        options: [
-          { id: 1, option: 'action', isCorrect: true },
-          { id: 2, option: 'method', isCorrect: false },
-          { id: 3, option: 'type', isCorrect: false },
-          { id: 4, option: 'id', isCorrect: false },
-        ],
-      },
-      {
-        id: 8,
-        question: '¿Qué devuelve esta función en Python?',
-        code: `def suma(a, b=5):
-      return a + b
-  print(suma(3))`,
-        time_limit: 20,
-        score: 100,
-        language: 'Python',
-        options: [
-          { id: 1, option: '8', isCorrect: true },
-          { id: 2, option: '5', isCorrect: false },
-          { id: 3, option: 'Error', isCorrect: false },
-          { id: 4, option: '3', isCorrect: false },
-        ],
-      },
-      {
-        id: 9,
-        question: '¿Cuál es la salida de este código HTML?',
-        code: `<p style="color: red;">Hola</p>`,
-        time_limit: 15,
-        score: 100,
-        language: 'HTML',
-        options: [
-          { id: 1, option: "Texto rojo con 'Hola'", isCorrect: true },
-          { id: 2, option: "Texto negro con 'Hola'", isCorrect: false },
-          { id: 3, option: 'Error', isCorrect: false },
-          { id: 4, option: 'Texto invisible', isCorrect: false },
-        ],
-      },
-      {
-        id: 10,
-        question: '¿Qué falta para que el código sea correcto?',
-        code: `let nombre = 'Juan';
-  console.log('Hola ' + nombre);`,
-        time_limit: 20,
-        score: 100,
-        language: 'JavaScript',
-        options: [
-          { id: 1, option: 'Nada, el código es correcto', isCorrect: true },
-          { id: 2, option: "Falta un ; después de 'Juan'", isCorrect: false },
-          { id: 3, option: "Falta declarar 'nombre'", isCorrect: false },
-          {
-            id: 4,
-            option: "Falta un espacio después de 'Hola'",
-            isCorrect: false,
-          },
-        ],
-      },
-    ],
+  const boxOptions = (item, index) => {
+    return (
+      <TouchableOpacity
+        className="w-[48%] h-24 rounded-lg flex justify-center items-center mb-4 relative px-3"
+        style={{
+          backgroundColor: isSelected
+            ? indexCorrect === item.id
+              ? 'green'
+              : 'red'
+            : boxColors[index],
+        }}
+        onPress={() => {
+          if (!isSelected) {
+            selectOption(item.id)
+          }
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'Mulish_700Bold',
+            fontSize: 14,
+            color: 'white',
+            textAlign: 'center',
+          }}
+        >
+          {item.option}
+        </Text>
+
+        {isSelected && (
+          <View
+            className={`absolute w-7 h-7 rounded-full -top-2 -left-2 flex justify-center items-center ${
+              indexCorrect === item.id ? 'bg-[#166534]' : 'bg-[#b91c1c]'
+            }`}
+          >
+            {indexCorrect === item.id ? (
+              <Octicons name="check" size={15} color={'white'} />
+            ) : (
+              <Octicons name="x" size={17} className="text-red-950" />
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
+    )
   }
 
-  const calculateScore = (activity, timeTaken) => {
-    const { time_limit, score } = activity
+  const stopTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }
+
+  const saveStudentActivity = async () => {
+    const res = await storageUtil.getSecureData('session_info')
+    const { user } = await JSON.parse(res)
+
+    const data = {
+      ActivityId: activity_id,
+      StudentId: user.id,
+      lightningResponses: userAnswers,
+    }
+    lightningResponseAPI
+      .register(data)
+      .then((res) => {
+        dispatch(saveUserAnswers(userAnswers))
+        dispatch(saveAcitiviTyId(activity_id))
+        closeLightningGame()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  const calculateScore = (question, timeTaken) => {
+    const { time_limit, score } = question
     const timeRemaining = time_limit - timeTaken
 
     const finalScore = Math.round(
       Math.max(0, score * (timeRemaining / time_limit))
     )
     setCurrentScore(finalScore)
+    setTotalScore((prev) => prev + finalScore)
     return finalScore
   }
 
-  const nextQuestion = () => {
-    if (currentIndex + 1 < quizzLightning.activities.length) {
-      setIsSelecteed(false)
-      setMessageShown(false)
-      setIsCorrectResponsed(false)
-      setCurrentScore(0)
-      setIndexCorrect(null)
-      setCurrentIndex((prev) => prev + 1)
-    } else {
-      setShowModalResults(true)
-    }
-  }
-
-  const closeLightningGame = () => {
-    setShowModalResults(false)
-    setIsSelecteed(false)
-    setMessageShown(false)
-    setIsCorrectResponsed(false)
-    setCurrentScore(0)
-    setIndexCorrect(null)
-    setCurrentIndex(0)
-    setUserAnswers([])
-    setMounted(false)
-    setTotalScore(0)
-    intervalRef.current = null
-    toggleLightningGame()
-  }
-
   const selectOption = (id) => {
+    stopTimer()
     if (isSelected) return
-    setIsSelecteed(true)
+    setIsSelected(true)
+
+    const timeTaken = question.time_limit - counter
     if (id !== null) {
-      const option = question.options.find((data) => data.id === id)
+      const option = question.OptionsLightning.find((opt) => opt.id === id)
       if (option.isCorrect) {
         setIndexCorrect(option.id)
         setIsCorrectResponsed(true)
         playSoundCorrect()
 
-        const timeTaken = question.time_limit - counter
-        const scoreForThisQuestion = calculateScore(question, timeTaken)
+        const scoreObtained = calculateScore(question, timeTaken)
 
         setUserAnswers((prev) => [
           ...prev,
@@ -334,16 +244,15 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
             user_response: option.option,
             correct_response: option.option,
             time_taken: timeTaken,
-            time_limit: question.time_limit,
-            score: question.score,
-            score_obtained: scoreForThisQuestion,
-            // feedback: question.feedback
+            score_total: question.score,
+            score_obtained: scoreObtained,
+            feedback: question.feedback,
           },
         ])
-
-        setTotalScore((prevScore) => prevScore + scoreForThisQuestion)
       } else {
-        const optionCorrect = question.options.find((data) => data.isCorrect)
+        const optionCorrect = question.OptionsLightning.find(
+          (data) => data.isCorrect
+        )
         setIndexCorrect(optionCorrect.id)
         setIsCorrectResponsed(false)
         setCurrentScore(0)
@@ -359,14 +268,16 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
             correct_response: optionCorrect.option,
             time_taken: timeTaken,
             time_limit: question.time_limit,
-            score: question.score,
+            score_total: question.score,
             score_obtained: 0,
-            // feedback: question.feedback
+            feedback: question.feedback,
           },
         ])
       }
     } else {
-      const optionCorrect = question.options.find((data) => data.isCorrect)
+      const optionCorrect = question.OptionsLightning.find(
+        (data) => data.isCorrect
+      )
       setIndexCorrect(optionCorrect.id)
       setIsCorrectResponsed(false)
       setCurrentScore(0)
@@ -381,76 +292,151 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
           correct_response: optionCorrect.option,
           time_taken: 0,
           time_limit: question.time_limit,
-          score: question.score,
+          score_total: question.score,
           score_obtained: 0,
-          // feedback: question.feedback
+          feedback: question.feedback,
         },
       ])
     }
-
-    stopTimer()
-    setMessageShown(true)
+    setShowMessage(true)
   }
 
-  const stopTimer = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
+  const nextQuestion = () => {
+    if (currentIndex + 1 < lightning.QuestionsLightning.length) {
+      setIsSelected(false)
+      setShowMessage(false)
+      setIsCorrectResponsed(false)
+      setCurrentScore(0)
+      setIndexCorrect(null)
+      setCurrentIndex((prev) => prev + 1)
+    } else {
+      saveStudentActivity()
+    }
+  }
+
+  const closeLightningGame = () => {
+    setShowModalResults(false)
+    setIsSelected(false)
+    setShowMessage(false)
+    setIsCorrectResponsed(false)
+    setCurrentScore(0)
+    setIndexCorrect(null)
+    setCurrentIndex(0)
+    setUserAnswers([])
+    setMounted(false)
+    setTotalScore(0)
+    setCountDown(10)
+    setStartCountDown(false)
+    setShowStartMessage(false)
+    intervalRef.current = null
+    showResults()
+  }
+
+  const stopCountDown = () => {
+    if (intervalCountDown.current) {
+      clearInterval(intervalCountDown.current)
+      intervalCountDown.current = null
     }
   }
 
   useEffect(() => {
-    if (showLightningGame && mounted) {
-      intervalRef.current = setInterval(() => {
-        setCounter((prev) => {
-          if (prev - 1 === 0) {
-            stopTimer()
-            selectOption(null)
-          }
+    if (startCountDown) {
+      intervalCountDown.current = setInterval(() => {
+        setCountDown((prev) => {
           if (prev > 0) {
+            playSoundBeep()
+
+            if (prev === 4) {
+              setShowStartMessage(true)
+              setStartMessage(
+                '¡Estamos a punto de comenzar! Prepara todo para esta experiencia.'
+              )
+            }
+
+            if (prev === 3)
+              setStartMessage(
+                'Es momento de enfocarte, ¡aléjate de cualquier distracción!'
+              )
+
+            if (prev === 2)
+              setStartMessage(
+                '¡Cuenta regresiva iniciada! Ajusta tus últimos detalles.'
+              )
+
+            if (prev === 1)
+              setStartMessage(
+                'Respira profundo, concéntrate, y prepárate para dar lo mejor de ti.'
+              )
+
             return prev - 1
           } else {
-            stopTimer()
+            stopCountDown()
+            playSoundStart()
+            setStartMessage('¡Comienza ahora!')
+            setMounted(true)
             return 0
           }
         })
       }, 1000)
-    } else {
-      setCounter(duration / 1000)
-      stopTimer()
     }
 
-    return () => stopTimer()
-  }, [showLightningGame, mounted, question])
+    return () => stopCountDown()
+  }, [startCountDown])
 
   useEffect(() => {
-    if (messageShown) {
+    if (showMessage) {
       const response = isCorrectResponsed
         ? notificationUtils.getCorrectMessage()
         : notificationUtils.getIncorrectMessage()
-
-      setResponse(response)
+      setMessage(response)
     } else {
-      setResponse(null)
+      setMessage(null)
     }
-  }, [messageShown])
+  }, [showMessage])
 
   useEffect(() => {
-    setQuestion(quizzLightning.activities[currentIndex])
-    if (messageShown) {
-      setMessageShown(false)
+    if (mounted) {
+      if (question) {
+        setCounter(question.time_limit)
+        intervalRef.current = setInterval(() => {
+          setCounter((prev) => {
+            if (prev > 1) return prev - 1
+            stopTimer()
+            selectOption(null)
+            return 0
+          })
+        }, 1000)
+      }
     }
-  }, [currentIndex])
+    return () => stopTimer()
+  }, [question, mounted])
 
   useEffect(() => {
-    setCounter((prev) => question?.time_limit)
-  }, [question])
+    if (lightning) {
+      setQuestion(lightning.QuestionsLightning[currentIndex])
+      setIsSelected(false)
+      setIndexCorrect(null)
+      setIsCorrectResponsed(false)
+      setCurrentScore(0)
+    }
+  }, [currentIndex, lightning])
+
+  useEffect(() => {
+    if (activity_id) {
+      activitiesAPI
+        .getLightningById(activity_id)
+        .then((res) => {
+          const { activity } = res.data
+          console.log(activity)
+          setLightning(activity)
+        })
+        .catch((err) => console.log(err.message))
+    }
+  }, [activity_id])
 
   useEffect(() => {
     loadSounds()
-    return () => {
-      releaseSounds()
-    }
+    return () => releaseSounds()
   }, [])
 
   return (
@@ -463,208 +449,185 @@ const LightningGame = ({ showLightningGame, toggleLightningGame }) => {
       <View className="flex-1 bg-[#F5F9FF]">
         <View className="flex-1 relative">
           <Image source={bg} className="absolute w-full h-full object-cover" />
-          {mounted ? (
-            !showModalResults ? (
-              <View>
-                <View className="flex flex-row items-center justify-between border-b border-purple-800 p-5">
+
+          {question && mounted ? (
+            <View className="p-5">
+              <View className="flex flex-row items-center justify-between">
+                <Text
+                  style={{
+                    fontFamily: 'Jost_600SemiBold',
+                    fontSize: 21,
+                    color: 'white',
+                  }}
+                >
+                  Lightning Code
+                </Text>
+                <View className="w-8 h-8 rounded-full bg-white justify-center items-center">
                   <Text
                     style={{
-                      fontFamily: 'Jost_600SemiBold',
-                      fontSize: 21,
+                      fontFamily: 'Mulish_800ExtraBold',
+                      fontSize: 14,
+                      color: '#741D1D',
+                    }}
+                  >
+                    {counter}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="flex flex-col mt-10">
+                <View className="mb-5 flex flex-row justify-between items-center">
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_700Bold',
+                      fontSize: 18,
                       color: 'white',
                     }}
                   >
-                    Lightning Code
+                    {currentIndex + 1}/{lightning.QuestionsLightning.length}
                   </Text>
-
-                  <View
-                    className="w-8 h-8 rounded-full bg-white flex justify-center items-center
-              "
-                  >
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_800ExtraBold',
-                        fontSize: 14,
-                        color: '#741D1D',
-                      }}
-                    >
-                      {counter}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Body */}
-                <View className="flex flex-col mt-6 px-5">
-                  {/* Preguntas y puntaje */}
-                  <View className="mb-10 flex flex-row items-center justify-between">
+                  {isSelected && (
                     <Text
                       style={{
                         fontFamily: 'Jost_700Bold',
                         fontSize: 18,
-                        color: 'white',
+                        color: isCorrectResponsed ? 'green' : 'red',
                       }}
                     >
-                      {currentIndex + 1}/{quizzLightning?.activities.length}
+                      {isCorrectResponsed ? `+${currentScore}` : 0}
                     </Text>
-
-                    {isSelected && (
-                      <Text
-                        style={{
-                          fontFamily: 'Jost_700Bold',
-                          fontSize: 18,
-                          color: isCorrectResponsed ? 'green' : 'red',
-                        }}
-                        className="transition-all duration-300"
-                      >
-                        + {currentScore}
-                      </Text>
-                    )}
-
-                    <Text
-                      style={{
-                        fontFamily: 'Jost_700Bold',
-                        fontSize: 18,
-                        color: 'white',
-                      }}
-                    >
-                      {totalScore} pts
-                    </Text>
-                  </View>
-
-                  {/* Código */}
+                  )}
                   <Text
                     style={{
-                      fontFamily: 'Jost_600SemiBold',
-                      fontSize: 16,
+                      fontFamily: 'Jost_700Bold',
+                      fontSize: 18,
                       color: 'white',
-                      marginBottom: 10,
+                    }}
+                  >
+                    {totalScore} pts
+                  </Text>
+                </View>
+
+                <View className="w-full h-[50px] flex justify-center items-center px-3">
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_700Bold',
+                      fontSize: 17,
+                      color: 'white',
                       textAlign: 'center',
                     }}
                   >
-                    {question?.question}
+                    {question.question}
                   </Text>
-                  <View className="w-full h-[180px] bg-black rounded-lg border border-gray-200 p-[10px] relative">
-                    <ScrollView showsVerticalScrollIndicator={false}>
+                </View>
+
+                {/* Codigo */}
+                <View className="w-full h-[160px] mt-5 px-8 py-2 rounded-lg bg-[#282C34]">
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_600SemiBold',
+                      fontSize: 14,
+                      color: '#F5F9FF',
+                    }}
+                  >
+                    {question.code}
+                  </Text>
+                </View>
+
+                <View className="flex flex-row flex-wrap justify-between mt-5">
+                  {question.OptionsLightning.map((item, index) =>
+                    boxOptions(item, index)
+                  )}
+                </View>
+
+                {showMessage && (
+                  <View className="mt-8 flex flex-col">
+                    <Text
+                      style={{
+                        fontFamily: 'Mulish_600SemiBold',
+                        fontSize: 16,
+                        color: 'white',
+                        marginBottom: 20,
+                        textAlign: 'center',
+                      }}
+                    >
+                      {message}
+                    </Text>
+                    <TouchableOpacity
+                      className="w-full bg-white/80 py-3 flex justify-center items-center"
+                      onPress={nextQuestion}
+                    >
                       <Text
                         style={{
                           fontFamily: 'Jost_600SemiBold',
                           fontSize: 15,
-                          color: 'white',
+                          color: '#202244',
                         }}
                       >
-                        {question?.code}
+                        Continuar
                       </Text>
-                    </ScrollView>
-
-                    <View
-                      className="w-[30px] h-[30px] absolute bottom-4 right-2
-                "
-                    >
-                      <Image
-                        source={getLogo(question?.language)}
-                        className="absolute w-full h-full object-contain"
-                      />
-                    </View>
+                    </TouchableOpacity>
                   </View>
-
-                  {/* Opciones */}
-                  <View className="flex flex-row flex-wrap justify-between mt-5">
-                    {question?.options.map((option, index) => (
-                      <TouchableOpacity
-                        className="w-[48%] h-20 rounded-lg justify-center items-center mb-4 relative px-3 bg-green-800"
-                        style={{
-                          backgroundColor: isSelected
-                            ? indexCorrect === option.id
-                              ? 'green'
-                              : 'red'
-                            : boxColors[index],
-                        }}
-                        onPress={() => {
-                          if (!isSelected) {
-                            selectOption(option.id)
-                          }
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontFamily: 'Mulish_700Bold',
-                            fontSize: 12,
-                            color: 'white',
-                            textAlign: 'center',
-                          }}
-                        >
-                          {option.option}
-                        </Text>
-
-                        {isSelected && (
-                          <View
-                            className={`absolute w-7 h-7 rounded-full -top-2 -left-2 flex justify-center items-center
-                           ${
-                             indexCorrect === option.id
-                               ? 'bg-[#166534]'
-                               : 'bg-[#b91c1c]'
-                           }`}
-                          >
-                            {indexCorrect === option.id ? (
-                              <Octicons
-                                name="check"
-                                size={15}
-                                color={'white'}
-                              />
-                            ) : (
-                              <Octicons
-                                name="x"
-                                size={17}
-                                className="text-red-950"
-                              />
-                            )}
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  {/* Mensaje */}
-                  {messageShown && (
-                    <View className="mt-6 flex flex-col">
-                      <Text
-                        style={{
-                          fontFamily: 'Mulish_600SemiBold',
-                          fontSize: 16,
-                          color: 'white',
-                          marginBottom: 15,
-                          textAlign: 'center',
-                        }}
-                      >
-                        {response}
-                      </Text>
-
-                      <TouchableOpacity
-                        className="w-full bg-white/80 py-3 flex justify-center items-center"
-                        onPress={nextQuestion}
-                      >
-                        <Text
-                          style={{
-                            fontFamily: 'Jost_600SemiBold',
-                            fontSize: 15,
-                            color: '#202244',
-                          }}
-                        >
-                          Continuar
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
+                )}
               </View>
-            ) : (
-              <Results
-                userAnswers={userAnswers}
-                toggleGame={closeLightningGame}
-              />
-            )
+            </View>
           ) : (
-            <Countdown mounted={mounted} setMounted={setMounted} />
+            <View className="flex-1 justify-center items-center flex flex-col gap-5 px-4 relative">
+              <View className="w-[250px] h-[250px] rounded-full bg-white flex justify-center items-center border-2 border-gray-200">
+                <Text
+                  style={{
+                    fontFamily: 'Jost_700Bold',
+                    fontSize: 150,
+                    color: '#202244',
+                  }}
+                >
+                  {countDown}
+                </Text>
+              </View>
+
+              {!startCountDown && (
+                <View className="flex flex-col w-full mt-10">
+                  <Text
+                    style={{
+                      fontFamily: 'Jost_600SemiBold',
+                      fontSize: 18,
+                      color: 'white',
+                      textAlign: 'center',
+                    }}
+                  >
+                    Puedes iniciar cuando desees. ¡Tómate tu tiempo!
+                  </Text>
+
+                  <TouchableOpacity
+                    className="w-full py-4 flex flex-row items-center justify-center bg-[#741D1D] rounded-full mt-10"
+                    onPress={() => setStartCountDown(true)}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: 'Jost_600SemiBold',
+                        fontSize: 16,
+                        color: 'white',
+                      }}
+                    >
+                      Iniciar
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {showStartMessage && (
+                <Text
+                  style={{
+                    fontFamily: 'Mulish_700Bold',
+                    fontSize: 16,
+                    color: 'white',
+                    textAlign: 'center',
+                  }}
+                >
+                  {startMessage}
+                </Text>
+              )}
+            </View>
           )}
         </View>
       </View>

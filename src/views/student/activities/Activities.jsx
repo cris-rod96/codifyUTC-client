@@ -29,6 +29,7 @@ import puzzleLogo from 'assets/puzzle.png'
 import poster from 'assets/game-default.png'
 import { dateUtils } from 'utils/index.utils'
 import Results from '../../../components/results/Results'
+import { lightningResponseAPI } from '../../../api/index.api'
 
 const Activities = () => {
   const { user } = useSelector((state) => state.user)
@@ -73,9 +74,14 @@ const Activities = () => {
     if (type === 'Quizz Code') {
       toggleQuizzGame()
     }
+    if (type === 'Lightning Code') {
+      toggleLightningGame()
+    }
   }
   const showResults = () => {
-    toggleQuizzGame()
+    setShowQuizzGame(false)
+    setShowLightningGame(false)
+    // toggleQuizzGame()
     setTimeout(() => {
       setShowResultsModal(true)
     }, 2000)
@@ -97,9 +103,38 @@ const Activities = () => {
       })
   }
 
+  const viewLightningResponses = (id) => {
+    const response = responses.find((resp) => resp.ActivityId === id)
+    lightningResponseAPI
+      .getByResponse(response.id)
+      .then((res) => {
+        const { lightningResponses } = res.data
+        navigation.navigate('LCFeedback', {
+          userAnswers: lightningResponses,
+          activityId: id,
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  const viewResponses = (type, id) => {
+    if (type === 'Quizz Code') {
+      viewQuizzResponses(id)
+    }
+
+    if (type === 'Lightning Code') {
+      viewLightningResponses(id)
+    }
+  }
+
   const renderActivity = (activity) => {
     return (
-      <View className="bg-white border border-gray-200 rounded-lg">
+      <View
+        className="bg-white border border-gray-200 rounded-lg"
+        key={activity.id}
+      >
         {/* Portada */}
         <View className="w-full h-[180px] bg-gray-800 rounded-t-lg relative">
           <Image
@@ -213,7 +248,7 @@ const Activities = () => {
         {responses.find((res) => res.ActivityId === activity.id) ? (
           <TouchableOpacity
             className="py-3 w-full rounded-b-lg bg-green-800 flex flex-row items-center justify-center relative"
-            onPress={() => viewQuizzResponses(activity.id)}
+            onPress={() => viewResponses(activity.type, activity.id)}
           >
             <Text
               style={{
@@ -365,6 +400,12 @@ const Activities = () => {
           <QuizzGame
             showQuizzGame={showQuizzGame}
             toggleQuizzGame={toggleQuizzGame}
+            activity_id={activityId}
+            showResults={showResults}
+          />
+          <LightningGame
+            showLightningGame={showLightningGame}
+            toggleLightningGame={toggleLightningGame}
             activity_id={activityId}
             showResults={showResults}
           />

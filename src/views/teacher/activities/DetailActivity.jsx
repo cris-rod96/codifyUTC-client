@@ -7,13 +7,17 @@ import { responsesAPI, quizzResponseAPI } from 'api/index.api'
 import { DeleteQuestionModal } from 'components/modal/index.modals'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from '../../../config/index.config'
+import { lightningResponseAPI } from '../../../api/index.api'
 const DetailActivity = ({ route, navigation }) => {
   const [showQuestionDelete, setShowQuestionDelete] = useState(false)
   const toggleShowQuestionDelete = () => setShowQuestionDelete((prev) => !prev)
   const [activityId, setActivityId] = useState(null)
+  const [activityType, setActivityType] = useState(null)
   const [participants, setParticipants] = useState(0)
   const [responses, setResponses] = useState([])
   const [quizzResponse, setQuizzResponse] = useState([])
+  const [lightningResponse, setLightningResponse] = useState([])
+
   const [averageTime, setAverageTime] = useState(0)
   const [averageScore, setAverageScore] = useState(0)
   const [arrFeed, setArrFeed] = useState([])
@@ -96,6 +100,37 @@ const DetailActivity = ({ route, navigation }) => {
   useEffect(() => {
     const newArrFeed = [...arrFeed] // Crear una copia de arrFeed
 
+    lightningResponse.forEach((qzr) => {
+      const { question, code, user_response, correct_response } = qzr
+
+      // Buscar si la pregunta ya está en el array
+      const existingQuestion = newArrFeed.find(
+        (item) => item.question === question
+      )
+
+      if (existingQuestion) {
+        // Si la pregunta ya existe, actualizamos los aciertos o errores
+        if (user_response === correct_response) {
+          existingQuestion.hits += 1
+        } else {
+          existingQuestion.errors += 1
+        }
+      } else {
+        // Si la pregunta no existe, agregamos una nueva entrada
+        newArrFeed.push({
+          question,
+          errors: user_response === correct_response ? 0 : 1,
+          hits: user_response === correct_response ? 1 : 0,
+        })
+      }
+    })
+    // Actualizamos el estado de arrFeed con el nuevo array
+    setArrFeed(newArrFeed)
+  }, [lightningResponse])
+
+  useEffect(() => {
+    const newArrFeed = [...arrFeed] // Crear una copia de arrFeed
+
     quizzResponse.forEach((qzr) => {
       const { question, user_response, correct_response } = qzr
 
@@ -133,12 +168,25 @@ const DetailActivity = ({ route, navigation }) => {
       setAverageTime(avgTimeTaken)
       setAverageScore(avgScoreTotal)
       const ids = responses.map((r) => r.id)
-      Promise.all(ids.map((id) => quizzResponseAPI.getByResponse(id))).then(
-        (res) => {
-          const allQuizzResponses = res.flatMap((r) => r.data.quizzResponses)
-          setQuizzResponse(allQuizzResponses)
-        }
-      )
+      if (activityType === 'Quizz Code') {
+        Promise.all(ids.map((id) => quizzResponseAPI.getByResponse(id))).then(
+          (res) => {
+            const allQuizzResponses = res.flatMap((r) => r.data.quizzResponses)
+            setQuizzResponse(allQuizzResponses)
+          }
+        )
+      }
+
+      if (activityType === 'Lightning Code') {
+        Promise.all(
+          ids.map((id) => lightningResponseAPI.getByResponse(id))
+        ).then((res) => {
+          const allLightningResponses = res.flatMap(
+            (r) => r.data.lightningResponses
+          )
+          setLightningResponse(allLightningResponses)
+        })
+      }
     }
   }, [responses])
 
@@ -154,7 +202,8 @@ const DetailActivity = ({ route, navigation }) => {
 
   useEffect(() => {
     if (route.params) {
-      const { id } = route.params
+      const { id, type } = route.params
+      setActivityType(type)
       setActivityId(id)
     }
   }, [route.params])
