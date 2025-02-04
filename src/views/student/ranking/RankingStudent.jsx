@@ -83,7 +83,7 @@ const RankingStudent = () => {
       }`}
     >
       {!hasUserActivity && (
-        <View className="flex flex-col w-full justify-center items-center bg-red-400">
+        <View className="flex flex-col w-full justify-center items-center ">
           <LottieView
             source={emptyData}
             loop
