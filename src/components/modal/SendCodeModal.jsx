@@ -1,57 +1,70 @@
 import { Octicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
-import { Modal, Text, TouchableOpacity, View, TextInput } from 'react-native'
-import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast/toast.config'
+import {
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native'
 import { codeAPI } from '../../api/index.api'
 import EmailSentModal from './EmailSentModal'
+import CustomToast from '../toast/Toast'
+import { useNavigation } from '@react-navigation/native'
 
 const SendCodeModal = ({ isVisible, toggleModal }) => {
+  const navigation = useNavigation()
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
   const handleChange = (value) => setEmail(value)
-
-  const [showEmailSentModal, setShowEmailSentModal] = useState(false)
-  const toggleEmailSentModal = () => setShowEmailSentModal((prev) => !prev)
-  const [userData, setUserData] = useState({})
-
-  const showToast = (type, title, message) =>
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
 
   const handleSubmit = () => {
     if (email.trim().length === 0) {
-      showToast(
-        'error',
-        'Email obligatorio',
-        'El correo electrónico es obligatorio.'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Email obligatorio')
+      setMessageToast('El correo electrónico es obligatorio')
+      return
     }
+
+    setLoading(true)
 
     codeAPI
       .verifyUserAndSendCode(email)
       .then((res) => {
         const { message, userData } = res.data
-        setUserData({
-          email: userData.email,
-          full_name: userData.fullName,
-        })
-
-        toggleEmailSentModal()
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Email verficado')
+        setMessageToast(message)
+        setTimeout(() => {
+          navigation.navigate('ActivationCode', {
+            email: userData.email,
+            full_name: userData.full_name,
+          })
+        }, 2500)
       })
       .catch((err) => {
         if (err.response.data) {
           const { message } = err.response.data
-          showToast('error', 'Error', message)
+          setToast(true)
+          setTypeToast('error')
+          setTitleToast('Error al verificar')
+          setMessageToast(message)
         } else {
-          showToast(
-            'error',
-            'Error desconocido',
-            'Ha ocurrido un error inesperado. Intente de nuevo.'
-          )
+          setToast(true)
+          setTypeToast('error')
+          setTitleToast('Error desconocido')
+          setMessageToast('Ha ocurrido un error inesperado. Intente de nuevo.')
         }
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }
   return (
@@ -92,9 +105,14 @@ const SendCodeModal = ({ isVisible, toggleModal }) => {
             />
 
             <TouchableOpacity
-              className="py-3 rounded-full bg-[#741D1D] mb-4"
+              className="py-3 rounded-full  mb-4 flex flex-row items-center justify-center gap-2"
               onPress={handleSubmit}
+              style={{
+                backgroundColor: loading ? '#888' : '#741D1D',
+              }}
+              disabled={loading}
             >
+              {loading && <ActivityIndicator size={'small'} color={'white'} />}
               <Text
                 style={{
                   fontFamily: 'Jost_600SemiBold',
@@ -103,18 +121,20 @@ const SendCodeModal = ({ isVisible, toggleModal }) => {
                   textAlign: 'center',
                 }}
               >
-                Enviar código
+                {loading ? 'Verificando' : 'Enviar código'}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
+        {toast && (
+          <CustomToast
+            setToast={setToast}
+            type={typeToast}
+            title={titleToast}
+            message={messageToast}
+          />
+        )}
       </Modal>
-      <EmailSentModal
-        isVisible={showEmailSentModal}
-        toggleModal={toggleEmailSentModal}
-        user={userData}
-      />
-      <Toast config={toastConfig} position="bottom" />
     </>
   )
 }

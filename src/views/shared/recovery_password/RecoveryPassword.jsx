@@ -1,5 +1,5 @@
 import { Ionicons, Octicons } from '@expo/vector-icons'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -13,40 +13,43 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native'
-import { userApi } from '../../../api/user/user.api'
-import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
 import useRecoveryPassword from '../../../hooks/useRecoveryPassword'
-import toastConfig from '../../../config/toast/toast.config'
 import LottieView from 'lottie-react-native'
 import forget from 'assets/forget_password.json'
+import CustomToast from 'components/toast/Toast'
 
 const RecoveryPassword = () => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const [loading, setLoading] = useState(false)
   const { handleChange, onSubmit } = useRecoveryPassword(setLoading)
-  const [selectedField, setSelectedField] = useState(null)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const navigation = useNavigation()
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const sendCode = async () => {
     const { ok, toast, title, message, method, value } = await onSubmit()
-    showToast(toast, title, message)
 
     if (ok) {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
+
       setTimeout(() => {
         navigation.replace('RecoveryCode', {
           method,
           value,
         })
       }, 2500)
+    } else {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
     }
   }
 
@@ -207,7 +210,14 @@ const RecoveryPassword = () => {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }

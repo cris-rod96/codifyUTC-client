@@ -1,6 +1,5 @@
 import { Ionicons, MaterialCommunityIcons, Octicons } from '@expo/vector-icons'
 import {
-  FlatList,
   Image,
   Keyboard,
   ScrollView,
@@ -16,8 +15,6 @@ import { pickerImagesUtil } from 'utils/index.utils'
 import TimeModal from 'components/modal/TimeModal'
 import ScoreModal from 'components/modal/ScoreModal'
 import uuid from 'uuid'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from 'config/index.config'
 import DatePicker from '@react-native-community/datetimepicker'
 import { dateUtils } from 'utils/index.utils'
 import activitiesAPI from '../../../api/activities/activities.api'
@@ -27,8 +24,14 @@ import { useSelector } from 'react-redux'
 import { coursesAPI } from '../../../api/index.api'
 import CoursesModal from '../../../components/modal/CoursesModal'
 import ClassesModal from '../../../components/modal/ClassesModal'
+import CustomToast from 'components/toast/Toast'
 
 const QuizzCode = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const [dueDate, setDueDate] = useState(new Date())
   const { user } = useSelector((state) => state.user)
 
@@ -128,14 +131,6 @@ const QuizzCode = ({ route }) => {
     if (uri) setImageUri(uri)
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const handleQuestion = (name, value) => {
     setQuestion({ ...question, [name]: value })
   }
@@ -174,51 +169,70 @@ const QuizzCode = ({ route }) => {
   }
 
   const saveQuizz = () => {
+    if (!classId) {
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Selecciona una clase')
+      setMessageToast('Debes seleccionar la clase de la actividad.')
+      return
+    }
+
     if (!question.question.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa una pregunta.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Pregunta obligatoria')
+      setMessageToast('Por favor, ingresa una pregunta.')
       return
     }
 
     if (question.time_limit === 0) {
-      showToast('error', 'Error', 'Por favor, ingresa un límite de tiempo.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Tiempo no válido')
+      setMessageToast('Por favor, ingresa un tiempo válido.')
       return
     }
     if (question.score === 0) {
-      showToast('error', 'Error', 'Por favor, ingresa un puntaje válido.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Puntaje no válido')
+      setMessageToast('Por favor, ingresa un puntaje válido.')
       return
     }
 
     if (answers.length < 4) {
-      showToast('error', 'Error', 'Por favor, ingresa las 4 opciones.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Respuestas incompletas')
+      setMessageToast('Por favor, ingresas las 4 respuestas')
       return
     }
 
     const correctAnswer = answers.filter((answer) => answer.isCorrect)
 
     if (correctAnswer.length !== 1) {
-      showToast(
-        'error',
-        'Error',
-        'Debe haber 1 respuesta marcada como correcta'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Respuesta no válida')
+      setMessageToast('Debe haber 1 respuesta marcada como correcta')
+
       return
     }
 
     if (!question.feedback.trim()) {
-      showToast(
-        'error',
-        'Error',
-        'Debes añadir una justificación a la respuesta'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Feedback obligatorio')
+      setMessageToast('Debes añadir una justificación a la respuesta')
       return
     }
 
-    if (question.feedback.trim().split(' ').length < 15) {
-      showToast(
-        'error',
-        'Error',
-        'La justificación debe tener más de 15 palabras'
-      )
+    if (question.feedback.trim().split(' ').length < 10) {
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Feedback muy corto')
+      setMessageToast('La justificación debe tener más de 10 palabras')
+
       return
     }
 
@@ -292,19 +306,17 @@ const QuizzCode = ({ route }) => {
     activitiesAPI
       .create(formData)
       .then((res) => {
-        showToast(
-          'success',
-          'Actividad creada',
-          'La actividad se creó con éxito'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Actividad creada')
+        setMessageToast('Se ha creado la actividad con éxito')
         clearAll()
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error',
-          'Error al crear la actividad. Intente de nuevo.'
-        )
+        setToast(true)
+        setTypeToast('errior')
+        setTitleToast('Error al crear')
+        setMessageToast('No se pudo crear la actividad')
       })
       .finally(() => {
         setLoading(false)
@@ -681,7 +693,6 @@ const QuizzCode = ({ route }) => {
               multiline={true}
               className="bg-white border border-gray-200 rounded-lg h-[100px] px-3 text-center"
               onChangeText={(value) => handleQuestion('feedback', value)}
-              textAlignVertical="top"
               value={question.feedback}
               style={{
                 fontFamily: 'Mulish_600SemiBold',
@@ -815,7 +826,14 @@ const QuizzCode = ({ route }) => {
           )}
         </View>
       </ScrollView>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

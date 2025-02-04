@@ -37,11 +37,16 @@ import {
   DeleteQuestionModal,
   EditActivityModal,
 } from 'components/modal/index.modals'
+import CustomToast from 'components/toast/Toast'
 
 const TeacherActivities = () => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const navigation = useNavigation()
   const { activities, courses, classes } = useSelector((state) => state.teacher)
-  const [allActivities, setAllActivities] = useState([])
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.user)
   const [userId, setUserId] = useState(null)
@@ -57,45 +62,9 @@ const TeacherActivities = () => {
   const toggleShowEditActivityModal = () =>
     setShowEditActivityModal((prev) => !prev)
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-      position: 'bottom',
-    })
-  }
-
   const getClassName = (class_id) => {
     const classItem = classes.find((item) => item.id === class_id)
     return classItem.topic
-  }
-
-  const handleContinue = (type) => {
-    console.log(type)
-    if (type === 'Quizz Code') {
-      navigation.navigate('TabActivity', {
-        screen: 'QuizzCode',
-      })
-    }
-
-    if (type === 'Lightning Code') {
-      navigation.navigate('TabActivity', {
-        screen: 'LightningCode',
-      })
-    }
-
-    if (type === 'Brain Boost') {
-      navigation.navigate('TabActivity', {
-        screen: 'BrainBoost',
-      })
-    }
-
-    if (type === 'Puzzle Master') {
-      navigation.navigate('TabActivity', {
-        screen: 'PuzzleMaster',
-      })
-    }
   }
 
   const getLogo = (type) => {
@@ -117,12 +86,9 @@ const TeacherActivities = () => {
         .getByTeacher(user.id)
         .then((res) => {
           const { activities } = res.data
-          console.log(activities)
           dispatch(saveActivities(activities))
         })
-        .catch((err) => {
-          console.log(err)
-        })
+        .catch((err) => {})
         .finally(() => {
           setRefreshing(false)
         })
@@ -138,17 +104,15 @@ const TeacherActivities = () => {
     toggleShowQuestionDelete()
     setTimeout(() => {
       if (confirm) {
-        showToast(
-          'success',
-          'Actvidad eliminada',
-          'Se ha eliminado la actividad con éxito'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Actividad eliminada')
+        setMessageToast('Se ha eliminado la actividad con éxito')
       } else {
-        showToast(
-          'error',
-          'Error al eliminar',
-          'No se eliminó la actividad. Intente de nuevo'
-        )
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al eliminar')
+        setMessageToast('No se eliminó la actividad. Intente de nuevo')
       }
       onRefresh()
     }, 1500)
@@ -181,7 +145,8 @@ const TeacherActivities = () => {
         <SelectActivityModal
           isVisible={showSelectActivityModal}
           onClose={toggleShowSelecActivityModal}
-          onContinue={handleContinue}
+          onContinue={() => {}}
+          hasClass={false}
         />
 
         <DeleteQuestionModal
@@ -497,7 +462,14 @@ const TeacherActivities = () => {
           activity_id={activityId}
           onContinue={refreshActivities}
         />
-        <Toast config={toastConfig} position="bottom" />
+        {toast && (
+          <CustomToast
+            setToast={setToast}
+            type={typeToast}
+            title={titleToast}
+            message={messageToast}
+          />
+        )}
       </View>
     ) : (
       <View className="flex-1 bg-[#F5F9FF] justify-center items-center px-5">

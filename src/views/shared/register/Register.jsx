@@ -15,13 +15,18 @@ import {
   View,
 } from 'react-native'
 import { useRegister } from 'hooks/index.hooks'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from 'config/index.config'
 import { useNavigation } from '@react-navigation/native'
 import logo from 'assets/logo.png'
 import { storageUtil } from '../../../utils/index.utils'
+import CustomToast from 'components/toast/Toast'
 
 const Register = () => {
+  // Toast
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const navigation = useNavigation()
   const [loading, setLoading] = useState(false)
   const { data, handleChange, onSubmit } = useRegister(setLoading)
@@ -60,9 +65,11 @@ const Register = () => {
   }
 
   const verifyUser = async () => {
+    setToast(true)
     const { ok, toast, title, message, role } = await onSubmit()
-
-    showToast(toast, title, message)
+    setTypeToast(toast)
+    setTitleToast(title)
+    setMessageToast(message)
 
     if (ok) {
       await storageUtil.saveSecureData('data_register', {
@@ -285,7 +292,14 @@ const Register = () => {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }

@@ -58,7 +58,7 @@ const BanStudentModal = ({
       animationType="fade"
       transparent={true}
     >
-      <View className="flex-1 bg-black/80 px-10 flex justify-center items-center">
+      <View className="flex-1 bg-black/80 px-8 flex justify-center items-center">
         <View className="w-full bg-white rounded-lg border border-gray-200  pb-5 fkex flex-col">
           {/* Header */}
           <View className="flex flex-row items-center justify-between px-5 mb-3 py-3 border-b border-gray-200">
@@ -78,7 +78,7 @@ const BanStudentModal = ({
           </View>
 
           {/* Question */}
-          <View className="flex flex-col w-full mb-2">
+          <View className="flex flex-col w-full mb-2 px-5">
             <Text
               style={{
                 fontFamily: 'Jost_600SemiBold',

@@ -8,7 +8,8 @@ const codeAPI = {
   },
 
   resendCode: (method, value, type) => {
-    return instance.patch(
+    console.log(method, value, type)
+    return instance.put(
       `${model}/resend?method=${method}&value=${value}&type=${type}`
     )
   },

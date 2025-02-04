@@ -10,16 +10,20 @@ import {
   View,
 } from 'react-native'
 import { topicsAPI } from 'api/index.api'
-import Toast from 'react-native-toast-message'
-import toastConfig from '../../config/toast/toast.config'
 import { DeleteQuestionModal } from 'components/modal/index.modals'
 import {
   saveCourses,
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
+import CustomToast from 'components/toast/Toast'
+
 import { useDispatch, useSelector } from 'react-redux'
 const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { courses } = useSelector((state) => state.teacher)
   const [topicId, setTopicId] = useState(null)
   const dispatch = useDispatch()
@@ -32,14 +36,6 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
     setExternalResource(external_resource !== null)
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const handleChange = (name, value) => {
     setCurrentTopic((prev) => ({
       ...prev,
@@ -50,11 +46,11 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
   const afterDelete = (confirm) => {
     if (confirm) {
       toggleShowQuestionDelete()
-      showToast(
-        'success',
-        'Contenido eliminado',
-        'Se ha eliminado el contenido con éxito'
-      )
+      setToast(true)
+      setTypeToast('success')
+      setTitleToast('Tema eliminado')
+      setMessageToast('Se ha eliminado el tema con éxito')
+
       const updatedCourses = courses.map((course) => ({
         ...course,
         Classes: course.Classes.map((classItem) =>
@@ -76,11 +72,10 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
         onClose()
       }, 2500)
     } else {
-      showToast(
-        'error',
-        'Error al eliminar',
-        'No se eliminó el contenido. Intente de nuevo'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Error al eliminar')
+      setMessageToast('No se elimino el contenido.')
     }
   }
 
@@ -108,16 +103,17 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
         dispatch(saveAllClassesInCourses(updatedCourses))
         dispatch(saveAllStudents(updatedCourses))
         const { message } = res.data
-        showToast('success', 'Contenido actualizado', message)
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Contenido actualizado')
+        setMessageToast(message)
         onContinue()
       })
       .catch((err) => {
-        console.log('Entr aqui')
-        showToast(
-          'error',
-          'Error al actualizar',
-          'No se actualizó el contenido. Intente de nuevo'
-        )
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al actualizar')
+        setMessageToast('No se actualizó el contenido. Intente de nuevo')
       })
   }
 
@@ -300,7 +296,14 @@ const EditTopicModal = ({ visible, onClose, topic_id, onContinue }) => {
         model={'topics'}
         id={topicId}
       />
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </Modal>
   )
 }

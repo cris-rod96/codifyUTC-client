@@ -24,10 +24,15 @@ import {
   SelectCourseModal,
   DeleteQuestionModal,
 } from 'components/modal/index.modals'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from 'config/index.config'
+import CustomToast from 'components/toast/Toast'
 
 const DetailCourse = ({ route, navigation }) => {
+  // Toast
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const [courseId, setCourseId] = useState(null)
   const [auxCourses, setAuxCourses] = useState([])
   const { courses } = useSelector((state) => state.teacher)
@@ -44,14 +49,6 @@ const DetailCourse = ({ route, navigation }) => {
   const toggleShowSectionModal = () => setShowSectionModal((prev) => !prev)
   const toggleShowSelectCourseModal = () =>
     setShowSelectCourseModal((prev) => !prev)
-
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-    })
-  }
 
   const handleChange = (name, value) => {
     setCurrentCourse({ ...currentCourse, [name]: value })
@@ -96,11 +93,10 @@ const DetailCourse = ({ route, navigation }) => {
 
     updateCourse
       .then((res) => {
-        showToast(
-          'success',
-          'Curso actualizado',
-          'Se ha actualizado la información de este curso'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Curso actualizado')
+        setMessageToast('La información del curso se ha actualizado')
 
         // 🔹 Actualiza auxCourses con el curso editado
         const updatedCourses = auxCourses.map((course) =>
@@ -115,11 +111,10 @@ const DetailCourse = ({ route, navigation }) => {
         dispatch(saveAllStudents(updatedCourses))
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error al actualizar',
-          'No se pudo actualizar la información de este curso'
-        )
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al actualizar')
+        setMessageToast('No se pudo actualizar el curso')
       })
       .finally(() => {
         setLoading(false)
@@ -129,7 +124,10 @@ const DetailCourse = ({ route, navigation }) => {
   const onContinue = (confirm) => {
     toggleShowQuestionDelete()
     if (confirm) {
-      showToast('success', 'Curso eliminado', 'Se ha eliminado el curso')
+      setToast(true)
+      setTypeToast('success')
+      setTitleToast('Curso eliminado')
+      setMessageToast('El curso ha sido eliminado')
       const updatedCourses = auxCourses.filter(
         (course) => course.id !== courseId
       )
@@ -137,9 +135,16 @@ const DetailCourse = ({ route, navigation }) => {
       dispatch(saveCourses(updatedCourses))
       dispatch(saveAllClassesInCourses(updatedCourses))
       dispatch(saveAllStudents(updatedCourses))
-      navigation.goBack()
+
+      setTimeout(() => {
+        setShowQuestionDelete(false)
+        navigation.goBack()
+      }, 2500)
     } else {
-      showToast('error', 'Error al eliminar', 'No se ha eliminado el curso')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Error al eliminar')
+      setMessageToast('No se eliminó el curso')
     }
   }
 
@@ -376,14 +381,20 @@ const DetailCourse = ({ route, navigation }) => {
         id={courseId}
       />
 
-      <Toast config={toastConfig} position="bottom" />
-
       <TouchableOpacity
         className="w-[45px] h-[45px] rounded-full bg-[#741D1D] flex justify-center items-center absolute bottom-5 right-4 border-2 border-gray-200"
         onPress={toggleShowQuestionDelete}
       >
         <Octicons name="trash" size={20} color={'white'} />
       </TouchableOpacity>
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

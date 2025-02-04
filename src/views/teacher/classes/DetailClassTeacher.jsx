@@ -80,6 +80,7 @@ const DetailClassTeacher = ({ route, navigation }) => {
   }
 
   const handleContinue = (type) => {
+    setShowSelectActivityModal(false)
     if (type === 'Quizz Code') {
       navigation.navigate('TabActivity', {
         screen: 'QuizzCode',
@@ -561,6 +562,7 @@ const DetailClassTeacher = ({ route, navigation }) => {
         isVisible={showSelectActivityModal}
         onClose={toggleShowSelecActivityModal}
         onContinue={handleContinue}
+        hasClass={true}
       />
 
       <EditTopicModal

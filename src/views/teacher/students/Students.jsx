@@ -14,8 +14,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import { coursesAPI } from 'api/index.api'
 import { FontAwesome6, Octicons } from '@expo/vector-icons'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from 'config/index.config'
 import { BanStudentModal } from 'components/modal/index.modals'
 import {
   saveCourses,
@@ -23,8 +21,14 @@ import {
   saveAllClassesInCourses,
 } from 'redux/slices/teacher.slice'
 import { useNavigation } from '@react-navigation/native'
+import profile from 'assets/profile.png'
+import CustomToast from 'components/toast/Toast'
 
 const Students = () => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const navigation = useNavigation()
   const { students, courses } = useSelector((state) => state.teacher)
   const { user } = useSelector((state) => state.user)
@@ -62,17 +66,15 @@ const Students = () => {
         dispatch(saveAllClassesInCourses(updateCourses))
         dispatch(saveAllStudents(updateCourses))
 
-        showToast(
-          'success',
-          'Estudiante eliminado',
-          'El estudiante ha sido notificado sobre su eliminación'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Alumno eliminado')
+        setMessageToast('Se ha eliminado al estudiante del curso')
       } else {
-        showToast(
-          'error',
-          'Error al eliminar',
-          'No se eliminó al estudiante. Intente de nuevo'
-        )
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al eliminar')
+        setMessageToast('No se eliminó al estudiante. Intente de nuevo')
       }
     }, 1500)
   }
@@ -88,17 +90,19 @@ const Students = () => {
 
   const getSubjectCourse = (course_id) => {
     const course = courses.find((course) => course.id === course_id)
-    return `${course.semester} Sistemas - ${course.subject}`
+    return `${course.subject}`
   }
 
   const renderStudent = (item) => {
     return (
-      <View className="flex flex-row border-b border-gray-200 items-center ">
+      <View className="flex-1 py-5 flex-row border-b border-gray-200 items-center ">
         {/* Foto de perfil */}
-        <View className="w-16 py-3 flex justify-center items-center  h-full">
+        <View className="w-16 lex justify-center items-center  h-full">
           <View className="relative w-[50px] h-[50px] rounded-full border border-gray-400">
             <Image
-              source={{ uri: item.profile_picture }}
+              source={
+                item.profile_picture ? { uri: item.profile_picture } : profile
+              }
               className="w-full h-full absolute object-contain rounded-full"
               resizeMode="cover"
             />
@@ -139,11 +143,18 @@ const Students = () => {
 
   return (
     <View
-      className={`flex-1 flex flex-col px-5 py-3 bg-[#F5F9FF] ${
+      className={`flex-1 flex flex-col px-5 py-3 bg-[#F5F9FF]${
         (!courses || courses.length === 0) && 'justify-center items-center'
       }`}
     >
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
       <BanStudentModal
         visible={showBanModal}
         onClose={toggleShowBanModal}
@@ -155,7 +166,7 @@ const Students = () => {
       />
       {courses && courses.length > 0 ? (
         students && students.length > 0 ? (
-          <View className="flex flex-col">
+          <View className="flex-1 flex flex-col ">
             <View className="flex flex-row items-center justify-between h-[55px] bg-white rounded-xl overflow-hidden border border-gray-200 pr-2">
               {/* Icono de busqueda */}
               <View className="w-12 flex justify-center items-center">
@@ -181,20 +192,25 @@ const Students = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Lista de estudiantes */}
-            <FlatList
-              data={students}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingTop: 20,
-                paddingBottom: 10,
-              }}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => renderStudent(item)}
-              // refreshControl={
-              //   <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
-              // }
-            />
+            <View className="flex flex-1 flex-col">
+              {/* Lista de estudiantes */}
+              <FlatList
+                style={{
+                  flex: 1,
+                }}
+                data={students}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingTop: 20,
+                  paddingBottom: 10,
+                }}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => renderStudent(item)}
+                // refreshControl={
+                //   <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+                // }
+              />
+            </View>
           </View>
         ) : (
           <View className="flex-1 flex flex-col justify-center items-center w-full">

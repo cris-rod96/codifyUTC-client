@@ -15,23 +15,18 @@ import { usersAPI } from 'api/index.api'
 
 import profile from 'assets/profile.png'
 import { saveUser } from '../../../redux/slices/user.slice'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from '../../../config/index.config'
+import CustomToast from 'components/toast/Toast'
 
 const EditProfile = () => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { user } = useSelector((state) => state.user)
   const [imageUri, setImageUri] = useState(null)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
-
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-    })
-  }
 
   const pickImage = async () => {
     const uri = await pickerImagesUtil.pickImageFromGalllery()
@@ -65,20 +60,18 @@ const EditProfile = () => {
     usersAPI
       .updateInfo(user.id, formData)
       .then((res) => {
-        showToast(
-          'success',
-          'Información actualiza',
-          'Se actualizó la información del usuario'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Información actualizada')
+        setMessageToast('Se actualizó la información del usuario')
         const { data: userData } = res.data
         dispatch(saveUser(userData))
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error al actualizar',
-          'No se actualizó la información del usuario'
-        )
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al actualizar')
+        setMessageToast('No se actualizó la información del usuario')
       })
       .finally(() => {
         setLoading(false)
@@ -277,7 +270,14 @@ const EditProfile = () => {
           )}
         </TouchableOpacity>
       </View>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </ScrollView>
   )
 }

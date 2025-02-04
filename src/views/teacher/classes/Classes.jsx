@@ -1,13 +1,6 @@
 import { Octicons } from '@expo/vector-icons'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import {
-  FlatList,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import LottieView from 'lottie-react-native'
 import emptyData from 'assets/no-data.json'
@@ -19,9 +12,19 @@ import {
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
+import CustomToast from 'components/toast/Toast'
 const Classes = ({ route, navigation }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+  const [deleteItem, setDeleteItem] = useState({
+    title: '',
+    type: '',
+    id: '',
+  })
+
   const [topicId, setTopicId] = useState(null)
-  const [auxCourses, setAuxCourses] = useState([])
   const dispatch = useDispatch()
   const { classes, courses } = useSelector((state) => state.teacher)
   const [showClassModal, setShowClassModal] = useState(false)
@@ -32,25 +35,49 @@ const Classes = ({ route, navigation }) => {
   const onContinue = (confirm) => {
     toggleShowQuestionDelete()
     if (confirm) {
-      const updatedCourses = courses.map((course) => ({
-        ...course,
-        Classes: course.Classes.map((classItem) => ({
-          ...classItem,
-          Topics: classItem.Topics.filter((topic) => topic.id !== topicId),
-        })),
-      }))
+      if (deleteItem.type === 'classes') {
+        const updatedCourses = courses.map((course) => ({
+          ...course,
+          Classes: course.Classes.filter((clc) => clc.id !== deleteItem.id),
+        }))
+        dispatch(saveCourses(updatedCourses))
+        dispatch(saveAllClassesInCourses(updatedCourses))
+        dispatch(saveAllStudents(updatedCourses))
 
-      setAuxCourses(updatedCourses)
-      dispatch(saveCourses(updatedCourses))
-      dispatch(saveAllClassesInCourses(updatedCourses))
-      dispatch(saveAllStudents(updatedCourses))
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Clase eliminada')
+        setMessageToast('Se ha eliminado la clase del curso')
+      }
+      if (deleteItem.type === 'topics') {
+        const updatedCourses = courses.map((course) => ({
+          ...course,
+          Classes: course.Classes.map((classItem) => ({
+            ...classItem,
+            Topics: classItem.Topics.filter((topic) => topic.id !== topicId),
+          })),
+        }))
+        dispatch(saveCourses(updatedCourses))
+        dispatch(saveAllClassesInCourses(updatedCourses))
+        dispatch(saveAllStudents(updatedCourses))
 
-      console.log('Clase eliminada')
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Tema eliminado')
+        setMessageToast('Se ha eliminado el tema de la clase')
+      }
     }
   }
 
-  const handleDelete = (id) => {
-    setTopicId(id)
+  const handleDelete = (type, id) => {
+    setDeleteItem({
+      title:
+        type === 'classes'
+          ? '¿Realmente desea eliminar la clase?'
+          : '¿Realmente desea eliminar este tema?',
+      type,
+      id,
+    })
     toggleShowQuestionDelete()
   }
 
@@ -65,16 +92,6 @@ const Classes = ({ route, navigation }) => {
     const course = courses.find((course) => course.id === CourseId)
     return course.subject
   }
-
-  const registerClassSuccess = (confirm) => {
-    if (confirm) {
-      console.log('Curso creado')
-    }
-  }
-
-  useEffect(() => {
-    setAuxCourses(courses)
-  }, [])
 
   return courses && courses.length > 0 ? (
     <>
@@ -206,7 +223,7 @@ const Classes = ({ route, navigation }) => {
 
                           <TouchableOpacity
                             className="w-[20px] h-[20px] rounded-full flex justify-center items-center"
-                            onPress={() => handleDelete(topic.id)}
+                            onPress={() => handleDelete('topics', topic.id)}
                           >
                             <Octicons
                               name="trash"
@@ -263,7 +280,7 @@ const Classes = ({ route, navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       className="flex-1 py-2 flex flex-row items-center gap-1 justify-center"
-                      // onPress={() => deleteClass(item.id)}
+                      onPress={() => handleDelete('classes', item.id)}
                     >
                       <Octicons name="trash" size={15} color={'#741D1D'} />
                       <Text
@@ -328,15 +345,14 @@ const Classes = ({ route, navigation }) => {
       <ClassModal
         isVisible={showClassModal}
         toggleModal={toggleShowClassModal}
-        registerClassSuccess={registerClassSuccess}
       />
       <DeleteQuestionModal
-        title={'¿Realmente desea eliminar este tema?'}
+        title={deleteItem.title}
         isVisible={showQuestionDelete}
         onClose={toggleShowQuestionDelete}
         onContinue={onContinue}
-        model={'topics'}
-        id={topicId}
+        model={deleteItem.type}
+        id={deleteItem.id}
       />
       <TouchableOpacity
         className="w-[45px] h-[45px] rounded-full bg-[#741D1D] flex justify-center items-center border-2 border-gray-200 absolute bottom-5 right-5"
@@ -344,6 +360,15 @@ const Classes = ({ route, navigation }) => {
       >
         <Octicons name="plus" size={21} color={'white'} />
       </TouchableOpacity>
+
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </>
   ) : (
     <View className="flex-1 flex-col justify-center items-center bg-[#F5F9FF]">

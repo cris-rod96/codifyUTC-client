@@ -11,8 +11,6 @@ import DatePicker from '@react-native-community/datetimepicker'
 import logo from 'assets/lightning.png'
 import { useNavigation } from '@react-navigation/native'
 import { useEffect, useRef, useState } from 'react'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from '../../../config/index.config'
 import { dateUtils } from 'utils/index.utils'
 import { activitiesAPI, coursesAPI } from 'api/index.api'
 import {
@@ -24,7 +22,12 @@ import {
 } from 'components/modal/index.modals'
 import uuid from 'uuid'
 import { useSelector } from 'react-redux'
+import CustomToast from 'components/toast/Toast'
 const LightningCode = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { user } = useSelector((state) => state.user)
   // Variables Generales
   const boxOptions = [
@@ -100,15 +103,6 @@ const LightningCode = ({ route }) => {
   })
   const [question, setQuestion] = useState(initialQuestionState)
   const [answer, setAnswer] = useState(initialAnswerState)
-
-  // Toast
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
 
   // Estados para las preguntas que se van añadiendo
   const [questions, setQuestions] = useState([])
@@ -194,41 +188,59 @@ const LightningCode = ({ route }) => {
 
   // Guardar Question
   const saveQuestionLightning = () => {
+    if (!classId) {
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Selecciona una clase')
+      setMessageToast('Debes seleccionar la clase de la actividad.')
+      return
+    }
+
     if (!question.question.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa la pregunta.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Pregunta obligatoria')
+      setMessageToast('Por favor, ingresa una pregunta.')
       return
     }
 
     if (!question.code.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa el programa.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Pregunta obligatoria')
+      setMessageToast('Por favor, ingresa el programa.')
       return
     }
     if (question.time_limit === 0) {
-      showToast('error', 'Error', 'Por favor, ingresa un tiempo mayor a 0.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Tiempo no válido')
+      setMessageToast('Por favor, ingresa un tiempo válido.')
       return
     }
     if (question.score === 0) {
-      showToast(
-        'error',
-        'Error',
-        'Por favor, ingresa una puntuación mayor a 0.'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Puntaje no válido')
+      setMessageToast('Por favor, ingresa un puntaje válido.')
       return
     }
 
     if (answers.length < 4) {
-      showToast('error', 'Error', 'Por favor, ingresa las 4 opciones.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Respuestas incompletas')
+      setMessageToast('Por favor, ingresas las 4 respuestas')
       return
     }
 
     const correctAnswer = answers.filter((answer) => answer.isCorrect)
 
     if (correctAnswer.length !== 1) {
-      showToast(
-        'error',
-        'Error',
-        'Debe haber 1 respuesta marcada como correcta'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Respuesta no válida')
+      setMessageToast('Debe haber 1 respuesta marcada como correcta')
       return
     }
 
@@ -236,7 +248,12 @@ const LightningCode = ({ route }) => {
       !question.feedback.trim() ||
       question.feedback.trim().split(' ').length < 10
     ) {
-      showToast('error', 'Error', 'Justifica la respuesta (+10 palabras)')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Feedback obligatorio')
+      setMessageToast(
+        'Debes añadir una justificación a la respuesta (+10 palabras)'
+      )
       return
     }
 
@@ -302,19 +319,17 @@ const LightningCode = ({ route }) => {
     activitiesAPI
       .createLightningActivity(formData)
       .then((res) => {
-        showToast(
-          'success',
-          'Actividad creada',
-          'Se creó la actividad con éxito'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Actividad creada')
+        setMessageToast('Se ha creado la actividad con éxito')
         clearAll()
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error',
-          'Error al crear la actividad. Intente de nuevo.'
-        )
+        setToast(true)
+        setTypeToast('errior')
+        setTitleToast('Error al crear')
+        setMessageToast('No se pudo crear la actividad')
       })
       .finally(() => {
         setLoading(false)
@@ -673,9 +688,8 @@ const LightningCode = ({ route }) => {
             </Text>
             <TextInput
               multiline={true}
-              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3"
+              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3 text-center"
               onChangeText={(value) => handleQuestion('feedback', value)}
-              textAlignVertical="top"
               value={question.feedback}
               style={{
                 fontFamily: 'Mulish_600SemiBold',
@@ -808,7 +822,14 @@ const LightningCode = ({ route }) => {
           )}
         </View>
       </ScrollView>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

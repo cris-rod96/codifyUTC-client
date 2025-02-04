@@ -8,13 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
-
-import { toastConfig } from 'config/index.config'
 import { useActivationCode } from 'hooks/index.hooks'
+import CustomToast from 'components/toast/Toast'
 
 const ActivationCode = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const [loading, setLoading] = useState(false)
   const { data, addInfoData, onSubmit } = useActivationCode(setLoading)
   const navigation = useNavigation()
@@ -47,21 +50,19 @@ const ActivationCode = ({ route }) => {
     })
 
     if (ok) {
-      showToast('success', 'Cuenta activada', message)
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
       setTimeout(() => {
         navigation.replace('Login')
       }, 2500)
     } else {
-      showToast('error', 'Error de activación', message)
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
     }
-  }
-
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
   }
 
   useEffect(() => {
@@ -182,7 +183,14 @@ const ActivationCode = ({ route }) => {
           )}
         </TouchableOpacity>
       </View>
-      <Toast position="bottom" config={toastConfig} />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

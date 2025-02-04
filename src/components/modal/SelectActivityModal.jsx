@@ -5,8 +5,10 @@ import quizzLogo from 'assets/quizz.png'
 import lightningLogo from 'assets/lightning.png'
 import puzzleLogo from 'assets/puzzle.png'
 import brainLogo from 'assets/brain.png'
+import { useNavigation } from '@react-navigation/native'
 
-const SelectActivityModal = ({ isVisible, onClose, onContinue }) => {
+const SelectActivityModal = ({ isVisible, onClose, onContinue, hasClass }) => {
+  const navigation = useNavigation()
   const [selectedActivity, setSelectedActivity] = useState(null)
 
   // Actividades disponibles
@@ -17,15 +19,55 @@ const SelectActivityModal = ({ isVisible, onClose, onContinue }) => {
     { id: 'brain', image: brainLogo, title: 'Brain Boost' },
   ]
 
+  const goToActivity = () => {
+    onClose()
+    if (selectedActivity === 'Quizz Code') {
+      navigation.navigate('TabActivity', {
+        screen: 'QuizzCode',
+      })
+    }
+
+    if (selectedActivity === 'Lightning Code') {
+      navigation.navigate('TabActivity', {
+        screen: 'LightningCode',
+      })
+    }
+
+    if (selectedActivity === 'Brain Boost') {
+      navigation.navigate('TabActivity', {
+        screen: 'BrainBoost',
+      })
+    }
+
+    if (selectedActivity === 'Puzzle Master') {
+      navigation.navigate('TabActivity', {
+        screen: 'PuzzleMaster',
+      })
+    }
+    resetInfo()
+  }
+
   // Manejar selección
   const handleSelect = (title) => {
     setSelectedActivity(title)
   }
 
+  const resetInfo = () => {
+    setSelectedActivity(null)
+  }
+
+  const handleClose = () => {
+    resetInfo()
+    onClose()
+  }
+
   const handleContinue = () => {
     if (selectedActivity) {
-      onContinue(selectedActivity)
-      setSelectedActivity(null)
+      if (hasClass) {
+        onContinue(selectedActivity)
+      } else {
+        goToActivity()
+      }
     }
   }
 
@@ -49,7 +91,7 @@ const SelectActivityModal = ({ isVisible, onClose, onContinue }) => {
             >
               Selecciona la actividad
             </Text>
-            <TouchableOpacity onPressIn={onClose}>
+            <TouchableOpacity onPressIn={() => handleClose()}>
               <Ionicons name="close-circle" size={30} color={'#FF5A5F'} />
             </TouchableOpacity>
           </View>

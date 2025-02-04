@@ -12,19 +12,23 @@ import {
 } from 'react-native'
 
 import { codeUtil, pickerImagesUtil, storageUtil } from 'utils/index.utils'
-import Toast from 'react-native-toast-message'
-import toastConfig from 'config/toast/toast.config'
 import { coursesAPI } from 'api/index.api'
 import { useSelector } from 'react-redux'
 import {
   SelectSectionModal,
   SelectCourseModal,
 } from 'components/modal/index.modals'
+import CustomToast from '../toast/Toast'
 
-const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
+const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const { user } = useSelector((state) => state.user)
   const [isMounted, setIsMounted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [imageUri, setImageUri] = useState(null)
 
   const [showSectionModal, setShowSectionModal] = useState(false)
@@ -53,22 +57,14 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
     if (uri) setImageUri(uri)
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-      position: 'bottom',
-      bottomOffset: 20,
-    })
-  }
-
   const handleSubmit = () => {
     if (Object.values(course).includes('')) {
-      showToast('error', 'Error', 'Todos los campos son obligatorios')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Campos obligatorios')
+      setMessageToast('Todos los datos son necesarios')
       return
     }
-    showToast('info', 'Creando curso', 'Espere un momento...')
 
     const formData = new FormData()
     Object.keys(course).forEach((key) => {
@@ -85,27 +81,30 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
       })
     }
 
+    setLoading(true)
+
     coursesAPI
       .create(formData)
       .then((res) => {
-        showToast(
-          'success',
-          'Curso creado',
-          'El curso ha sido creado exitosamente'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Curso creado')
+        setMessageToast('El curso fue creado con éxito')
         setCourse(initialState)
         setImageUri(null)
         setTimeout(() => {
-          toggleModal()
-          onContinue()
+          onCourseAdded()
         }, 2500)
       })
       .catch((err) => {
         const { message } = err.response.data
-        showToast('error', 'Error', message)
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al crear')
+        setMessageToast(message)
       })
       .finally(() => {
-        setIsLoading(false)
+        setLoading(false)
       })
   }
 
@@ -127,7 +126,7 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
     }
   }, [isVisible])
 
-  return !isLoading ? (
+  return (
     <Modal
       visible={isVisible}
       animationType="slide"
@@ -163,18 +162,15 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
             </View>
 
             <View className="flex flex-row items-center gap-2">
-              <TouchableOpacity
-                className="w-10 h-10 rounded-full bg-[#741D1D] flex flex-row  items-center justify-center shadow-sm "
-                onPress={handleSubmit}
-              >
-                <Ionicons name="save" color="white" size={18} />
-              </TouchableOpacity>
               <TouchableOpacity className="flex flex-row  items-center justify-center w-10 h-10 rounded-full bg-[#383838]">
                 <Ionicons name="reload" size={18} color="white" />
               </TouchableOpacity>
             </View>
           </View>
-          <ScrollView className="px-5 pb-10">
+          <ScrollView
+            className="px-5 pb-10"
+            showsVerticalScrollIndicator={false}
+          >
             <View className="mt-5 flex flex-col gap-3">
               <Text
                 style={{
@@ -300,10 +296,17 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
                   </View>
                 </View>
 
-                {/* <TouchableOpacity
-                  className="flex flex-row items-center justify-center bg-[#741D1D] py-4 mt-2 gap-2 relative rounded-full mb-10"
+                <TouchableOpacity
+                  className="flex flex-row items-center justify-center  py-4 mt-10 gap-2 relative rounded-full mb-10"
                   onPressOut={handleSubmit}
+                  disabled={loading}
+                  style={{
+                    backgroundColor: loading ? '#888' : '#741D1D',
+                  }}
                 >
+                  {loading && (
+                    <ActivityIndicator size={'small'} color={'white'} />
+                  )}
                   <Text
                     style={{
                       fontFamily: 'Jost_600SemiBold',
@@ -311,42 +314,22 @@ const CourseModal = ({ isVisible, toggleModal, onContinue }) => {
                       color: '#FFFFFF',
                     }}
                   >
-                    Guardar
+                    {loading ? 'Creando curso' : 'Guardar'}
                   </Text>
-                  <Ionicons
-                    name="chevron-forward-circle-sharp"
-                    className="absolute right-3"
-                    size={24}
-                    color={'#FFFFFF'}
-                  />
-                </TouchableOpacity> */}
+                </TouchableOpacity>
               </View>
             </View>
           </ScrollView>
         </View>
       )}
-      <Toast position="bottom" config={toastConfig} />
-    </Modal>
-  ) : (
-    <Modal
-      visible={isLoading}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => {}}
-    >
-      <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-        <ActivityIndicator size="large" color="#FFFFFF" />
-        <Text
-          style={{
-            marginTop: 10,
-            fontSize: 18,
-            color: '#FFFFFF',
-            fontFamily: 'Jost_600SemiBold',
-          }}
-        >
-          Creando curso...
-        </Text>
-      </View>
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </Modal>
   )
 }

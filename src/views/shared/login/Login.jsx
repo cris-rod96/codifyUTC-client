@@ -14,8 +14,6 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from 'config/index.config'
 import { useLogin } from 'hooks/index.hooks'
 import {
   CommonActions,
@@ -27,10 +25,14 @@ import { storageUtil } from '../../../utils/index.utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { saveUser } from '../../../redux/slices/user.slice'
 import SendCodeModal from '../../../components/modal/SendCodeModal'
-import EmailSentModal from '../../../components/modal/EmailSentModal'
 import logo from 'assets/logo.png'
+import CustomToast from 'components/toast/Toast'
 
 const Login = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { user } = useSelector((state) => state.user)
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
@@ -42,24 +44,24 @@ const Login = ({ route }) => {
   const [showSendCodeModal, setShowSendCodeModal] = useState(false)
   const toggleSendCodeModal = () => setShowSendCodeModal((prev) => !prev)
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const login = async () => {
     const { ok, toast, title, message, role } = await onSubmit()
-    showToast(toast, title, message)
 
     if (ok) {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
       const home =
         role === 'Estudiante' ? 'TabStudentNavigator' : 'TabsTeacherNavigator'
       setTimeout(() => {
         navigation.navigate(home)
       }, 1500)
+    } else {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
     }
   }
 
@@ -319,7 +321,14 @@ const Login = ({ route }) => {
         isVisible={showSendCodeModal}
         toggleModal={toggleSendCodeModal}
       />
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }

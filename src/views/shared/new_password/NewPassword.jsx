@@ -18,8 +18,13 @@ import Toast from 'react-native-toast-message'
 import { toastConfig } from '../../../config/index.config'
 import { useSelector } from 'react-redux'
 import { usersAPI } from 'api/index.api'
+import CustomToast from 'components/toast/Toast'
 
 const NewPassword = ({ route, navigation }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { user } = useSelector((state) => state.user)
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -32,14 +37,6 @@ const NewPassword = ({ route, navigation }) => {
 
   const handlePassword = (value) => {
     setPassword(value)
-  }
-
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
   }
 
   const handleConfirmPasword = (value) => {
@@ -83,19 +80,17 @@ const NewPassword = ({ route, navigation }) => {
     usersAPI
       .newPassword(user.id, password)
       .then((res) => {
-        showToast(
-          'success',
-          'Contraseña actualizada',
-          'La contraseña ha sido actualizada con éxito'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Contraseña actualizada')
+        setMessageToast('Se ha actualizado su contraseña.')
         resetData()
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error al actualizar',
-          'No se pudo actualizar la contraseña'
-        )
+        setToast(true)
+        setTypeToast('errior')
+        setTitleToast('Error al actualizar')
+        setMessageToast('No se pudo actualizar su contraseña')
       })
       .finally(() => {
         setLoading(false)
@@ -260,7 +255,14 @@ const NewPassword = ({ route, navigation }) => {
           </View>
         </ScrollView>
       </TouchableNativeFeedback>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }

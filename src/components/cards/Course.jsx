@@ -143,7 +143,7 @@ const Course = ({ course, onContinue }) => {
                 fontSize: 20,
               }}
             >
-              {course.Classes.length}
+              {course.Classes.filter((cls) => !cls.isDeleted).length}
             </Text>
             <Text
               style={{
@@ -151,7 +151,9 @@ const Course = ({ course, onContinue }) => {
                 fontSize: 12,
               }}
             >
-              {course.Classes.length === 1 ? 'Clase' : 'Clases'}
+              {course.Classes.filter((cls) => !cls.isDeleted).length === 1
+                ? 'Clase'
+                : 'Clases'}
             </Text>
           </TouchableOpacity>
         </View>

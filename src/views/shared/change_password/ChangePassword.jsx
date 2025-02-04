@@ -14,12 +14,15 @@ import {
   View,
 } from 'react-native'
 import useChangePassword from '../../../hooks/useChangePassword'
-import Toast from 'react-native-toast-message'
-import toastConfig from '../../../config/toast/toast.config'
 import LottieView from 'lottie-react-native'
 import forget from 'assets/forget_password.json'
+import CustomToast from 'components/toast/Toast'
 
 const ChangePassword = ({ route, navigation }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const [loading, setLoading] = useState(false)
   const [keyboardVisible, setKeyboardVisible] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -32,23 +35,21 @@ const ChangePassword = ({ route, navigation }) => {
     onSubmit,
   } = useChangePassword(setLoading)
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const changePassword = async () => {
     const { ok, toast, title, message } = await onSubmit()
-    console.log(ok, toast, title, message)
-    showToast(toast, title, message)
-
     if (ok) {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
       setTimeout(() => {
         navigation.replace('Login')
       }, 2500)
+    } else {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
     }
   }
 
@@ -236,7 +237,14 @@ const ChangePassword = ({ route, navigation }) => {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }

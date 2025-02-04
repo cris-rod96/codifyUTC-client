@@ -8,13 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import Toast from 'react-native-toast-message'
 import { useNavigation } from '@react-navigation/native'
-import { toastConfig } from 'config/index.config'
 import { useRecuperationCode } from 'hooks/index.hooks'
 import { codeAPI } from '../../../api/index.api'
+import CustomToast from 'components/toast/Toast'
 
 const RecoveryCode = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const [loading, setLoading] = useState(false)
   const { data, addInfoData, onSubmit } = useRecuperationCode(setLoading)
   const navigation = useNavigation()
@@ -42,18 +45,19 @@ const RecoveryCode = ({ route }) => {
     }
   }
 
-  const resendCode = () => {
+  const resendCode = async () => {
     codeAPI
       .resendCode(data.method, data.value, 'Recovery')
       .then((res) => {
-        showToast(
-          'success',
-          'Código reenviado',
-          `Código reenviado vía ${method}`
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Código reenviado')
+        setMessageToast('El código fue reenviado con éxito.')
       })
       .catch((err) => {
-        showToast('error', 'Error al reenviar', 'No se pudo reenvíar el código')
+        setTypeToast('error')
+        setTitleToast('Error al enviar')
+        setMessageToast('No se pudo reenviar el código')
       })
   }
 
@@ -63,7 +67,10 @@ const RecoveryCode = ({ route }) => {
     })
 
     if (ok) {
-      showToast('success', 'Código correcto', message)
+      setToast(true)
+      setTypeToast('success')
+      setTitleToast('Código verificado')
+      setMessageToast(message)
       setTimeout(() => {
         navigation.replace('ChangePassword', {
           method: data.method,
@@ -71,16 +78,11 @@ const RecoveryCode = ({ route }) => {
         })
       }, 2500)
     } else {
-      showToast('error', 'Código incorrecto', message)
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast('Código verificado')
+      setMessageToast(message)
     }
-  }
-
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
   }
 
   useEffect(() => {
@@ -249,7 +251,14 @@ const RecoveryCode = ({ route }) => {
           </Text>
         </TouchableOpacity>
       </View>
-      <Toast position="bottom" config={toastConfig} />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

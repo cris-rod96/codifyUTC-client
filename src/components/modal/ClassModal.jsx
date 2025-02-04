@@ -21,8 +21,14 @@ import {
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
+import CustomToast from '../toast/Toast'
 
-const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
+const ClassModal = ({ isVisible, toggleModal }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const [loading, setLoading] = useState(false)
   const [auxCourses, setAuxCourses] = useState([])
   const { courses } = useSelector((state) => state.teacher)
@@ -49,21 +55,12 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
     })
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const registerClass = () => {
     if (dataClass.topic === '' || dataClass.CourseId === '') {
-      showToast(
-        'error',
-        'Campos obligatorios',
-        'Todos los datos son necesarios'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Campos obligatorios')
+      setMessageToast('Todos los datos son necesarios')
       return
     }
 
@@ -74,7 +71,6 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
       .then((res) => {
         resetData()
         const { message, new_class } = res.data
-        showToast('success', 'Clase creada', message)
         const updatedCourses = auxCourses.map((course) =>
           course.id === dataClass.CourseId
             ? {
@@ -86,12 +82,21 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
         dispatch(saveCourses(updatedCourses))
         dispatch(saveAllClassesInCourses(updatedCourses))
         dispatch(saveAllStudents(updatedCourses))
+
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Clase creada')
+        setMessageToast(message)
         setTimeout(() => {
-          registerClassSuccess(true)
           toggleModal()
         }, 2500)
       })
-      .catch((err) => {})
+      .catch((err) => {
+        setToast(true)
+        setTypeToast('error')
+        setTitleToast('Error al crear')
+        setMessageToast('No se pudo crear. Intente de nuevo.')
+      })
       .finally(() => {
         setLoading(false)
       })
@@ -241,7 +246,14 @@ const ClassModal = ({ isVisible, toggleModal, registerClassSuccess }) => {
           </View>
         </View>
       </ScrollView>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </Modal>
   )
 }

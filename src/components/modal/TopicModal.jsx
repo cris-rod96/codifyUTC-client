@@ -9,8 +9,6 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native'
-import Toast from 'react-native-toast-message'
-import toastConfig from 'config/toast/toast.config'
 import { topicsAPI } from 'api/index.api'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -18,8 +16,13 @@ import {
   saveAllClassesInCourses,
   saveAllStudents,
 } from 'redux/slices/teacher.slice'
+import CustomToast from 'components/toast/Toast'
 
 const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { courses } = useSelector((state) => state.teacher)
   const dispatch = useDispatch()
   const initialState = {
@@ -45,30 +48,19 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
     setExternalResource(false)
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-      position: 'bottom',
-      bottomOffset: 20,
-    })
-  }
-
   const handleSubmit = async () => {
     if (arrContent.length === 0) {
-      showToast(
-        'error',
-        'Contenido Obligatorio',
-        'Todos los datos son obligatorios'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Contenido obligatorio')
+      setMessageToast('Todos los datos son obligatorios')
+
       return
     }
 
     topicsAPI
       .create(arrContent)
       .then((res) => {
-        resetData()
         const { topics, message } = res.data
         const updatedCourses = courses.map((course) => ({
           ...course,
@@ -84,20 +76,24 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
         dispatch(saveCourses(updatedCourses))
         dispatch(saveAllClassesInCourses(updatedCourses))
         dispatch(saveAllStudents(updatedCourses))
-        showToast('success', 'Éxito', message)
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Temas agregados')
+        setMessageToast('Se han agregado todos los temas')
+
+        resetData()
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err.response.data.message)
       })
   }
 
   const addTopic = () => {
     if (Object.values(topic).includes('')) {
-      showToast(
-        'error',
-        'Contenido Obligatorio',
-        'Todos los datos son obligatorios'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Contenido obligatorio')
+      setMessageToast('Todos los datos son obligatorios')
     } else {
       arrContent.push({
         ...topic,
@@ -105,23 +101,20 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
         created_at: new Date(),
       })
       setTopic(initialState)
-
-      showToast(
-        'success',
-        'Contenido Agregado',
-        'Agrega más contenido a tu clase'
-      )
+      setToast(true)
+      setTypeToast('success')
+      setTitleToast('Temas agregado')
+      setMessageToast('Se ha agregado el tema')
     }
   }
 
   const deleteTopic = (index) => {
     const newArr = arrContent.filter((_, i) => i !== index)
     setArrContent(newArr)
-    showToast(
-      'success',
-      'Contenido Eliminado',
-      'Contenido eliminado exitosamente'
-    )
+    setToast(true)
+    setTypeToast('success')
+    setTitleToast('Tema eliminado')
+    setMessageToast('Se ha eliminado el tema')
   }
 
   const handleChange = (name, value) => {
@@ -365,7 +358,14 @@ const TopicModal = ({ showTopicModal, toggleTopicModal, ClassId }) => {
               </View>
             </View>
           </ScrollView>
-          <Toast config={toastConfig} position="bottom" />
+          {toast && (
+            <CustomToast
+              setToast={setToast}
+              type={typeToast}
+              title={titleToast}
+              message={messageToast}
+            />
+          )}
         </View>
       )}
     </Modal>

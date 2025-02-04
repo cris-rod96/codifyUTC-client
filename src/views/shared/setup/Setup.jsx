@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native'
 import profileDefault from 'assets/profile.png'
-import { pickerImagesUtil, storageUtil } from 'utils/index.utils'
+import { pickerImagesUtil } from 'utils/index.utils'
 import { useSetup } from 'hooks/index.hooks'
 import {
   Feather,
@@ -18,12 +18,16 @@ import {
   MaterialCommunityIcons,
   Octicons,
 } from '@expo/vector-icons'
-import Toast from 'react-native-toast-message'
 import { EmailSentModal, GenderModal } from 'components/modal/index.modals'
-import toastConfig from '../../../config/toast/toast.config'
 import { useNavigation } from '@react-navigation/native'
+import CustomToast from 'components/toast/Toast'
 
 const Setup = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
+
   const navigation = useNavigation()
   const [contactData, setContacData] = useState({
     email: '',
@@ -45,14 +49,6 @@ const Setup = ({ route }) => {
     }
   }
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const onChange = (key, value) => {
     setContacData((prev) => ({
       ...prev,
@@ -64,14 +60,11 @@ const Setup = ({ route }) => {
 
   const register = async () => {
     const { ok, message, title, toast } = await onSubmit(imageUri, setLoading)
-    showToast(toast, title, message)
-
     if (ok) {
-      showToast(
-        'success',
-        'Usuario registrado',
-        'Enviamos un código de activación al correo registrado'
-      )
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
       setImageUri(null)
 
       setTimeout(() => {
@@ -80,6 +73,11 @@ const Setup = ({ route }) => {
           full_name: contactData.full_name,
         })
       }, 2500)
+    } else {
+      setToast(true)
+      setTypeToast(toast)
+      setTitleToast(title)
+      setMessageToast(message)
     }
   }
 
@@ -289,7 +287,14 @@ const Setup = ({ route }) => {
           </View>
         </View>
       </ScrollView>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }

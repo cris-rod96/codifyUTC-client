@@ -17,7 +17,9 @@ const teacherSlice = createSlice({
 
     saveAllClassesInCourses: (state, action) => {
       if (action.payload.length > 0) {
-        const mapClasses = action.payload.map((course) => course.Classes).flat()
+        const mapClasses = action.payload
+          .map((course) => course.Classes.filter((cls) => !cls.isDeleted))
+          .flat()
         state.classes = [...mapClasses]
       } else {
         state.classes = []

@@ -14,13 +14,16 @@ import {
   ClassesModal,
 } from 'components/modal/index.modals'
 import { activitiesAPI, coursesAPI } from 'api/index.api'
-import Toast from 'react-native-toast-message'
-import { toastConfig } from '../../../config/index.config'
 import { dateUtils } from 'utils/index.utils'
+import CustomToast from 'components/toast/Toast'
 
 import uuid from 'uuid'
 
 const BrainBoost = ({ route }) => {
+  const [toast, setToast] = useState(false)
+  const [titleToast, setTitleToast] = useState('')
+  const [messageToast, setMessageToast] = useState('')
+  const [typeToast, setTypeToast] = useState(null)
   const { user } = useSelector((state) => state.user)
   const navigation = useNavigation()
   const [dueDate, setDueDate] = useState(new Date())
@@ -62,13 +65,6 @@ const BrainBoost = ({ route }) => {
   }
 
   const [question, setQuestion] = useState(initialQuestionState)
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type,
-      text1: title,
-      text2: message,
-    })
-  }
 
   const [questions, setQuestions] = useState([])
   const inputRef = useRef(null)
@@ -116,30 +112,49 @@ const BrainBoost = ({ route }) => {
   }
 
   const saveQuestionBrain = () => {
+    if (!classId) {
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Selecciona una clase')
+      setMessageToast('Debes seleccionar la clase de la actividad.')
+      return
+    }
+
     if (!question.problem.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa el problema.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Pregunta obligatoria')
+      setMessageToast('Por favor, ingresa una pregunta.')
       return
     }
 
     if (!question.code.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa el programa.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Pregunta obligatoria')
+      setMessageToast('Por favor, ingresa el programa.')
       return
     }
     if (question.time_limit === 0) {
-      showToast('error', 'Error', 'Por favor, ingresa un tiempo mayor a 0.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Tiempo no válido')
+      setMessageToast('Por favor, ingresa un tiempo válido.')
       return
     }
     if (question.score === 0) {
-      showToast(
-        'error',
-        'Error',
-        'Por favor, ingresa una puntuación mayor a 0.'
-      )
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Puntaje no válido')
+      setMessageToast('Por favor, ingresa un puntaje válido.')
       return
     }
 
     if (!question.expected_output.trim()) {
-      showToast('error', 'Error', 'Por favor, ingresa el output esperado.')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Respuestas incompletas')
+      setMessageToast('Por favor, ingresa la salida esperada.')
       return
     }
 
@@ -147,7 +162,12 @@ const BrainBoost = ({ route }) => {
       !question.feedback.trim() ||
       question.feedback.trim().split(' ').length < 10
     ) {
-      showToast('error', 'Error', 'Justifica la respuesta (+10 palabras)')
+      setToast(true)
+      setTypeToast('error')
+      setTitleToast('Feedback obligatorio')
+      setMessageToast(
+        'Debes añadir una justificación a la respuesta (+10 palabras)'
+      )
       return
     }
 
@@ -202,19 +222,17 @@ const BrainBoost = ({ route }) => {
     activitiesAPI
       .createBrainActivity(formData)
       .then((res) => {
-        showToast(
-          'success',
-          'Actividad creada',
-          'Se ha creado la actividad correctamente'
-        )
+        setToast(true)
+        setTypeToast('success')
+        setTitleToast('Actividad creada')
+        setMessageToast('Se ha creado la actividad con éxito')
         clearAll()
       })
       .catch((err) => {
-        showToast(
-          'error',
-          'Error',
-          'Error al crear la actividad. Intente de nuevo.'
-        )
+        setToast(true)
+        setTypeToast('errior')
+        setTitleToast('Error al crear')
+        setMessageToast('No se pudo crear la actividad')
       })
       .finally(() => {
         setLoading(false)
@@ -555,9 +573,8 @@ const BrainBoost = ({ route }) => {
             </Text>
             <TextInput
               multiline={true}
-              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3"
+              className="bg-white border border-gray-200 rounded-lg h-[100px] px-3 text-center"
               onChangeText={(value) => handleQuestion('feedback', value)}
-              textAlignVertical="top"
               value={question.feedback}
               style={{
                 fontFamily: 'Mulish_600SemiBold',
@@ -678,7 +695,14 @@ const BrainBoost = ({ route }) => {
           </View>
         </View>
       </ScrollView>
-      <Toast config={toastConfig} position="bottom" />
+      {toast && (
+        <CustomToast
+          setToast={setToast}
+          type={typeToast}
+          title={titleToast}
+          message={messageToast}
+        />
+      )}
     </View>
   )
 }
