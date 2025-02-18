@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/logo_codify.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#741D1D"
     },

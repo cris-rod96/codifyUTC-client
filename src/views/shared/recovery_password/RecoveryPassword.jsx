@@ -105,8 +105,7 @@ const RecoveryPassword = () => {
                   textAlign: 'center',
                 }}
               >
-                Seleccione el método de recuperación para restablecer su
-                contraseña
+                Ingrese el email de recuperación
               </Text>
 
               {/* Caja de métodos de recuperación */}
@@ -140,39 +139,6 @@ const RecoveryPassword = () => {
                         color: '#202244',
                       }}
                       placeholder="Escriba su correo"
-                    />
-                  </View>
-                </View>
-
-                {/* SMS */}
-                <View className="flex flex-row items-center bg-white w-full h-24 px-5 gap-2 rounded-xl overflow-hidden shadow-md shadow-gray-300">
-                  <View className="w-12 h-12 border-2 border-[#741D1D] rounded-full flex items-center justify-center bg-[#741D1D]/40">
-                    <Ionicons
-                      name="phone-portrait-outline"
-                      size={22}
-                      className="font-bold"
-                    />
-                  </View>
-                  <View className="flex-1 flex-col gap-1 ">
-                    <Text
-                      style={{
-                        fontFamily: 'Mulish_700Bold',
-                        fontSize: 12,
-                        color: '#505050',
-                      }}
-                    >
-                      Verificar por SMS
-                    </Text>
-                    <TextInput
-                      keyboardType="phone-pad"
-                      onChangeText={(text) => handleChange('phone', text)}
-                      className="w-full"
-                      style={{
-                        fontFamily: 'Mulish_700Bold',
-                        fontSize: 12,
-                        color: '#202244',
-                      }}
-                      placeholder="Escriba su teléfono"
                     />
                   </View>
                 </View>

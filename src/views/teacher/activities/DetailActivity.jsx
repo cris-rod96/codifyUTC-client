@@ -161,10 +161,12 @@ const DetailActivity = ({ route, navigation }) => {
 
   useEffect(() => {
     if (responses.length > 0) {
-      const avgScoreTotal =
+      const avgScoreTotal = Math.ceil(
         responses.reduce((sum, r) => sum + r.score_total, 0) / responses.length
-      const avgTimeTaken =
+      )
+      const avgTimeTaken = Math.ceil(
         responses.reduce((sum, r) => sum + r.time_taken, 0) / responses.length
+      )
       setAverageTime(avgTimeTaken)
       setAverageScore(avgScoreTotal)
       const ids = responses.map((r) => r.id)
