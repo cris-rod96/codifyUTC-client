@@ -104,9 +104,9 @@ const Setup = ({ route }) => {
 
   useEffect(() => {
     if (route.params) {
-      const { email, nick_name, password, role } = route.params
+      const { email, nick_name, password } = route.params
       onChange('email', email)
-      addRegisterData(email, nick_name, password, role)
+      addRegisterData(email, nick_name, password)
     }
   }, [route.params])
 
@@ -224,23 +224,6 @@ const Setup = ({ route }) => {
                 >
                   <Octicons name="chevron-down" size={18} color={'#202244'} />
                 </TouchableOpacity>
-              </View>
-
-              <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300">
-                <View className="w-14 flex flex-row items-center justify-center h-full ">
-                  <Octicons name="shield-lock" size={20} color={'#545454'} />
-                </View>
-                <TextInput
-                  autoComplete="off"
-                  defaultValue={user.role}
-                  className="flex-1 bg-white px-1 "
-                  editable={false}
-                  style={{
-                    fontFamily: 'Mulish_700Bold',
-                    fontSize: 14,
-                    color: '#505050',
-                  }}
-                />
               </View>
 
               <TouchableOpacity

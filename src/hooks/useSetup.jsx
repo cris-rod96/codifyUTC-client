@@ -10,7 +10,6 @@ const useSetup = () => {
     full_name: '',
     email: '',
     password: '',
-    role: '',
     gender: '',
     phone: '',
     dni: '',
@@ -25,13 +24,12 @@ const useSetup = () => {
     })
   }
 
-  const addRegisterData = (email, nick_name, password, role) => {
+  const addRegisterData = (email, nick_name, password) => {
     setUser({
       ...user,
       email,
       nick_name,
       password,
-      role,
     })
   }
 

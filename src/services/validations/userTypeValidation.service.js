@@ -16,12 +16,10 @@ const determineUserType = (email) => {
   if (studentRegex.test(localPart)) {
     return {
       isValid: true,
-      role: 'Estudiante',
     }
   } else if (teacherRegex.test(localPart)) {
     return {
       isValid: true,
-      role: 'Docente',
     }
   } else {
     return {

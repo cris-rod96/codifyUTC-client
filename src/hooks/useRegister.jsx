@@ -29,8 +29,7 @@ const useRegister = (setLoading) => {
       }
     }
 
-    const { isValid, role, message } =
-      validationService.determineUserType(email)
+    const { isValid, message } = validationService.determineUserType(email)
 
     if (!isValid)
       return {
@@ -53,7 +52,6 @@ const useRegister = (setLoading) => {
             toast: 'success',
             title: 'Usuario disponible',
             message: 'Email y nick_name disponibles',
-            role,
           }
         }
 

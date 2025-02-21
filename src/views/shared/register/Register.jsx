@@ -56,17 +56,9 @@ const Register = () => {
     }
   }, [])
 
-  const showToast = (type, title, message) => {
-    Toast.show({
-      type: type,
-      text1: title,
-      text2: message,
-    })
-  }
-
   const verifyUser = async () => {
     setToast(true)
-    const { ok, toast, title, message, role } = await onSubmit()
+    const { ok, toast, title, message } = await onSubmit()
     setTypeToast(toast)
     setTitleToast(title)
     setMessageToast(message)
@@ -76,14 +68,12 @@ const Register = () => {
         email: data.email,
         password: data.password,
         nick_name: data.nick_name,
-        role,
       })
       setTimeout(() => {
         navigation.replace('Setup', {
           email: data.email,
           password: data.password,
           nick_name: data.nick_name,
-          role,
         })
       }, 2500)
     }

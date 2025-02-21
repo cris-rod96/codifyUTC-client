@@ -46,7 +46,7 @@ const SlideUsers = () => {
     return (
       <View className="flex flex-col w-[200px] h-auto bg-white mr-4 items-center py-5 rounded-xl border border-gray-200 gap-1 px-3">
         {/* Profile */}
-        <View className="w-[100px] h-[100px] rounded-full relative">
+        <View className="w-[100px] h-[100px] rounded-full relative overflow-hidden border border-gray-200">
           <Image
             source={
               item?.profile_picture ? { uri: item.profile_picture } : profile
