@@ -4,11 +4,11 @@
     "slug": "codify",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo_codify.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/logo_codify.png",
       "resizeMode": "contain",
       "backgroundColor": "#741D1D"
     },

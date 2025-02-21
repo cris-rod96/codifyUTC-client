@@ -17,16 +17,24 @@ import { useSelector } from 'react-redux'
 import {
   SelectSectionModal,
   SelectCourseModal,
+  TeachersModal,
 } from 'components/modal/index.modals'
 import CustomToast from '../toast/Toast'
 
 const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
+  const [showTeachersModal, setShowTeachersModal] = useState(false)
+  const toggleShowTeachersModal = () => setShowTeachersModal((prev) => !prev)
+  const [teacher, setTeacher] = useState({
+    id: null,
+    name: null,
+  })
+  const [filterUsers, setFilterUsers] = useState([])
+  const { users } = useSelector((state) => state.admin)
   const [toast, setToast] = useState(false)
   const [titleToast, setTitleToast] = useState('')
   const [messageToast, setMessageToast] = useState('')
   const [typeToast, setTypeToast] = useState(null)
 
-  const { user } = useSelector((state) => state.user)
   const [isMounted, setIsMounted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [imageUri, setImageUri] = useState(null)
@@ -43,10 +51,16 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
     subject: '',
     section: '',
     access_code: '',
-    TeacherId: '',
   }
 
   const [course, setCourse] = useState(initialState)
+
+  const handleTeacher = (id, name) => {
+    setTeacher({
+      id: id,
+      name: name,
+    })
+  }
 
   const handleChange = (name, value) => {
     setCourse({ ...course, [name]: value })
@@ -57,7 +71,9 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
     if (uri) setImageUri(uri)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const session_info = await storageUtil.getSecureData('session_info')
+    const { token } = JSON.parse(session_info)
     if (Object.values(course).includes('')) {
       setToast(true)
       setTypeToast('error')
@@ -81,10 +97,14 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
       })
     }
 
+    if (teacher.id) {
+      formData.append('TeacherId', teacher.id)
+    }
+
     setLoading(true)
 
     coursesAPI
-      .create(formData)
+      .create(formData, token)
       .then((res) => {
         setToast(true)
         setTypeToast('success')
@@ -117,10 +137,8 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
     if (isVisible) {
       setIsMounted(true)
       generateAccessCode() // Genera un código al abrir el modal
-      setCourse((prev) => ({
-        ...prev,
-        TeacherId: user.id,
-      }))
+      const usersFiltered = users.filter((usr) => usr.role === 'Docente')
+      setFilterUsers(usersFiltered)
     } else {
       setTimeout(() => setIsMounted(false), 300)
     }
@@ -137,6 +155,12 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
         <View className="flex h-full  bg-[#F5F9FF]">
           {/* Header */}
           <View className="flex flex-row justify-between items-center border-b border-gray-300 py-5 px-3">
+            <TeachersModal
+              visible={showTeachersModal}
+              onClose={toggleShowTeachersModal}
+              handleTeacher={handleTeacher}
+              teachers={filterUsers}
+            />
             <SelectSectionModal
               visible={showSectionModal}
               onClose={toggleShowSectionModal}
@@ -208,6 +232,27 @@ const CourseModal = ({ isVisible, toggleModal, onCourseAdded }) => {
 
               {/* Formulario */}
               <View className="flex flex-col gap-3">
+                <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative">
+                  <View className="w-14 flex flex-row items-center justify-center h-full ">
+                    <Octicons name="people" size={20} color={'#545454'} />
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: 'Mulish_700Bold',
+                      fontSize: 14,
+                      color: '#505050',
+                    }}
+                  >
+                    {teacher.name || 'Docente'}
+                  </Text>
+
+                  <TouchableOpacity
+                    className="absolute right-5"
+                    onPress={toggleShowTeachersModal}
+                  >
+                    <Octicons name="chevron-down" size={18} color={'#202244'} />
+                  </TouchableOpacity>
+                </View>
                 <View className="flex flex-row bg-white items-center h-[60px] overflow-hidden rounded-lg shadow-md shadow-gray-300 relative">
                   <View className="w-14 flex flex-row items-center justify-center h-full ">
                     <MaterialCommunityIcons

@@ -6,10 +6,11 @@ const coursesAPI = {
   getAll: (teacher_id) => {
     return instance.get(`${model}/teacher/${teacher_id}`)
   },
-  create: (formData) => {
+  create: (formData, token) => {
     return instance.post(`${model}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        'x-token': token,
       },
     })
   },
@@ -33,8 +34,12 @@ const coursesAPI = {
     })
   },
 
-  deleteCourse: (id) => {
-    return instance.delete(`${model}/${id}`)
+  deleteCourse: (id, token) => {
+    return instance.delete(`${model}/${id}`, {
+      headers: {
+        'x-token': token,
+      },
+    })
   },
 }
 

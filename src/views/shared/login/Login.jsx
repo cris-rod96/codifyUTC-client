@@ -52,11 +52,17 @@ const Login = ({ route }) => {
       setTypeToast(toast)
       setTitleToast(title)
       setMessageToast(message)
+
       const home =
-        role === 'Estudiante' ? 'TabStudentNavigator' : 'TabsTeacherNavigator'
+        role === 'Estudiante'
+          ? 'TabStudentNavigator'
+          : role === 'Administrador'
+          ? 'TabAdminNavigator'
+          : 'TabsTeacherNavigator'
       setTimeout(() => {
         navigation.navigate(home)
       }, 1500)
+      console.log(role, message)
     } else {
       setToast(true)
       setTypeToast(toast)
@@ -100,9 +106,11 @@ const Login = ({ route }) => {
         const { user } = JSON.parse(res)
         dispatch(saveUser(user))
         const home =
-          user.role === 'Docente'
-            ? 'TabsTeacherNavigator'
-            : 'TabStudentNavigator'
+          role === 'Estudiante'
+            ? 'TabStudentNavigator'
+            : role === 'Administrador'
+            ? 'TabAdminNavigator'
+            : 'TabsTeacherNavigator'
         navigation.navigate(home)
       }
     })

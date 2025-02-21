@@ -5,6 +5,7 @@ import teacherReducer from './slices/teacher.slice.js'
 import userReducer from './slices/user.slice'
 import idReducer from './slices/id.slice.js'
 import gameReducer from './slices/gameSlice.js'
+import adminReducer from './slices/admin.slice.js'
 const store = configureStore({
   reducer: {
     counter: counterReducer,
@@ -13,6 +14,7 @@ const store = configureStore({
     user: userReducer,
     ids: idReducer,
     game: gameReducer,
+    admin: adminReducer,
   },
 
   middleware: (getDefaultMiddleware) =>

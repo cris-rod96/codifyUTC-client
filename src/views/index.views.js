@@ -52,3 +52,11 @@ export {
   QuizzGame,
   RankingStudent,
 } from './student/index.student'
+
+export {
+  HomeAdmin,
+  Users,
+  CoursesAdmin,
+  Support,
+  Settings,
+} from './admin/index.admin'

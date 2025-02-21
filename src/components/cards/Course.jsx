@@ -14,29 +14,29 @@ const Course = ({ course, onContinue }) => {
     })
   }
 
-  const shareOnWP = () => {
-    const msg = msgUtil.messageWhatsapp(course, user.full_name)
-    const url = `whatsapp://send?text=${encodeURIComponent(msg)}`
+  // const shareOnWP = () => {
+  //   const msg = msgUtil.messageWhatsapp(course, user.full_name)
+  //   const url = `whatsapp://send?text=${encodeURIComponent(msg)}`
 
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(url)
-        } else {
-          console.log('Error al compartir')
-        }
-      })
-      .catch((err) => {
-        console.log('No se puede compartir en estos momentos')
-      })
-  }
+  //   Linking.canOpenURL(url)
+  //     .then((supported) => {
+  //       if (supported) {
+  //         Linking.openURL(url)
+  //       } else {
+  //         console.log('Error al compartir')
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log('No se puede compartir en estos momentos')
+  //     })
+  // }
 
-  const goToCourseDetail = (id, subject) => {
-    navigation.navigate('DetailCourse', {
-      courseId: id,
-      courseName: subject,
-    })
-  }
+  // const goToCourseDetail = (id, subject) => {
+  //   navigation.navigate('DetailCourse', {
+  //     courseId: id,
+  //     courseName: subject,
+  //   })
+  // }
 
   const getIconSection = (section) => {
     switch (section) {
@@ -54,7 +54,7 @@ const Course = ({ course, onContinue }) => {
       <View className="w-full h-[180px] relative mb-3">
         <Image
           source={course.poster ? { uri: course.poster } : logoDefault}
-          className="w-full h-full absolute object-contain"
+          className="w-full h-full absolute object-cover"
           resizeMode="cover"
         />
       </View>
@@ -186,24 +186,9 @@ const Course = ({ course, onContinue }) => {
         </View>
       </View>
 
-      <View className="flex flex-row justify-between">
+      {/* <View className="flex flex-row justify-between">
         <TouchableOpacity
-          className="flex flex-row  items-center justify-center bg-green-700 py-3 gap-2 flex-1"
-          onPress={shareOnWP}
-        >
-          <Octicons name="share-android" size={18} color={'white'} />
-          <Text
-            style={{
-              fontFamily: 'Jost_600SemiBold',
-              fontSize: 16,
-              color: 'white',
-            }}
-          >
-            Compartir
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex flex-row  items-center justify-center bg-purple-800 py-3 gap-2 flex-1"
+          className="flex flex-row  items-center justify-center bg-purple-800 py-3 gap-2 flex-1 w-full"
           onPress={() => goToCourseDetail(course.id, course.subject)}
         >
           <Octicons name="pencil" size={18} color={'white'} />
@@ -214,10 +199,10 @@ const Course = ({ course, onContinue }) => {
               color: 'white',
             }}
           >
-            Editar
+            Ver detalle
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   )
 }

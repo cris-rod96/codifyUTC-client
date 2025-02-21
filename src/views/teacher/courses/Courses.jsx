@@ -25,7 +25,6 @@ import { coursesAPI } from 'api/index.api'
 const Courses = ({ route }) => {
   const { user } = useSelector((state) => state.user)
   const { courses } = useSelector((state) => state.teacher)
-  const [showModal, setShowModal] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const dispatch = useDispatch()
 
@@ -52,10 +51,6 @@ const Courses = ({ route }) => {
     }, [user.id]) // Esto asegura que se vuelve a cargar cuando cambia el usuario
   )
 
-  const toggleModal = () => {
-    setShowModal(!showModal)
-  }
-
   const onCourseAdded = () => {
     fetchCourses() // Actualizar la vista después de agregar un curso
     toggleModal() // Cerrar el modal
@@ -63,14 +58,12 @@ const Courses = ({ route }) => {
 
   return (
     <View className="flex flex-col h-full w-full bg-[#F5F9FF] relative">
-      {/* Floating Action Button */}
       <TouchableOpacity
         className="absolute bottom-4 right-2 w-12 h-12 bg-[#741D1D] rounded-full flex items-center justify-center z-50 border border-gray-200 shadow-lg shadow-gray-300"
-        onPress={toggleModal}
+        onPress={fetchCourses}
       >
-        <Octicons name="plus" size={25} color={'white'} />
+        <Octicons name="sync" size={20} color={'white'} />
       </TouchableOpacity>
-
       {courses.length === 0 ? (
         // Vista cuando no hay cursos
         <View className="flex-1 justify-center items-center px-5">
@@ -88,7 +81,7 @@ const Courses = ({ route }) => {
               marginTop: 20,
             }}
           >
-            Aún no has agregado cursos
+            Aún no se te ha asignado un curso
           </Text>
           <Text
             style={{
@@ -99,8 +92,7 @@ const Courses = ({ route }) => {
               marginVertical: 10,
             }}
           >
-            Agrega los cursos en los que impartes clases para que tus
-            estudiantes puedan encontrarlos fácilmente.
+            Revisa tu email o comunícate con el administrador.
           </Text>
         </View>
       ) : (
@@ -139,12 +131,6 @@ const Courses = ({ route }) => {
           ))}
         </ScrollView>
       )}
-
-      <CourseModal
-        isVisible={showModal}
-        toggleModal={toggleModal}
-        onCourseAdded={onCourseAdded} // Pasar la función para actualizar la vista
-      />
     </View>
   )
 }

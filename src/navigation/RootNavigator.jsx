@@ -39,6 +39,11 @@ import {
   NewPassword,
   DetailCourse,
   RankingStudent,
+  HomeAdmin,
+  Users,
+  CoursesAdmin,
+  Support,
+  Settings,
 } from 'views/index.views'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { AntDesign, Octicons } from '@expo/vector-icons'
@@ -573,6 +578,112 @@ const ProfileNavigator = () => {
   )
 }
 
+const AdminTabs = () => {
+  return (
+    <Tabs.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#741d1d',
+        tabBarInactiveTintColor: '#202244',
+        tabBarStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        sceneStyle: {
+          backgroundColor: '#F5F9FF',
+        },
+        lazy: true,
+      }}
+    >
+      <Tabs.Screen
+        name="HomeAdmin"
+        component={HomeAdmin}
+        options={{
+          tabBarLabel: 'Inicio',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="home" size={21} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Users"
+        component={Users}
+        options={{
+          headerShown: true,
+          headerTitle: 'Usuarios',
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+          tabBarLabel: 'Usuarios',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="people" size={21} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="CoursesAdmin"
+        component={CoursesAdmin}
+        options={{
+          headerShown: true,
+          headerTitle: 'Cursos',
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+          tabBarLabel: 'Cursos',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="stack" size={21} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          headerShown: true,
+          headerTitle: 'Ajustes',
+          headerStyle: {
+            backgroundColor: '#741D1D',
+            borderBottomColor: '#000',
+            elevation: 1,
+          },
+          sceneStyle: {
+            backgroundColor: '#F5F9FF',
+          },
+          headerTitleStyle: {
+            color: 'white',
+            fontFamily: 'Jost_600SemiBold',
+            fontSize: 21,
+          },
+          tabBarLabel: 'Ajustes',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="gear" size={21} color={color} />
+          ),
+        }}
+      />
+    </Tabs.Navigator>
+  )
+}
+
 function RootNavigator() {
   return (
     <Stack.Navigator
@@ -624,6 +735,7 @@ function RootNavigator() {
 
       {/* Rutas del estudiante */}
       <Stack.Screen name="TabStudentNavigator" component={StudentsTabs} />
+      <Stack.Screen name="TabAdminNavigator" component={AdminTabs} />
     </Stack.Navigator>
   )
 }

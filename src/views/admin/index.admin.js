@@ -1,0 +1,5 @@
+export { default as HomeAdmin } from './home/Home.jsx'
+export { default as Users } from './users/Users.jsx'
+export { default as CoursesAdmin } from './courses/Courses.jsx'
+export { default as Support } from './support/Support.jsx'
+export { default as Settings } from './settings/Settings.jsx'
